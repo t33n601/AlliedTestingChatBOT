@@ -90,17 +90,24 @@ The answer is streamed over **Server-Sent Events** in typed events (`rewrite →
 
 ## 🚀 Run it locally
 
-**Requirements:** Python 3.11+, Docker, [Ollama](https://ollama.com/download).
+**Requirements:** [Docker Desktop](https://www.docker.com/products/docker-desktop/), [Ollama](https://ollama.com/download), [Python 3.11+](https://www.python.org/downloads/).
 
 ### One command
 
 ```bash
-./kb.sh            # starts Docker, the database, Ollama and the server, then opens the app
-./kb.sh status     # what is running
-./kb.sh stop       # stop the server
-./kb.sh logs       # follow the server log
+git clone https://github.com/t33n601/AlliedTestingChatBOT.git
+cd AlliedTestingChatBOT
 ```
 
+| | macOS / Linux | Windows (cmd or PowerShell) |
+|---|---|---|
+| **Start** and open the app | `./kbhelper` | `kbhelper` · in PowerShell `.\kbhelper` |
+| What is running | `./kbhelper status` | `kbhelper status` |
+| Stop the server | `./kbhelper stop` | `kbhelper stop` |
+| Follow the log | `./kbhelper logs` | `kbhelper logs` |
+| Use `kbhelper` from any folder | `./kbhelper install` | `kbhelper install` |
+
+`kbhelper` starts Docker, the database, Ollama and the API server, warms up the model and opens `localhost:8091` in the browser.
 On the first run it also pulls the models, creates the virtualenv, loads the knowledge base and embeds it.
 
 <details>
@@ -176,7 +183,7 @@ The E2E suite also runs in **GitHub Actions** on a self-hosted runner (`.github/
 ## 📁 Project structure
 
 ```
-kb.sh                one-command launcher (start · stop · status · logs)
+kbhelper             one-command launcher for macOS / Linux (kbhelper.cmd on Windows)
 ragserver.py         FastAPI app: RAG pipeline, SSE streaming, map, documents API
 loader.py            imports knowledge/*.md into Postgres
 chunking.py          parses PDF / DOCX / MD / TXT and splits by headings

@@ -32,3 +32,4 @@ design/screens/redesign/HANDOFF.md
 .env.*
 *.pem
 .kb.pid
+api.out.log

@@ -1,2 +1,12 @@
+# line endings: LF everywhere, CRLF only for Windows scripts
+* text=auto eol=lf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+kbhelper text eol=lf
+*.png binary
+*.jpg binary
+*.gif binary
+
+# GitHub language stats
 design/** linguist-documentation
 web/vendor/** linguist-vendored

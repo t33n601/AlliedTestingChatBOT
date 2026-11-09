@@ -1,0 +1,9 @@
+# Used automatically by kbhelper.cmd on Windows: Postgres cannot keep its data on an NTFS bind mount,
+# so the database lives in a named Docker volume instead of ./pgdata.
+services:
+  kb_vectordb:
+    volumes:
+      - kb_pgdata:/var/lib/postgresql/data
+
+volumes:
+  kb_pgdata:

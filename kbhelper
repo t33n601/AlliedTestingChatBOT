@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # KB Helper launcher: one command for the whole stack on localhost.
-#   ./kb.sh            start everything and open the browser (same as ./kb.sh start)
-#   ./kb.sh stop       stop the API server (database and Ollama keep running)
-#   ./kb.sh restart    stop + start
-#   ./kb.sh status     what is running
-#   ./kb.sh logs       follow the server log
+#   ./kbhelper             start everything and open the browser (same as ./kbhelper start)
+#   ./kbhelper stop        stop the API server (database and Ollama keep running)
+#   ./kbhelper restart     stop + start
+#   ./kbhelper status      what is running
+#   ./kbhelper logs        follow the server log
+#   ./kbhelper install     add the `kbhelper` command to your shell, usable from any folder
 set -euo pipefail
 
 DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
@@ -31,6 +32,9 @@ wait_for() {
   return 1
 }
 
+open_url() { if command -v open >/dev/null; then open "$1"; elif command -v xdg-open >/dev/null; then xdg-open "$1" >/dev/null 2>&1; fi; }
+start_app() { [ "$(uname)" = "Darwin" ] && open -a "$1" 2>/dev/null; }
+
 server_up() { curl -sf -m 2 "$URL/kb/stats" >/dev/null; }
 
 banner() {
@@ -42,13 +46,14 @@ start() {
 
   if server_up; then
     step "Already running"; ok "$URL"
-    open "$URL"; return
+    open_url "$URL"; return
   fi
 
   # 1. Docker
   step "Docker"
   if ! docker info >/dev/null 2>&1; then
-    open -a Docker
+    command -v docker >/dev/null || die "Docker is not installed: https://www.docker.com/products/docker-desktop/"
+    start_app Docker || true
     wait_for 90 docker info || die "Docker did not start. Open Docker Desktop and try again."
   fi
   ok
@@ -66,7 +71,8 @@ start() {
   # 3. Ollama + models
   step "Ollama"
   if ! curl -sf -m 2 "$OLLAMA/api/tags" >/dev/null; then
-    open -a Ollama 2>/dev/null || (ollama serve >/dev/null 2>&1 &)
+    command -v ollama >/dev/null || die "Ollama is not installed: https://ollama.com/download"
+    start_app Ollama || (nohup ollama serve >/dev/null 2>&1 &)
     wait_for 60 curl -sf -m 2 "$OLLAMA/api/tags" || die "Ollama did not start. Install it from ollama.com."
   fi
   for m in "$EMBED_MODEL" "$CHAT_MODEL"; do
@@ -78,6 +84,7 @@ start() {
 
   # 4. Python environment (first run only)
   step "Python env"
+  command -v python3 >/dev/null || die "Python 3 is not installed: https://www.python.org/downloads/"
   if [ ! -x .venv/bin/uvicorn ]; then
     printf "\n  creating .venv and installing requirements…\n"
     python3 -m venv .venv
@@ -103,12 +110,12 @@ start() {
 
   # 6. API + web app
   step "Server"
-  if lsof -nP -iTCP:"$PORT" -sTCP:LISTEN >/dev/null 2>&1; then
+  if command -v lsof >/dev/null && lsof -nP -iTCP:"$PORT" -sTCP:LISTEN >/dev/null 2>&1; then
     die "port $PORT is busy with another program (lsof -i :$PORT)"
   fi
   nohup .venv/bin/uvicorn ragserver:app --port "$PORT" >>"$LOG" 2>&1 &
   echo $! >"$PID_FILE"
-  wait_for 60 server_up || die "server did not start, see: ./kb.sh logs"
+  wait_for 60 server_up || die "server did not start, see: ./kbhelper logs"
   ok "$URL"
 
   # 7. warm the chat model so the first answer is fast
@@ -118,7 +125,7 @@ start() {
 
   printf "\n  %sReady →%s %s%s%s\n" "$bold" "$off" "$bold$red" "$URL" "$off"
   printf "  %sAPI docs: %s/docs · stop: kbhelper stop · logs: kbhelper logs%s\n\n" "$dim" "$URL" "$off"
-  open "$URL"
+  open_url "$URL"
 }
 
 stop() {
@@ -137,6 +144,21 @@ stop() {
   ok
 }
 
+install() {
+  local rc line="alias kbhelper=\"$DIR/kbhelper\""
+  case "$(basename "${SHELL:-bash}")" in
+    zsh)  rc="$HOME/.zshrc" ;;
+    bash) [ "$(uname)" = "Darwin" ] && rc="$HOME/.bash_profile" || rc="$HOME/.bashrc" ;;
+    *)    rc="$HOME/.profile" ;;
+  esac
+  step "Adding the kbhelper command to $rc"
+  touch "$rc"
+  { grep -v '^alias kbhelper=' "$rc" || true; } >"$rc.kbtmp"; mv "$rc.kbtmp" "$rc"
+  printf '%s\n' "$line" >>"$rc"
+  ok
+  printf "\n  Open a new terminal (or run %ssource %s%s), then just type %skbhelper%s.\n\n" "$bold" "$rc" "$off" "$bold$red" "$off"
+}
+
 status() {
   banner
   printf "  Docker     "; docker info >/dev/null 2>&1 && echo "${green}running${off}" || echo "${red}stopped${off}"
@@ -153,5 +175,6 @@ case "${1:-start}" in
   restart) stop; start ;;
   status)  status ;;
   logs)    tail -f "$LOG" ;;
-  *)       echo "usage: kbhelper [start|stop|restart|status|logs]"; exit 1 ;;
+  install) install ;;
+  *)       echo "usage: kbhelper [start|stop|restart|status|logs|install]"; exit 1 ;;
 esac
