@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>KB Helper — Mobile</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#19191B}
+a{color:#ECECEA}a:hover{color:#FFFFFF}
+.blink{animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.pulse{animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(95,211,138,.55)}70%{box-shadow:0 0 0 7px rgba(95,211,138,0)}100%{box-shadow:0 0 0 0 rgba(95,211,138,0)}}
+.sheet{animation:up .25s ease-out}
+@keyframes up{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion: reduce){.blink,.pulse,.sheet{animation:none}}
+</style>
+</helmet>
+
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; display: flex; flex-direction: column; color: #ECECEA; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 15px; line-height: 1.55; background-color: #19191B; background-image: linear-gradient(rgba(255,255,255,0.028) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.028) 1px, transparent 1px); background-size: 24px 24px;">
+  <div style="height: 5px; flex: 0 0 5px; background: linear-gradient(90deg, #4B4B4D 0 62%, #C14031 62% 100%);"></div>
+
+  <!-- top bar -->
+  <header style="flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px 12px; border-bottom: 1px solid rgba(151,150,136,0.28);">
+    <img src="LOGO_IMAGE" alt="Allied Testing" style="height: 38px; width: auto; display: block; box-shadow: 4px 4px 0 rgba(0,0,0,0.45);">
+    <div style="display: flex; align-items: center; gap: 6px;">
+      <span style="display: flex; align-items: center; gap: 7px; padding: 6px 10px; background: #242426; border: 1px solid rgba(151,150,136,0.28); font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;"><span class="pulse" style="width: 7px; height: 7px; background: #5FD38A; display: block;"></span>online</span>
+      <button type="button" aria-label="New chat" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: transparent; border: 1px solid rgba(151,150,136,0.35); color: #D6D5CF; cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+    </div>
+  </header>
+
+  <!-- run strip -->
+  <ol aria-label="Pipeline for this answer" style="flex: 0 0 auto; list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-bottom: 1px solid rgba(151,150,136,0.28); background: #1E1E20;">
+    <li style="display: flex; flex-direction: column; padding: 8px 12px; border-right: 1px solid rgba(151,150,136,0.18); line-height: 1.3;"><b style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; color: #FFFFFF;"><span style="color: #EF6150;">✓</span> RETRIEVE</b><small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">38 ms</small></li>
+    <li style="display: flex; flex-direction: column; padding: 8px 12px; border-right: 1px solid rgba(151,150,136,0.18); line-height: 1.3;"><b style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; color: #FFFFFF;"><span style="color: #EF6150;">✓</span> AUGMENT</b><small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">5 chunks</small></li>
+    <li style="display: flex; flex-direction: column; padding: 8px 12px; line-height: 1.3;"><b style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; color: #FFFFFF;"><span style="color: #EF6150;">✓</span> GENERATE</b><small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">3.6 s</small></li>
+  </ol>
+
+  <!-- conversation -->
+  <main style="flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; padding: 18px 16px;">
+    <div style="display: flex; justify-content: flex-end;">
+      <div style="max-width: 84%; background: #C14031; color: #FFFFFF; padding: 10px 14px; box-shadow: 4px 4px 0 rgba(0,0,0,0.4);">What products does the company have?</div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 10px; background: #262628; border: 1px solid rgba(151,150,136,0.22); border-top: 4px solid #C14031; padding: 14px 14px 12px;">
+      <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">searched as → <span style="color: #ECECEA;">company products and service offerings</span></p>
+      <div style="font-size: 15px; line-height: 1.6;">
+        <p style="margin: 0 0 8px;">Allied Testing covers the full delivery cycle:</p>
+        <ul style="margin: 0 0 8px; padding-left: 18px; display: flex; flex-direction: column; gap: 4px;">
+          <li><strong style="color: #FFFFFF;">Product development</strong> — design, implementation, systems integration, performance tuning <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 4px; vertical-align: 2px; background: #C14031; color: #FFFFFF; font: 600 10px/1 'IBM Plex Mono', monospace;">2</span></li>
+          <li><strong style="color: #FFFFFF;">QA &amp; testing</strong> — functional, mobile, stress and security testing <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 4px; vertical-align: 2px; background: #C14031; color: #FFFFFF; font: 600 10px/1 'IBM Plex Mono', monospace;">3</span></li>
+        </ul>
+        <p style="margin: 0;">Goal: quality products, faster and cheaper to ship <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 4px; vertical-align: 2px; background: #C14031; color: #FFFFFF; font: 600 10px/1 'IBM Plex Mono', monospace;">2</span><span class="blink" style="display: inline-block; width: 8px; height: 1em; background: #EF6150; vertical-align: -2px; margin-left: 4px;"></span></p>
+      </div>
+      <button type="button" onClick="{{toggle}}" aria-expanded="{{open}}" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 12px; background: #19191B; border: 1px solid rgba(151,150,136,0.3); color: #ECECEA; cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;">
+        <span style="display: flex; align-items: center; gap: 8px;"><span style="display: flex; gap: 3px;"><span style="width: 6px; height: 14px; background: #EF6150; display: block;"></span><span style="width: 6px; height: 14px; background: #EF6150; opacity: 0.8; display: block;"></span><span style="width: 6px; height: 14px; background: #979688; display: block;"></span><span style="width: 6px; height: 14px; background: #979688; display: block;"></span><span style="width: 6px; height: 14px; background: #979688; display: block;"></span></span>5 sources</span>
+        <span style="color: #EF6150;">{{chev}}</span>
+      </button>
+      <div style="display: flex; gap: 14px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A897F;"><span>3.6 s</span><span>264 tok</span><span>qwen3:1.7b</span></div>
+    </div>
+
+    <div role="group" aria-label="Suggested questions" style="display: flex; flex-direction: column; gap: 8px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #8A897F;">try next</span>
+      <button type="button" style="min-height: 44px; padding: 10px 14px; text-align: left; background: #222224; border: 1px solid rgba(151,150,136,0.28); color: #ECECEA; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; cursor: pointer;">How do you handle security testing?</button>
+      <button type="button" style="min-height: 44px; padding: 10px 14px; text-align: left; background: #222224; border: 1px solid rgba(151,150,136,0.28); color: #ECECEA; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; cursor: pointer;">Какие AI-решения есть у компании?</button>
+    </div>
+  </main>
+
+  <!-- sources sheet -->
+  <sc-if value="{{open}}" hint-placeholder-val="{{false}}">
+    <div class="sheet" style="position: absolute; left: 0; right: 0; bottom: 136px; max-height: 420px; overflow-y: auto; background: #262628; border-top: 6px solid #C14031; box-shadow: 0 -20px 60px rgba(0,0,0,0.6); padding: 6px 16px 10px; z-index: 5;">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(151,150,136,0.22);">
+        <h2 style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A89E;">Evidence · 5 chunks</h2>
+        <button type="button" onClick="{{toggle}}" aria-label="Close sources" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: #D6D5CF; cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+      </div>
+      <ol style="list-style: none; margin: 0; padding: 0;">
+        <sc-for list="{{sources}}" as="s" hint-placeholder-count="5">
+          <li style="display: grid; grid-template-columns: 22px minmax(0, 1fr) 40px; gap: 10px; align-items: center; min-height: 52px; border-bottom: 1px solid rgba(151,150,136,0.14);">
+            <span style="font: 600 11px/20px 'IBM Plex Mono', monospace; text-align: center; height: 20px; background: #C14031; color: #FFFFFF;">{{s.n}}</span>
+            <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;"><small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">{{s.doc}}</small><span style="font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{s.title}}</span></span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #FFFFFF; text-align: right;">{{s.score}}%</span>
+          </li>
+        </sc-for>
+      </ol>
+    </div>
+  </sc-if>
+
+  <!-- composer -->
+  <form style="flex: 0 0 auto; display: flex; align-items: center; gap: 8px; margin: 0 12px 10px; padding: 5px 5px 5px 14px; background: #1E1E20; border: 1px solid rgba(151,150,136,0.35); position: relative; z-index: 6;">
+    <label for="m-ask" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">Your question</label>
+    <input id="m-ask" type="text" placeholder="Ask in English or Russian…" style="flex: 1; min-width: 0; height: 44px; background: transparent; border: none; outline: none; color: #FFFFFF; font-family: 'IBM Plex Sans', sans-serif; font-size: 16px;">
+    <button type="submit" aria-label="Ask" style="width: 52px; height: 46px; display: flex; align-items: center; justify-content: center; background: #C14031; color: #FFFFFF; border: none; box-shadow: 3px 3px 0 rgba(0,0,0,0.45); cursor: pointer;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"></path></svg></button>
+  </form>
+
+  <!-- tab bar -->
+  <nav aria-label="Main" style="flex: 0 0 auto; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid rgba(151,150,136,0.28); background: #1E1E20; position: relative; z-index: 6;">
+    <a href="Mobile.dc.html" aria-current="page" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; height: 64px; text-decoration: none; color: #FFFFFF; box-shadow: inset 0 3px 0 #C14031; font-family: 'Silkscreen', monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M4 5h16v11H9l-5 4V5z"></path></svg>Assistant</a>
+    <a href="Map.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; height: 64px; text-decoration: none; color: #A9A89E; font-family: 'Silkscreen', monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><circle cx="6" cy="7" r="1.5"></circle><circle cx="16" cy="5" r="1.5"></circle><circle cx="9" cy="16" r="1.5"></circle><circle cx="18" cy="15" r="1.5"></circle><path d="M12 11l2 2-2 2-2-2z"></path></svg>Map</a>
+    <a href="Docs.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; height: 64px; text-decoration: none; color: #A9A89E; font-family: 'Silkscreen', monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"></path><path d="M9 12h7M9 16h7"></path></svg>Docs</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { open: false };
+  }
+  renderVals() {
+    const open = this.state.open;
+    return {
+      open,
+      chev: open ? '▾ hide' : '▸ view',
+      toggle: () => this.setState({ open: !open }),
+      sources: [
+        { n: 1, doc: 'careers', title: 'We offer', score: 63 },
+        { n: 2, doc: 'productdevelopment', title: 'Product Development', score: 60 },
+        { n: 3, doc: 'aboutus', title: 'What We Do', score: 57 },
+        { n: 4, doc: 'casestudies', title: 'Helping clients ship', score: 57 },
+        { n: 5, doc: 'whyalied', title: 'Objectivity', score: 57 }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,612 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"><style>
+body{margin:0;background:#19191B}
+a{color:#ECECEA}a:hover{color:#FFFFFF}
+.nav-a{color:#A9A89E;text-decoration:none;border-bottom:3px solid transparent;transition:color .2s,border-color .2s}
+.nav-a:hover{color:#FFFFFF;border-bottom-color:#5A5A5D}
+.hov-row{transition:background .15s}
+.hov-row:hover{background:rgba(255,255,255,.05)}
+.btn-red{transition:background .2s,transform .2s}
+.btn-red:hover{background:#D4513F !important;transform:translate(-1px,-1px)}
+.icon-b{transition:color .15s,background .15s}
+.icon-b:hover{color:#FFFFFF !important;background:#333336 !important}
+.dot{transition:opacity .3s,background .3s,transform .2s}
+.dot:hover{transform:scale(1.8)}
+.blink{animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.pulse{animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(95,211,138,.55)}70%{box-shadow:0 0 0 8px rgba(95,211,138,0)}100%{box-shadow:0 0 0 0 rgba(95,211,138,0)}}
+.ring{animation:ring 1.8s ease-out infinite}
+@keyframes ring{from{transform:rotate(45deg) scale(.6);opacity:1}to{transform:rotate(45deg) scale(2.8);opacity:0}}
+.dash{animation:dash 1s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-8}}
+@media (prefers-reduced-motion: reduce){.blink,.pulse,.ring,.dash{animation:none}}
+</style><style>html,body{margin:0;background:#19191B} #root{width:1440px} *,*::before,*::after{animation:none !important;transition:none !important}</style></head><body>
+<div id="root">
+
+
+<div style="min-height: 100vh; color: #ECECEA; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 15.5px; line-height: 1.6; background-color: #19191B; background-image: linear-gradient(rgba(255,255,255,0.028) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.028) 1px, transparent 1px); background-size: 24px 24px;">
+  <div style="height: 6px; background: linear-gradient(90deg, #4B4B4D 0 62%, #C14031 62% 100%);"></div>
+
+  <div style="max-width: 1440px; margin: 0 auto; padding: 0 40px; box-sizing: border-box;">
+
+    <header style="display: flex; align-items: center; flex-wrap: wrap; gap: 16px 36px; padding: 22px 0 18px; border-bottom: 1px solid rgba(151,150,136,0.28);">
+      <a href="Home.dc.html" aria-label="Allied Testing — KB Helper home" style="display: flex; line-height: 0; box-shadow: 6px 6px 0 rgba(0,0,0,0.45);">
+        <img src="img/logo.png" alt="Allied Testing" style="height: 56px; width: auto; display: block;">
+      </a>
+      <nav aria-label="Main" style="display: flex; gap: 30px; flex-wrap: wrap; margin-right: auto; font-family: 'Silkscreen', 'Courier New', monospace; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase;">
+        <a href="Main.dc.html" class="nav-a" style="padding-bottom: 4px;">Assistant</a>
+        <a href="Map.dc.html" aria-current="page" style="color: #FFFFFF; text-decoration: none; padding-bottom: 4px; border-bottom: 3px solid #C14031;">Knowledge map</a>
+        <a href="Docs.dc.html" class="nav-a" style="padding-bottom: 4px;">Documents</a>
+      </nav>
+      <div style="display: flex; align-items: center; gap: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;">
+        <div style="display: flex; align-items: center; gap: 8px; padding: 7px 12px; background: #242426; border: 1px solid rgba(151,150,136,0.28);">
+          <span class="pulse" style="width: 8px; height: 8px; background: #5FD38A; display: block;"></span>
+          qwen3:1.7b · online
+        </div>
+        <div style="padding: 7px 12px; border: 1px solid rgba(151,150,136,0.28); color: #A9A89E;">nomic-embed-text</div>
+      </div>
+    </header>
+
+    
+    <section style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px 40px; padding: 40px 0 28px;">
+      <div style="flex: 1 1 520px; min-width: 0;">
+        <p style="margin: 0 0 14px; font-family: 'IBM Plex Mono', monospace; font-size: 14px; letter-spacing: 0.14em; text-transform: uppercase; color: #EF6150;">&gt; what the assistant can see<span class="blink">_</span></p>
+        <h1 style="margin: 0 0 14px; font-family: 'Silkscreen', 'Courier New', monospace; font-weight: 400; font-size: clamp(36px, 4.6vw, 64px); line-height: 1; text-transform: uppercase; color: #FFFFFF;">Knowledge map</h1>
+        <p style="margin: 0; max-width: 640px; color: #D6D5CF;">Every dot is one passage from Allied Testing's documents, placed by what it means. Passages about similar things sit together. Type a question to see where it lands — and exactly which passages the assistant would read to answer it.</p>
+      </div>
+      <form style="flex: 0 1 480px; min-width: min(100%, 320px); display: flex; gap: 8px;">
+        <label for="locate" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">Question to locate</label>
+        <input id="locate" type="text" value="What products does the company have?" style="flex: 1; min-width: 0; height: 48px; padding: 0 14px; background: #19191B; border: 1px solid rgba(151,150,136,0.35); color: #FFFFFF; font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; outline: none; box-sizing: border-box;">
+        <button type="submit" class="btn-red" style="height: 48px; padding: 0 22px; background: #C14031; color: #FFFFFF; border: none; box-shadow: 3px 3px 0 rgba(0,0,0,0.45); font-family: 'Silkscreen', monospace; font-size: 16px; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer;">Locate</button>
+      </form>
+    </section>
+
+    <section style="display: flex; flex-wrap: wrap; gap: 20px; padding-bottom: 40px;">
+
+      
+      <div style="flex: 999 1 620px; min-width: 0; position: relative; background: #1E1E20; border: 1px solid rgba(151,150,136,0.28); border-top: 6px solid #C14031; box-shadow: 0 30px 80px rgba(0,0,0,0.45);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; padding: 12px 16px; border-bottom: 1px solid rgba(151,150,136,0.22); font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #A9A89E;">
+          <span>149 passages · 26 documents · all documents</span>
+          <div style="display: flex; gap: 2px;">
+            <button type="button" class="icon-b" aria-label="Zoom in" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: #262628; border: 1px solid rgba(151,150,136,0.28); color: #D6D5CF; cursor: pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+            <button type="button" class="icon-b" aria-label="Zoom out" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: #262628; border: 1px solid rgba(151,150,136,0.28); color: #D6D5CF; cursor: pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" aria-hidden="true"><path d="M5 12h14"></path></svg></button>
+            <button type="button" class="icon-b" aria-label="Reset view" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: #262628; border: 1px solid rgba(151,150,136,0.28); color: #D6D5CF; cursor: pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"></path></svg></button>
+          </div>
+        </div>
+
+        <div role="img" aria-label="Scatter map of knowledge-base chunks with the question placed among its five nearest chunks" style="position: relative; height: 720px; overflow: hidden; background-image: linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px); background-size: 48px 48px;">
+          
+          <span style="position: absolute; left: 0; right: 0; top: 46%; height: 1px; background: rgba(239,97,80,0.18);"></span>
+          <span style="position: absolute; top: 0; bottom: 0; left: 50%; width: 1px; background: rgba(239,97,80,0.18);"></span>
+
+          
+            <span class="dot" style="position: absolute; left: 18.31%; top: 27.22%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 21.58%; top: 30.55%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 12.77%; top: 28.40%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 14.05%; top: 29.87%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 21.75%; top: 27.58%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 13.75%; top: 33.73%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 20.19%; top: 25.11%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 13.06%; top: 28.01%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 19.43%; top: 29.66%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 10.55%; top: 27.56%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 21.39%; top: 21.27%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 18.20%; top: 20.97%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 13.97%; top: 21.43%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 12.91%; top: 32.25%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 17.39%; top: 20.91%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 12.75%; top: 33.14%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 32.84%; top: 22.64%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 30.65%; top: 17.25%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 26.99%; top: 11.27%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 33.74%; top: 19.45%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 29.69%; top: 20.19%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 29.22%; top: 15.05%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 36.10%; top: 23.38%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 33.10%; top: 13.56%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 30.19%; top: 14.89%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 27.47%; top: 20.40%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 35.35%; top: 20.90%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 38.56%; top: 11.82%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 38.77%; top: 16.97%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 32.75%; top: 46.56%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 21.94%; top: 44.74%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 25.19%; top: 51.73%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 28.45%; top: 57.99%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 21.51%; top: 55.29%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 32.65%; top: 48.67%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 29.69%; top: 47.19%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 27.26%; top: 56.83%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 22.07%; top: 59.43%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 27.82%; top: 58.24%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 26.14%; top: 53.18%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 81.88%; top: 17.44%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 81.70%; top: 19.44%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 81.34%; top: 15.25%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 88.46%; top: 18.93%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 90.42%; top: 21.85%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 83.11%; top: 16.68%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 81.35%; top: 10.01%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 86.56%; top: 13.20%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 87.72%; top: 22.07%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 78.72%; top: 15.63%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 74.19%; top: 64.45%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 76.15%; top: 65.18%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 72.72%; top: 73.00%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 66.40%; top: 68.69%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 65.62%; top: 72.32%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 67.87%; top: 65.60%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 71.68%; top: 75.80%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 67.74%; top: 74.39%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 68.61%; top: 64.47%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 17.73%; top: 74.05%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 6.62%; top: 79.56%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 14.76%; top: 81.64%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 18.31%; top: 71.63%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 14.35%; top: 75.84%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 8.89%; top: 69.21%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 15.67%; top: 79.13%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 10.29%; top: 72.63%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 10.88%; top: 68.94%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 48.37%; top: 43.40%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 52.94%; top: 43.33%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 47.63%; top: 31.06%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 52.79%; top: 32.89%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 50.63%; top: 35.02%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 50.94%; top: 38.79%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 50.68%; top: 33.54%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 57.14%; top: 33.41%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 51.94%; top: 37.66%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 87.60%; top: 51.34%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 83.56%; top: 47.38%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 84.38%; top: 47.31%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 89.20%; top: 45.81%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 82.70%; top: 52.92%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 84.58%; top: 44.37%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 84.58%; top: 43.14%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 43.01%; top: 79.62%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 41.76%; top: 82.20%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 44.76%; top: 90.19%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 46.05%; top: 83.09%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 37.50%; top: 89.51%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 42.33%; top: 89.11%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 47.13%; top: 83.25%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 57.41%; top: 25.78%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 66.00%; top: 19.63%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 60.57%; top: 24.68%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 68.30%; top: 23.88%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 66.67%; top: 29.15%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 65.17%; top: 17.30%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 56.40%; top: 19.04%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: #7D7C73; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 50.58%; top: 65.55%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 72.95%; top: 93.25%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 77.81%; top: 61.58%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 79.65%; top: 81.06%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 58.75%; top: 36.90%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 45.33%; top: 83.30%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 65.93%; top: 36.73%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 88.50%; top: 61.08%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 34.98%; top: 80.33%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 19.34%; top: 38.19%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 7.76%; top: 13.52%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 62.99%; top: 69.92%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 90.12%; top: 83.39%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 47.03%; top: 68.26%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 18.77%; top: 30.03%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 18.24%; top: 10.20%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 31.61%; top: 44.81%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 56.05%; top: 69.04%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 75.83%; top: 75.06%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 23.24%; top: 64.64%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 51.57%; top: 45.03%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 47.27%; top: 46.40%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 43.40%; top: 35.21%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 33.07%; top: 18.99%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 50.40%; top: 29.53%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 52.69%; top: 54.22%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 62.97%; top: 44.47%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 17.86%; top: 6.33%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 19.04%; top: 89.01%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 12.10%; top: 82.62%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 43.88%; top: 50.22%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 14.69%; top: 78.31%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 10.99%; top: 38.61%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 26.21%; top: 67.84%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 55.64%; top: 14.33%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 91.04%; top: 72.01%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 64.19%; top: 76.08%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 54.30%; top: 76.83%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 52.38%; top: 21.56%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 12.87%; top: 14.44%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 11.24%; top: 29.12%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 65.15%; top: 64.82%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 55.37%; top: 91.94%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 7.95%; top: 40.92%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 35.73%; top: 31.00%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 79.31%; top: 53.23%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 24.04%; top: 89.10%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 89.78%; top: 29.43%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 51.62%; top: 81.68%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 88.31%; top: 66.28%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+            <span class="dot" style="position: absolute; left: 56.03%; top: 77.27%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: 1;"></span>
+          
+
+          
+            <span style="position: absolute; left: 17%; top: 28%; transform: translate(-50%, -58px); font: 500 11px 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; pointer-events: none; color: #8A897F; opacity: 1;">mobiletesting</span>
+          
+            <span style="position: absolute; left: 33%; top: 18%; transform: translate(-50%, -58px); font: 500 11px 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; pointer-events: none; color: #8A897F; opacity: 1;">specializedtesting</span>
+          
+            <span style="position: absolute; left: 27%; top: 52%; transform: translate(-50%, -58px); font: 500 11px 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; pointer-events: none; color: #8A897F; opacity: 1;">qarole</span>
+          
+            <span style="position: absolute; left: 84%; top: 16%; transform: translate(-50%, -58px); font: 500 11px 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; pointer-events: none; color: #8A897F; opacity: 1;">leadership</span>
+          
+            <span style="position: absolute; left: 70%; top: 70%; transform: translate(-50%, -58px); font: 500 11px 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; pointer-events: none; color: #8A897F; opacity: 1;">casestudies</span>
+          
+            <span style="position: absolute; left: 13%; top: 76%; transform: translate(-50%, -58px); font: 500 11px 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; pointer-events: none; color: #8A897F; opacity: 1;">stressbusting</span>
+          
+            <span style="position: absolute; left: 52%; top: 36%; transform: translate(-50%, -58px); font: 500 11px 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; pointer-events: none; color: #8A897F; opacity: 1;">whyalied</span>
+          
+            <span style="position: absolute; left: 87%; top: 50%; transform: translate(-50%, -58px); font: 500 11px 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; pointer-events: none; color: #8A897F; opacity: 1;">fintech</span>
+          
+            <span style="position: absolute; left: 42%; top: 84%; transform: translate(-50%, -58px); font: 500 11px 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; pointer-events: none; color: #8A897F; opacity: 1;">oracletopostgres</span>
+          
+            <span style="position: absolute; left: 62%; top: 24%; transform: translate(-50%, -58px); font: 500 11px 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; pointer-events: none; color: #8A897F; opacity: 1;">ourproducts</span>
+          
+
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" style="position: absolute; inset: 0; width: 100%; height: 100%;">
+            <g stroke="#EF6150" stroke-width="1.5" fill="none" stroke-dasharray="4 4" class="dash">
+              <line x1="50" y1="46" x2="45" y2="33" vector-effect="non-scaling-stroke"></line>
+              <line x1="50" y1="46" x2="61" y2="28" vector-effect="non-scaling-stroke"></line>
+              <line x1="50" y1="46" x2="58" y2="54" vector-effect="non-scaling-stroke"></line>
+              <line x1="50" y1="46" x2="67" y2="67" vector-effect="non-scaling-stroke"></line>
+              <line x1="50" y1="46" x2="53" y2="39" vector-effect="non-scaling-stroke"></line>
+            </g>
+          </svg>
+
+          
+            <span style="position: absolute; left: 45%; top: 33%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: #EF6150; border: 2px solid #FFFFFF; box-sizing: border-box; box-shadow: 0 0 0 4px rgba(239,97,80,0.18);"></span>
+            <span style="position: absolute; left: 45%; top: 33%; margin: -26px 0 0 8px; padding: 1px 5px; background: #C14031; color: #FFFFFF; font: 600 11px/16px 'IBM Plex Mono', monospace;">1</span>
+          
+            <span style="position: absolute; left: 61%; top: 28%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: #EF6150; border: 2px solid #FFFFFF; box-sizing: border-box; box-shadow: 0 0 0 4px rgba(239,97,80,0.18);"></span>
+            <span style="position: absolute; left: 61%; top: 28%; margin: -26px 0 0 8px; padding: 1px 5px; background: #C14031; color: #FFFFFF; font: 600 11px/16px 'IBM Plex Mono', monospace;">2</span>
+          
+            <span style="position: absolute; left: 58%; top: 54%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: #EF6150; border: 2px solid #FFFFFF; box-sizing: border-box; box-shadow: 0 0 0 4px rgba(239,97,80,0.18);"></span>
+            <span style="position: absolute; left: 58%; top: 54%; margin: -26px 0 0 8px; padding: 1px 5px; background: #C14031; color: #FFFFFF; font: 600 11px/16px 'IBM Plex Mono', monospace;">3</span>
+          
+            <span style="position: absolute; left: 67%; top: 67%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: #EF6150; border: 2px solid #FFFFFF; box-sizing: border-box; box-shadow: 0 0 0 4px rgba(239,97,80,0.18);"></span>
+            <span style="position: absolute; left: 67%; top: 67%; margin: -26px 0 0 8px; padding: 1px 5px; background: #C14031; color: #FFFFFF; font: 600 11px/16px 'IBM Plex Mono', monospace;">4</span>
+          
+            <span style="position: absolute; left: 53%; top: 39%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: #EF6150; border: 2px solid #FFFFFF; box-sizing: border-box; box-shadow: 0 0 0 4px rgba(239,97,80,0.18);"></span>
+            <span style="position: absolute; left: 53%; top: 39%; margin: -26px 0 0 8px; padding: 1px 5px; background: #C14031; color: #FFFFFF; font: 600 11px/16px 'IBM Plex Mono', monospace;">5</span>
+          
+
+          
+          <span class="ring" style="position: absolute; left: 50%; top: 46%; width: 22px; height: 22px; margin: -11px 0 0 -11px; border: 2px solid #EF6150; box-sizing: border-box;"></span>
+          <span style="position: absolute; left: 50%; top: 46%; width: 20px; height: 20px; margin: -10px 0 0 -10px; background: #C14031; border: 2.5px solid #FFFFFF; transform: rotate(45deg); box-sizing: border-box; box-shadow: 0 6px 20px rgba(0,0,0,0.5);"></span>
+          <span style="position: absolute; left: 50%; top: 46%; transform: translate(-50%, 22px); padding: 6px 10px; background: #19191B; border: 1px solid #C14031; white-space: nowrap; font: 600 13px 'IBM Plex Mono', monospace; color: #FFFFFF; box-shadow: 4px 4px 0 rgba(0,0,0,0.45);">“What products does the company have?”</span>
+
+          
+          <div style="position: absolute; left: 63%; top: 18%; max-width: 260px; padding: 8px 12px; background: #19191B; border: 1px solid rgba(151,150,136,0.35); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <small style="display: block; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #EF6150;">productdevelopment · #2 · 60%</small>
+            <span style="font-size: 13.5px; color: #FFFFFF;">Product Development</span>
+          </div>
+
+          
+          
+            <div style="position: absolute; left: 20px; top: 20px; width: 300px; max-width: calc(100% - 40px); background: #19191B; border: 1px solid rgba(151,150,136,0.4); border-top: 4px solid #C14031; box-shadow: 8px 8px 0 rgba(0,0,0,0.45); padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; z-index: 3;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #EF6150;">How to read this map</span>
+              <ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: 14px; line-height: 1.45; color: #D6D5CF;">
+                <li style="display: grid; grid-template-columns: 22px 1fr; gap: 10px;"><span style="font: 600 11px/20px 'IBM Plex Mono', monospace; text-align: center; height: 20px; background: #3A3A3D; color: #FFFFFF;">1</span><span>Each dot is one passage from a document. Similar topics sit close together.</span></li>
+                <li style="display: grid; grid-template-columns: 22px 1fr; gap: 10px;"><span style="font: 600 11px/20px 'IBM Plex Mono', monospace; text-align: center; height: 20px; background: #3A3A3D; color: #FFFFFF;">2</span><span>Type a question above — the ◆ shows where it lands and lines point to what the assistant would read.</span></li>
+                <li style="display: grid; grid-template-columns: 22px 1fr; gap: 10px;"><span style="font: 600 11px/20px 'IBM Plex Mono', monospace; text-align: center; height: 20px; background: #3A3A3D; color: #FFFFFF;">3</span><span>Click a document on the right to isolate its passages.</span></li>
+              </ol>
+              <button type="button" style="align-self: flex-start; height: 40px; padding: 0 16px; background: #C14031; color: #FFFFFF; border: none; box-shadow: 3px 3px 0 rgba(0,0,0,0.45); font-family: 'Silkscreen', monospace; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;">Got it</button>
+            </div>
+          
+
+          <span style="position: absolute; left: 16px; bottom: 12px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #8A897F;">drag to pan · scroll to zoom · click a dot to read it</span>
+        </div>
+      </div>
+
+      
+      <aside style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; background: #222224; border: 1px solid rgba(151,150,136,0.28); border-top: 6px solid #C14031;">
+        <div style="padding: 16px 18px; border-bottom: 1px solid rgba(151,150,136,0.28);">
+          <h2 style="margin: 0 0 6px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A89E;">Closest passages</h2>
+          <p style="margin: 0; font-size: 16px; font-weight: 600; line-height: 1.4; color: #FFFFFF;">“What products does the company have?”</p>
+        </div>
+        <ol style="list-style: none; margin: 0; padding: 8px 10px; display: flex; flex-direction: column; border-bottom: 1px solid rgba(151,150,136,0.28);">
+          
+            <li>
+              <a href="Main.dc.html" class="hov-row" style="display: grid; grid-template-columns: 22px minmax(0, 1fr) 64px; gap: 10px; align-items: center; padding: 9px 6px; text-decoration: none; color: #ECECEA; min-height: 44px; box-sizing: border-box;">
+                <span style="font: 600 11px/20px 'IBM Plex Mono', monospace; text-align: center; height: 20px; background: #C14031; color: #FFFFFF;">1</span>
+                <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;">
+                  <small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">careers</small>
+                  <span style="font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">We offer</span>
+                </span>
+                <span style="display: flex; align-items: center; gap: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;"><span style="flex: 1; height: 4px; background: #333336; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 63%; background: #EF6150; display: block;"></span></span>63%</span>
+              </a>
+            </li>
+          
+            <li>
+              <a href="Main.dc.html" class="hov-row" style="display: grid; grid-template-columns: 22px minmax(0, 1fr) 64px; gap: 10px; align-items: center; padding: 9px 6px; text-decoration: none; color: #ECECEA; min-height: 44px; box-sizing: border-box;">
+                <span style="font: 600 11px/20px 'IBM Plex Mono', monospace; text-align: center; height: 20px; background: #C14031; color: #FFFFFF;">2</span>
+                <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;">
+                  <small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">productdevelopment</small>
+                  <span style="font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Product Development</span>
+                </span>
+                <span style="display: flex; align-items: center; gap: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;"><span style="flex: 1; height: 4px; background: #333336; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 60%; background: #EF6150; display: block;"></span></span>60%</span>
+              </a>
+            </li>
+          
+            <li>
+              <a href="Main.dc.html" class="hov-row" style="display: grid; grid-template-columns: 22px minmax(0, 1fr) 64px; gap: 10px; align-items: center; padding: 9px 6px; text-decoration: none; color: #ECECEA; min-height: 44px; box-sizing: border-box;">
+                <span style="font: 600 11px/20px 'IBM Plex Mono', monospace; text-align: center; height: 20px; background: #C14031; color: #FFFFFF;">3</span>
+                <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;">
+                  <small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">aboutus</small>
+                  <span style="font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">What We Do</span>
+                </span>
+                <span style="display: flex; align-items: center; gap: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;"><span style="flex: 1; height: 4px; background: #333336; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 57%; background: #EF6150; display: block;"></span></span>57%</span>
+              </a>
+            </li>
+          
+            <li>
+              <a href="Main.dc.html" class="hov-row" style="display: grid; grid-template-columns: 22px minmax(0, 1fr) 64px; gap: 10px; align-items: center; padding: 9px 6px; text-decoration: none; color: #ECECEA; min-height: 44px; box-sizing: border-box;">
+                <span style="font: 600 11px/20px 'IBM Plex Mono', monospace; text-align: center; height: 20px; background: #C14031; color: #FFFFFF;">4</span>
+                <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;">
+                  <small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">casestudies</small>
+                  <span style="font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Helping clients ship</span>
+                </span>
+                <span style="display: flex; align-items: center; gap: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;"><span style="flex: 1; height: 4px; background: #333336; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 57%; background: #EF6150; display: block;"></span></span>57%</span>
+              </a>
+            </li>
+          
+            <li>
+              <a href="Main.dc.html" class="hov-row" style="display: grid; grid-template-columns: 22px minmax(0, 1fr) 64px; gap: 10px; align-items: center; padding: 9px 6px; text-decoration: none; color: #ECECEA; min-height: 44px; box-sizing: border-box;">
+                <span style="font: 600 11px/20px 'IBM Plex Mono', monospace; text-align: center; height: 20px; background: #C14031; color: #FFFFFF;">5</span>
+                <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;">
+                  <small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">whyalied</small>
+                  <span style="font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Objectivity</span>
+                </span>
+                <span style="display: flex; align-items: center; gap: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;"><span style="flex: 1; height: 4px; background: #333336; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 57%; background: #EF6150; display: block;"></span></span>57%</span>
+              </a>
+            </li>
+          
+        </ol>
+
+        <div style="padding: 16px 18px 6px; display: flex; justify-content: space-between; align-items: baseline;">
+          <h2 style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A89E;">Documents</h2>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A897F;">click to isolate</span>
+        </div>
+        <ul style="list-style: none; margin: 0; padding: 0 10px 14px; display: flex; flex-direction: column;">
+          
+            <li>
+              <button type="button" aria-pressed="false" style="width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 36px; padding: 6px 8px; border: none; cursor: pointer; text-align: left; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; color: #D6D5CF; background: transparent; box-shadow: none;">
+                <span style="display: flex; align-items: center; gap: 10px;"><span style="width: 8px; height: 8px; border-radius: 50%; display: block; background: #7D7C73;"></span>mobiletesting</span>
+                <small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">16</small>
+              </button>
+            </li>
+          
+            <li>
+              <button type="button" aria-pressed="false" style="width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 36px; padding: 6px 8px; border: none; cursor: pointer; text-align: left; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; color: #D6D5CF; background: transparent; box-shadow: none;">
+                <span style="display: flex; align-items: center; gap: 10px;"><span style="width: 8px; height: 8px; border-radius: 50%; display: block; background: #7D7C73;"></span>specializedtesting</span>
+                <small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">13</small>
+              </button>
+            </li>
+          
+            <li>
+              <button type="button" aria-pressed="false" style="width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 36px; padding: 6px 8px; border: none; cursor: pointer; text-align: left; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; color: #D6D5CF; background: transparent; box-shadow: none;">
+                <span style="display: flex; align-items: center; gap: 10px;"><span style="width: 8px; height: 8px; border-radius: 50%; display: block; background: #7D7C73;"></span>qarole</span>
+                <small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">11</small>
+              </button>
+            </li>
+          
+            <li>
+              <button type="button" aria-pressed="false" style="width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 36px; padding: 6px 8px; border: none; cursor: pointer; text-align: left; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; color: #D6D5CF; background: transparent; box-shadow: none;">
+                <span style="display: flex; align-items: center; gap: 10px;"><span style="width: 8px; height: 8px; border-radius: 50%; display: block; background: #7D7C73;"></span>leadership</span>
+                <small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">10</small>
+              </button>
+            </li>
+          
+            <li>
+              <button type="button" aria-pressed="false" style="width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 36px; padding: 6px 8px; border: none; cursor: pointer; text-align: left; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; color: #D6D5CF; background: transparent; box-shadow: none;">
+                <span style="display: flex; align-items: center; gap: 10px;"><span style="width: 8px; height: 8px; border-radius: 50%; display: block; background: #7D7C73;"></span>casestudies</span>
+                <small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">9</small>
+              </button>
+            </li>
+          
+            <li>
+              <button type="button" aria-pressed="false" style="width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 36px; padding: 6px 8px; border: none; cursor: pointer; text-align: left; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; color: #D6D5CF; background: transparent; box-shadow: none;">
+                <span style="display: flex; align-items: center; gap: 10px;"><span style="width: 8px; height: 8px; border-radius: 50%; display: block; background: #7D7C73;"></span>stressbusting</span>
+                <small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">9</small>
+              </button>
+            </li>
+          
+            <li>
+              <button type="button" aria-pressed="false" style="width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 36px; padding: 6px 8px; border: none; cursor: pointer; text-align: left; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; color: #D6D5CF; background: transparent; box-shadow: none;">
+                <span style="display: flex; align-items: center; gap: 10px;"><span style="width: 8px; height: 8px; border-radius: 50%; display: block; background: #7D7C73;"></span>whyalied</span>
+                <small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">9</small>
+              </button>
+            </li>
+          
+            <li>
+              <button type="button" aria-pressed="false" style="width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 36px; padding: 6px 8px; border: none; cursor: pointer; text-align: left; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; color: #D6D5CF; background: transparent; box-shadow: none;">
+                <span style="display: flex; align-items: center; gap: 10px;"><span style="width: 8px; height: 8px; border-radius: 50%; display: block; background: #7D7C73;"></span>fintech</span>
+                <small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">7</small>
+              </button>
+            </li>
+          
+            <li>
+              <button type="button" aria-pressed="false" style="width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 36px; padding: 6px 8px; border: none; cursor: pointer; text-align: left; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; color: #D6D5CF; background: transparent; box-shadow: none;">
+                <span style="display: flex; align-items: center; gap: 10px;"><span style="width: 8px; height: 8px; border-radius: 50%; display: block; background: #7D7C73;"></span>oracletopostgres</span>
+                <small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">7</small>
+              </button>
+            </li>
+          
+            <li>
+              <button type="button" aria-pressed="false" style="width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 36px; padding: 6px 8px; border: none; cursor: pointer; text-align: left; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; color: #D6D5CF; background: transparent; box-shadow: none;">
+                <span style="display: flex; align-items: center; gap: 10px;"><span style="width: 8px; height: 8px; border-radius: 50%; display: block; background: #7D7C73;"></span>ourproducts</span>
+                <small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">7</small>
+              </button>
+            </li>
+          
+        </ul>
+      </aside>
+    </section>
+
+    <footer style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 22px 0 30px; border-top: 1px solid rgba(151,150,136,0.28); font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase; color: #8A897F;">
+      <span>Allied Testing · KB Helper · local RAG on Ollama</span>
+      <span>Built by [YOUR NAME] · CEITI</span>
+    </footer>
+  </div>
+</div>
+</div>
+</body></html>

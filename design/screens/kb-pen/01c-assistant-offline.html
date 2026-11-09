@@ -1,0 +1,179 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"><style>
+body{margin:0;background:#19191B}
+a{color:#ECECEA}a:hover{color:#FFFFFF}
+.nav-a{color:#A9A89E;text-decoration:none;border-bottom:3px solid transparent;transition:color .2s,border-color .2s}
+.nav-a:hover{color:#FFFFFF;border-bottom-color:#5A5A5D}
+.hov{transition:background .15s,color .15s}
+.hov:hover{background:rgba(255,255,255,.05) !important}
+.btn-red{transition:background .2s,transform .2s,box-shadow .2s}
+.btn-red:hover{background:#D4513F !important;transform:translate(-1px,-1px);box-shadow:5px 5px 0 #000 !important}
+.ghost{transition:color .2s,border-color .2s,background .2s}
+.ghost:hover{color:#FFFFFF !important;border-color:#979688 !important}
+.icon-b{transition:color .15s,background .15s}
+.icon-b:hover{color:#FFFFFF !important;background:#333336 !important}
+.ex{transition:background .2s,border-color .2s,transform .2s}
+.ex:hover{background:#C14031 !important;border-color:#C14031 !important;color:#FFFFFF !important;transform:translateY(-2px)}
+.chip{transition:border-color .2s,color .2s}
+.chip:hover{border-color:#EF6150 !important;color:#FFFFFF !important}
+.cite{transition:background .15s,transform .15s}
+.cite:hover{background:#D4513F !important;transform:translateY(-1px)}
+.fade{animation:fade .35s ease-out}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.slide{animation:slide .3s ease-out}
+@keyframes slide{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+.blink{animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.busy{animation:busy .9s steps(2) infinite}
+@keyframes busy{50%{background:#EF6150}}
+.skel{animation:skel 1.6s ease-in-out infinite}
+@keyframes skel{50%{opacity:.4}}
+.pulse{animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(95,211,138,.55)}70%{box-shadow:0 0 0 8px rgba(95,211,138,0)}100%{box-shadow:0 0 0 0 rgba(95,211,138,0)}}
+.ring{animation:ring 1.8s ease-out infinite}
+@keyframes ring{from{transform:rotate(45deg) scale(.6);opacity:1}to{transform:rotate(45deg) scale(2.6);opacity:0}}
+.dash{animation:dash 1s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-8}}
+@media (prefers-reduced-motion: reduce){.skel,.fade,.slide,.blink,.busy,.pulse,.ring,.dash{animation:none}}
+</style><style>html,body{margin:0;background:#19191B} #root{width:1440px} *,*::before,*::after{animation:none !important;transition:none !important}</style></head><body>
+<div id="root">
+
+
+<div style="min-height: 100vh; color: #ECECEA; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 15.5px; line-height: 1.6; background-color: #19191B; background-image: linear-gradient(rgba(255,255,255,0.028) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.028) 1px, transparent 1px); background-size: 24px 24px;">
+  <div style="height: 6px; background: linear-gradient(90deg, #4B4B4D 0 62%, #C14031 62% 100%);"></div>
+
+  <div style="max-width: 1440px; margin: 0 auto; padding: 0 40px; box-sizing: border-box;">
+
+    
+    <header style="display: flex; align-items: center; flex-wrap: wrap; gap: 16px 36px; padding: 22px 0 18px; border-bottom: 1px solid rgba(151,150,136,0.28);">
+      <a href="Home.dc.html" aria-label="Allied Testing — KB Helper home" style="display: flex; line-height: 0; box-shadow: 6px 6px 0 rgba(0,0,0,0.45);">
+        <img src="img/logo.png" alt="Allied Testing" style="height: 56px; width: auto; display: block;">
+      </a>
+      <nav aria-label="Main" style="display: flex; gap: 30px; flex-wrap: wrap; margin-right: auto; font-family: 'Silkscreen', 'Courier New', monospace; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase;">
+        <a href="Main.dc.html" aria-current="page" style="color: #FFFFFF; text-decoration: none; padding-bottom: 4px; border-bottom: 3px solid #C14031;">Assistant</a>
+        <a href="Map.dc.html" class="nav-a" style="padding-bottom: 4px;">Knowledge map</a>
+        <a href="Docs.dc.html" class="nav-a" style="padding-bottom: 4px;">Documents</a>
+      </nav>
+      <div role="status" style="display: flex; align-items: center; gap: 8px; padding: 7px 12px; background: #242426; border: 1px solid #D4513F; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #ECECEA;">
+        
+        <span style="width: 8px; height: 8px; background: #EF6150; display: block;"></span>
+        ollama offline
+      </div>
+    </header>
+
+    
+    <section aria-label="Assistant" style="display: flex; flex-wrap: wrap; gap: 20px; align-items: stretch; padding: 24px 0 32px; min-height: calc(100vh - 200px); box-sizing: border-box;">
+
+      
+      <aside style="flex: 1 1 250px; max-width: 100%; min-width: 0; display: flex; flex-direction: column; gap: 16px;">
+        <button type="button" class="btn-red" style="height: 50px; display: flex; align-items: center; justify-content: center; gap: 10px; background: #C14031; color: #FFFFFF; border: none; box-shadow: 4px 4px 0 rgba(0,0,0,0.45); font-family: 'Silkscreen', monospace; font-size: 15px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>New chat</button>
+
+        <div style="background: #212123; border: 1px solid rgba(151,150,136,0.28);">
+          <h2 style="margin: 0; padding: 12px 14px 8px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A89E;">Recent</h2>
+          <div style="display: flex; flex-direction: column; padding: 0 6px 8px;">
+            
+            
+              
+                <button type="button" class="hov" style="display: flex; flex-direction: column; gap: 1px; padding: 9px 10px; min-height: 48px; text-align: left; border: none; cursor: pointer; font-family: inherit; background: #2E2E31; box-shadow: inset 3px 0 0 #C14031;">
+                  <span style="font-size: 14px; line-height: 1.35; color: #ECECEA; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">What products does the company have?</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A897F;">now</span>
+                </button>
+              
+                <button type="button" class="hov" style="display: flex; flex-direction: column; gap: 1px; padding: 9px 10px; min-height: 48px; text-align: left; border: none; cursor: pointer; font-family: inherit; background: transparent; box-shadow: none;">
+                  <span style="font-size: 14px; line-height: 1.35; color: #ECECEA; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">How do you handle security testing?</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A897F;">12 min ago</span>
+                </button>
+              
+                <button type="button" class="hov" style="display: flex; flex-direction: column; gap: 1px; padding: 9px 10px; min-height: 48px; text-align: left; border: none; cursor: pointer; font-family: inherit; background: transparent; box-shadow: none;">
+                  <span style="font-size: 14px; line-height: 1.35; color: #ECECEA; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Какие AI-решения есть у компании?</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A897F;">yesterday</span>
+                </button>
+              
+                <button type="button" class="hov" style="display: flex; flex-direction: column; gap: 1px; padding: 9px 10px; min-height: 48px; text-align: left; border: none; cursor: pointer; font-family: inherit; background: transparent; box-shadow: none;">
+                  <span style="font-size: 14px; line-height: 1.35; color: #ECECEA; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Tell me about your QA consulting</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A897F;">yesterday</span>
+                </button>
+              
+            
+          </div>
+        </div>
+
+        <div style="background: #212123; border: 1px solid rgba(151,150,136,0.28);">
+          <button type="button" class="hov" aria-expanded="false" style="width: 100%; min-height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px; background: transparent; border: none; cursor: pointer; text-align: left;">
+            <span style="display: flex; flex-direction: column; line-height: 1.35;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A89E;">Answer settings</span>
+              <span style="font-size: 13px; color: #D6D5CF;">Balanced · 5 sources · qwen3:1.7b</span>
+            </span>
+            <span style="font-family: 'IBM Plex Mono', monospace; color: #EF6150;">+</span>
+          </button>
+          
+        </div>
+      </aside>
+
+      
+      <div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; background: #252527; border: 1px solid rgba(151,150,136,0.28); border-top: 6px solid #C14031; box-shadow: 0 30px 80px rgba(0,0,0,0.45);">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 22px; border-bottom: 1px solid rgba(151,150,136,0.25);">
+          <h1 style="margin: 0; font-family: 'Silkscreen', monospace; font-weight: 400; font-size: 20px; letter-spacing: 0.06em; text-transform: uppercase; color: #FFFFFF;">KB Helper</h1>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #8A897F;">answers from 26 Allied Testing documents</span>
+        </div>
+
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 22px; padding: 28px 28px 20px; min-height: 520px;">
+
+          
+          
+
+          
+          
+            <div class="fade" style="display: flex; justify-content: flex-end;">
+              <div style="max-width: 78%; background: #C14031; color: #FFFFFF; padding: 12px 18px; box-shadow: 5px 5px 0 rgba(0,0,0,0.4); font-size: 16px;">What products does the company have?</div>
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+          
+            <div class="fade" role="alert" style="display: flex; flex-direction: column; gap: 14px; padding: 20px 22px; background: rgba(193,64,49,0.10); border: 1px solid #D4513F;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#EF6150" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M12 3l10 18H2z"></path><path d="M12 10v5M12 18v.5"></path></svg>
+                <h2 style="margin: 0; font-size: 19px; font-weight: 600; color: #FFFFFF;">Can't reach the language model</h2>
+              </div>
+              <p style="margin: 0; color: #D6D5CF;">KB Helper couldn't connect to Ollama on this machine, so no answer was generated. Your question is saved — retry once it's running.</p>
+              <ol style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; color: #D6D5CF;">
+                <li>Start Ollama: <code style="font-family: 'IBM Plex Mono', monospace; font-size: 0.9em; color: #FFFFFF; background: #19191B; padding: 2px 7px;">ollama serve</code></li>
+                <li>Make sure the model is there: <code style="font-family: 'IBM Plex Mono', monospace; font-size: 0.9em; color: #FFFFFF; background: #19191B; padding: 2px 7px;">ollama pull qwen3:1.7b</code></li>
+              </ol>
+              <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button type="button" class="btn-red" style="height: 44px; padding: 0 20px; background: #C14031; color: #FFFFFF; border: none; box-shadow: 3px 3px 0 rgba(0,0,0,0.45); font-family: 'Silkscreen', monospace; font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;">Retry</button>
+                <span style="align-self: center; font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: #A9A89E;">error · connection refused · localhost:11434</span>
+              </div>
+            </div>
+          
+
+          
+          
+        </div>
+
+        
+        <form style="margin: 0 22px 22px; display: flex; align-items: flex-end; gap: 8px; padding: 6px 6px 6px 16px; background: #19191B; border: 1px solid #D4513F; box-shadow: 0 0 0 3px rgba(193,64,49,0.22);">
+          <label for="ask" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">Your question</label>
+          <textarea id="ask" rows="1" placeholder="Ask about services, products, expertise…" style="flex: 1; resize: none; border: none; outline: none; background: transparent; color: #FFFFFF; font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; line-height: 1.5; padding: 10px 0; min-height: 44px; box-sizing: border-box;"></textarea>
+          <span style="align-self: center; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #8A897F; padding: 0 6px; white-space: nowrap;">↵ send</span>
+          
+          
+            <button type="button" class="btn-red" style="height: 46px; min-width: 104px; padding: 0 20px; display: flex; align-items: center; justify-content: center; gap: 10px; background: #C14031; color: #FFFFFF; border: none; box-shadow: 3px 3px 0 rgba(0,0,0,0.45); font-family: 'Silkscreen', monospace; font-size: 16px; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer;">Ask <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"></path></svg></button>
+          
+        </form>
+      </div>
+
+      
+      
+    </section>
+  </div>
+</div>
+</div>
+</body></html>

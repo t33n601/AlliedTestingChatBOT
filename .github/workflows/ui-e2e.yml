@@ -1,0 +1,19 @@
+name: UI E2E (Selenoid)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  selenium:
+    runs-on: [self-hosted, kb]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install deps
+        run: |
+          python3 -m venv .venv
+          . .venv/bin/activate
+          pip install -r requirements.txt
+      - name: Run Selenium test
+        run: |
+          . .venv/bin/activate
+          pytest tests/test_ui_selenium.py::test_open_chat_ui -v

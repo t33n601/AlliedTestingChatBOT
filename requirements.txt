@@ -1,0 +1,13 @@
+fastapi==0.115.12
+uvicorn==0.34.2
+psycopg2-binary==2.9.10
+ollama==0.4.8
+gradio==5.30.0
+requests==2.32.3
+pytest==8.3.5
+selenium==4.47.0
+pydantic>=2.0
+numpy>=1.26
+python-multipart>=0.0.9
+pypdf==5.4.0
+python-docx==1.1.2

@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KB Helper</title>
+  <meta name="description" content="Local RAG assistant over the Allied Testing knowledge base: Postgres + pgvector, Ollama, FastAPI.">
+  <link rel="icon" href="/brand/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="/brand/favicon-64.png" sizes="64x64" type="image/png">
+  <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png">
+  <script>
+    (function () {   // saved theme before first paint (no flash)
+      var t = localStorage.getItem("kb.theme") || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+      document.documentElement.dataset.theme = t;
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=Titillium+Web:wght@400;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="bar">
+    <a class="logo" href="#assistant" aria-label="Allied Testing — KB Helper home"><img src="/brand/logo.png" alt="Allied Testing"></a>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="#assistant" data-view="assistant" class="on">Assistant</a>
+      <a href="#map" data-view="map">Knowledge map</a>
+      <a href="#documents" data-view="documents">Documents</a>
+    </nav>
+    <div class="chips">
+      <span class="live" id="live">connecting…</span>
+      <button type="button" class="icon-b theme-toggle" id="theme-toggle" aria-label="Switch theme" title="Switch theme">
+        <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>
+      </button>
+      <button type="button" class="m-new" id="m-new" aria-label="New chat" title="New chat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ============================================================ ASSISTANT -->
+    <section class="view on" id="view-assistant">
+      <div id="motif" hidden></div>
+
+      <div class="bench" aria-label="Assistant workspace">
+        <!-- left rail: runs + tune -->
+        <aside class="rail">
+          <div class="panel">
+            <div class="panel-head">
+              <h2>Chats</h2>
+              <button class="btn-primary" id="new-chat" type="button" title="Start a new conversation"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>New chat</button>
+            </div>
+            <label class="chat-search">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+              <span class="sr-only">Search chats</span>
+              <input id="run-search" type="search" placeholder="Search chats" autocomplete="off">
+            </label>
+            <div class="runs" id="runs"><p class="runs-empty">No chats yet. Ask a question to start one.</p></div>
+          </div>
+        </aside>
+
+        <!-- center: the conversation -->
+        <div class="card chat">
+          <div class="card-head">
+            <h3>KB Helper</h3>
+            <span class="run-status" id="run-status">ready</span>
+          </div>
+          <ol class="pipeline" id="pipeline" aria-label="Pipeline for this answer">
+            <li data-step="retrieve"><span class="chk" aria-hidden="true"></span><span class="step"><b>Retrieve</b><small>—</small></span></li>
+            <li data-step="augment"><span class="chk" aria-hidden="true"></span><span class="step"><b>Augment</b><small>—</small></span></li>
+            <li data-step="generate"><span class="chk" aria-hidden="true"></span><span class="step"><b>Generate</b><small>—</small></span></li>
+          </ol>
+          <div class="messages" id="messages">
+            <div class="empty" id="empty">
+              <div class="rhomb lg" aria-hidden="true"><i class="halo"></i><span class="shape"><img src="/static/assets/hammer.png" alt=""></span></div>
+              <p class="eyebrow">KB Helper · Allied Testing</p>
+              <h4>What would you like to know?</h4>
+              <p>I answer from Allied Testing's own documents and show the exact sources for every answer. Ask in English or Russian.</p>
+              <div class="examples" id="examples"></div>
+            </div>
+          </div>
+          <form class="composer" id="composer">
+            <label for="input" class="sr-only">Your question</label>
+            <textarea id="input" rows="1" placeholder="Ask about services, products, expertise…" autocomplete="off"></textarea>
+            <div class="model-pick">
+              <button type="button" class="model-chip" id="model-btn" aria-haspopup="listbox" aria-expanded="false" title="Choose model">
+                <svg class="mc-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 9-8 9-8-9z"/></svg><span id="model-name">model</span><svg class="mc-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+              <div class="model-menu" id="model-menu" role="listbox" aria-label="Model" hidden></div>
+            </div>
+            <div class="model-pick style-pick">
+              <button type="button" class="model-chip" id="style-btn" aria-haspopup="dialog" aria-expanded="false" title="Answer style">
+                <svg class="sc-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span id="style-summary">Formal · 5</span><svg class="mc-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+              <div class="model-menu style-menu" id="style-menu" role="dialog" aria-label="Answer style" hidden>
+                <p class="mm-head">Tone</p>
+                <div class="tone-list" id="tone" role="radiogroup" aria-label="Tone">
+                  <button type="button" role="radio" class="mm-item" data-v="formal"><span class="mm-text"><b class="t">Formal</b><small>Precise, business-like</small></span><svg class="mm-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>
+                  <button type="button" role="radio" class="mm-item" data-v="friendly"><span class="mm-text"><b class="t">Friendly</b><small>Warm and conversational</small></span><svg class="mm-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>
+                  <button type="button" role="radio" class="mm-item" data-v="brief"><span class="mm-text"><b class="t">Brief</b><small>Short, straight to the point</small></span><svg class="mm-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>
+                  <button type="button" role="radio" class="mm-item" data-v="simple"><span class="mm-text"><b class="t">Simple</b><small>Plain words, no jargon</small></span><svg class="mm-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>
+                </div>
+                <div class="mm-sep" aria-hidden="true"></div>
+                <div class="mm-row">
+                  <span class="mm-text"><b class="t">Sources</b><small>Passages read per answer</small></span>
+                  <div class="stepper" role="group" aria-label="Sources to read">
+                    <button type="button" id="topk-dec" aria-label="Fewer sources"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"/></svg></button>
+                    <b id="topk-val" aria-live="polite">5</b>
+                    <button type="button" id="topk-inc" aria-label="More sources"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg></button>
+                  </div>
+                  <input type="range" id="topk" min="1" max="10" step="1" value="5" hidden>
+                </div>
+                <label class="mm-row mm-switch">
+                  <span class="mm-text"><b class="t">Show reasoning</b><small>See how the model thinks</small></span>
+                  <input type="checkbox" id="think-toggle" checked><i></i>
+                </label>
+              </div>
+            </div>
+            <span class="hint">EN · RU</span>
+            <button class="ask" id="ask" type="submit"><span>Ask</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></button>
+          </form>
+        </div>
+
+        <!-- right: evidence -->
+        <aside class="panel evidence" id="evidence" aria-label="Evidence for this answer">
+          <div class="panel-head">
+            <h2 id="ev-title">Sources</h2>
+            <button class="link" id="ev-map" type="button" hidden>Show on map ▸</button>
+            <button class="ghost sheet-close" id="ev-close" type="button" aria-label="Close sources"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+          </div>
+          <div class="ev-map" id="ev-minimap" aria-hidden="true"></div>
+          <ol class="ev-list" id="ev-list"></ol>
+          <p class="ev-empty" id="ev-empty">Sources appear here with each answer: the passages the assistant read, how closely each one matches your question, and where they sit on the knowledge map.</p>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============================================================ MAP -->
+    <section class="view" id="view-map">
+      <div class="section-head">
+        <div class="section-text">
+          <p class="kicker">&gt; 768 dimensions → 2<span class="blink">_</span></p>
+          <h2>Knowledge map</h2>
+          <p class="sub">Every dot is one chunk of the knowledge base, placed by the meaning of its text.
+            Close dots talk about similar things. Type a question to see where it lands and which chunks the
+            assistant would read.</p>
+        </div>
+        <form class="map-search" id="map-search">
+          <label for="map-query" class="sr-only">Question to locate</label>
+          <input id="map-query" placeholder="e.g. penetration testing" autocomplete="off">
+          <button class="ask" type="submit"><span>Locate</span></button>
+        </form>
+      </div>
+      <div class="map-wrap">
+        <div class="map-card">
+          <div class="map-toolbar">
+            <span id="map-count">loading…</span>
+            <div class="zoom">
+              <button type="button" class="icon-b" id="zoom-in" aria-label="Zoom in" title="Zoom in"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+              <button type="button" class="icon-b" id="zoom-out" aria-label="Zoom out" title="Zoom out"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+              <button type="button" class="icon-b" id="zoom-reset" aria-label="Reset view" title="Reset view"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+            </div>
+          </div>
+          <div class="map-stage">
+            <svg id="map" viewBox="0 0 1000 720" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Scatter map of knowledge-base chunks"></svg>
+            <div class="tip" id="map-tip" hidden></div>
+            <div class="map-hint" id="map-hint">drag to pan · scroll to zoom · click a dot to read it</div>
+          </div>
+        </div>
+        <aside class="map-side">
+          <div class="side-panel" id="map-detail" hidden></div>
+          <div class="side-panel" id="map-legend">
+            <div class="side-title"><h4>Documents</h4><small>click to isolate</small></div>
+            <ul class="legend" id="legend"></ul>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============================================================ DOCUMENTS -->
+    <section class="view" id="view-documents">
+      <div class="section-head">
+        <div class="section-text">
+          <p class="kicker">&gt; knowledge base<span class="blink">_</span></p>
+          <h2>Documents</h2>
+          <p class="sub">The sources the assistant answers from. Drop a PDF, DOCX, Markdown or text file:
+            it is split into chunks, embedded with <code>nomic-embed-text</code> and searchable seconds later.</p>
+        </div>
+        <div class="mini-stats">
+          <div><b id="ds-files">—</b><small>files</small></div>
+          <div><b id="ds-chunks">—</b><small>chunks</small></div>
+          <div><b id="ds-chars">—</b><small>characters</small></div>
+        </div>
+      </div>
+
+      <div class="ingest" aria-label="Add documents">
+        <label class="drop" id="drop">
+          <input type="file" id="file" accept=".pdf,.docx,.md,.markdown,.txt" class="sr-only">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg>
+          <b>Drop a file here</b>
+          <span>or click to choose · PDF, DOCX, MD, TXT up to 15 MB</span>
+          <div class="progress" id="upload-progress" hidden><i></i></div>
+        </label>
+        <div class="job" id="job">
+          <div class="job-top"><span class="job-state" id="job-state">ready</span><span class="job-meta" id="job-meta">waiting for a file</span></div>
+          <span class="job-name" id="job-name">No file in progress</span>
+          <div class="job-bar"><i id="job-bar"></i></div>
+          <ol class="job-steps" id="job-steps">
+            <li data-s="parse">○ parse</li><li data-s="split">○ split</li><li data-s="embed">○ embed</li><li data-s="index">○ index</li>
+          </ol>
+          <div class="admin" id="admin" hidden>
+            <label for="admin-token" class="sr-only">Admin token</label>
+            <input type="password" id="admin-token" placeholder="Admin token (needed to upload or delete)">
+          </div>
+        </div>
+      </div>
+
+      <div class="docs-wrap">
+        <div class="ledger">
+          <div class="ledger-tools">
+            <label class="filter">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+              <span class="sr-only">Filter documents</span>
+              <input id="doc-filter" type="text" placeholder="Filter documents…" autocomplete="off">
+            </label>
+            <div class="sort" role="group" aria-label="Sort by">
+              <span>Sort</span>
+              <div class="seg-inline" id="doc-sort">
+                <button type="button" data-v="chunks" class="on" aria-pressed="true">Chunks</button>
+                <button type="button" data-v="name" aria-pressed="false">A–Z</button>
+                <button type="button" data-v="size" aria-pressed="false">Size</button>
+              </div>
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table class="doc-table">
+              <thead><tr><th scope="col" class="c-n">#</th><th scope="col">Document</th><th scope="col" class="c-bar">Chunks</th><th scope="col" class="c-num">Chars</th><th scope="col" class="c-num">Share</th></tr></thead>
+              <tbody id="docs"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <aside class="inspector" id="inspector" aria-label="Document inspector">
+          <div class="insp-head">
+            <span class="insp-kicker">inspector</span>
+            <h3 id="insp-title">Select a document</h3>
+            <span class="insp-meta" id="insp-meta">click a row in the table</span>
+            <div class="insp-acts" id="insp-acts" hidden>
+              <button type="button" class="ghost" id="insp-map">Show on map</button>
+              <button type="button" class="ghost" id="insp-reembed">Re-embed</button>
+              <button type="button" class="ghost danger" id="insp-delete">Remove</button>
+            </div>
+          </div>
+          <ol class="insp-chunks" id="insp-body"></ol>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <nav class="tabbar" id="tabbar" aria-label="Main">
+    <a href="#assistant" data-view="assistant" class="on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4V5z"/></svg>Assistant</a>
+    <a href="#map" data-view="map"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="7" r="1.5"/><circle cx="16" cy="5" r="1.5"/><circle cx="9" cy="16" r="1.5"/><circle cx="18" cy="15" r="1.5"/><path d="M12 11l2 2-2 2-2-2z"/></svg>Map</a>
+    <a href="#documents" data-view="documents"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h7"/></svg>Docs</a>
+  </nav>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <footer class="foot">
+    <span>Allied Testing · KB Helper · local RAG on Ollama</span>
+    <span>Answers only from company documents · <a href="/docs">API</a></span>
+  </footer>
+
+  <script src="/static/vendor/marked.min.js"></script>
+  <script src="/static/vendor/purify.min.js"></script>
+  <script src="/static/app.js"></script>
+  <script>
+    document.getElementById("theme-toggle").addEventListener("click", function () {
+      var t = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+      document.documentElement.dataset.theme = t;
+      localStorage.setItem("kb.theme", t);
+    });
+  </script>
+</body>
+</html>

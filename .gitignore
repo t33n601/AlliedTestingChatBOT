@@ -1,0 +1,33 @@
+# project related
+pgdata/
+pgadmin_data/
+.venv/
+.gradio/
+backup/
+runner/_work/
+selenoid/video/
+selenoid/logs/
+*.mp4
+
+# Compiled Python bytecode
+*.py[cod]
+__pycache__/
+.pytest_cache/
+
+# Log files
+*.log
+
+.DS_Store
+.idea/
+
+# local backups, private notes, design handoff
+backup-before-4-features/
+web-backup-before-redesign/
+DEMO.txt
+image.png
+design/screens/redesign/HANDOFF.md
+
+# env / secrets
+.env
+.env.*
+*.pem

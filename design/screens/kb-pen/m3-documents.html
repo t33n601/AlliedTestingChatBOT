@@ -1,0 +1,252 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"><style>
+body{margin:0;background:#19191B}
+a{color:#ECECEA}a:hover{color:#FFFFFF}
+.stripes{background-image:repeating-linear-gradient(-45deg,rgba(255,255,255,.18) 0 8px,transparent 8px 16px);background-size:22.6px 22.6px;animation:move .8s linear infinite}
+@keyframes move{to{background-position:22.6px 0}}
+.sheet{animation:up .28s ease-out}
+@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.glass{background-color:rgba(36,36,40,.42);background-image:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.04) 46%,rgba(0,0,0,.10));-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.38),inset 0 -1px 1px rgba(0,0,0,.35),inset 0 0 20px rgba(255,255,255,.05),0 14px 34px rgba(0,0,0,.55),0 2px 6px rgba(0,0,0,.35)}
+.tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:27px;text-decoration:none;color:rgba(236,236,234,.78);font-family:'Silkscreen',monospace;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;transition:background .25s,color .25s,transform .2s}
+.tab:hover{color:#FFFFFF;background:rgba(255,255,255,.07)}
+.tab:active{transform:scale(.93)}
+.tab.on{color:#FFFFFF;background:linear-gradient(180deg,rgba(239,97,80,.82),rgba(193,64,49,.66));box-shadow:inset 0 1px 0 rgba(255,255,255,.5),inset 0 -2px 5px rgba(0,0,0,.25),0 4px 16px rgba(193,64,49,.5)}
+@media (prefers-reduced-motion: reduce){.stripes,.sheet{animation:none}}
+</style><style>html,body{margin:0;background:#19191B} #root{width:390px} *,*::before,*::after{animation:none !important;transition:none !important}</style></head><body>
+<div id="root">
+
+
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; display: flex; flex-direction: column; color: #ECECEA; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 15.5px; line-height: 1.55; background-color: #19191B; background-image: linear-gradient(rgba(255,255,255,0.028) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.028) 1px, transparent 1px); background-size: 24px 24px;">
+  <div style="height: 5px; flex: 0 0 5px; background: linear-gradient(90deg, #4B4B4D 0 62%, #C14031 62% 100%);"></div>
+
+  <header style="flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 16px; border-bottom: 1px solid rgba(151,150,136,0.28);">
+    <a href="MHome.dc.html" aria-label="Allied Testing — KB Helper home" style="display: flex; line-height: 0; box-shadow: 3px 3px 0 rgba(0,0,0,0.45);"><img src="img/logo.png" alt="Allied Testing" style="height: 34px; width: auto; display: block;"></a>
+    <h1 style="margin: 0; font-family: 'Silkscreen', monospace; font-weight: 400; font-size: 16px; letter-spacing: 0.06em; text-transform: uppercase; color: #FFFFFF;">Documents</h1>
+  </header>
+
+  <div style="flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 14px 12px 100px;">
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: rgba(151,150,136,0.28); border: 1px solid rgba(151,150,136,0.28);">
+      <div style="background: #19191B; padding: 10px 12px;"><div style="font-family: 'Silkscreen', monospace; font-size: 22px; line-height: 1; color: #FFFFFF;">26</div><div style="margin-top: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #A9A89E;">files</div></div>
+      <div style="background: #19191B; padding: 10px 12px;"><div style="font-family: 'Silkscreen', monospace; font-size: 22px; line-height: 1; color: #FFFFFF;">149</div><div style="margin-top: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #A9A89E;">passages</div></div>
+      <div style="background: #19191B; padding: 10px 12px;"><div style="font-family: 'Silkscreen', monospace; font-size: 22px; line-height: 1; color: #FFFFFF;">131K</div><div style="margin-top: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #A9A89E;">characters</div></div>
+    </div>
+
+    <label for="md-file" style="min-height: 64px; display: flex; align-items: center; justify-content: center; gap: 12px; border: 2px dashed rgba(151,150,136,0.45); background: rgba(0,0,0,0.12); cursor: pointer;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EF6150" stroke-width="2.2" stroke-linecap="square" aria-hidden="true"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"></path></svg>
+      <span style="display: flex; flex-direction: column; line-height: 1.3;"><b style="font-family: 'Silkscreen', monospace; font-weight: 400; font-size: 15px; letter-spacing: 0.06em; text-transform: uppercase; color: #FFFFFF;">Upload a file</b><span style="font-size: 12.5px; color: #A9A89E;">PDF, DOCX, MD, TXT · up to 15 MB</span></span>
+      <input id="md-file" type="file" style="position: absolute; width: 1px; height: 1px; opacity: 0;">
+    </label>
+
+    <div style="display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; background: #222224; border: 1px solid rgba(151,150,136,0.28); border-top: 4px solid #C14031;">
+      <div style="display: flex; justify-content: space-between; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;"><span style="color: #EF6150;">ingesting · embed</span><span style="color: #A9A89E;">7 / 12</span></div>
+      <span style="font-size: 14.5px; font-weight: 600; color: #FFFFFF;">[new-document].pdf</span>
+      <div style="height: 8px; background: #19191B; border: 1px solid rgba(151,150,136,0.28); position: relative; overflow: hidden;"><div class="stripes" style="position: absolute; left: 0; top: 0; bottom: 0; width: 58%; background-color: #C14031;"></div></div>
+    </div>
+
+    <div style="display: flex; gap: 6px; align-items: center;">
+      <div style="flex: 1; display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px; background: #1E1E20; border: 1px solid rgba(151,150,136,0.35); box-sizing: border-box;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A9A89E" stroke-width="2" stroke-linecap="square" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+        <label for="md-filter" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">Filter documents</label>
+        <input id="md-filter" type="text" placeholder="Filter…" style="flex: 1; min-width: 0; background: transparent; border: none; outline: none; color: #FFFFFF; font-family: 'IBM Plex Sans', sans-serif; font-size: 16px;">
+      </div>
+      <button type="button" aria-label="Change sort order" style="flex: 0 0 auto; height: 44px; padding: 0 12px; background: transparent; border: 1px solid rgba(151,150,136,0.35); color: #D6D5CF; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; cursor: pointer;">↓ Passages</button>
+    </div>
+
+    <ul style="list-style: none; margin: 0; padding: 0; background: #222224; border: 1px solid rgba(151,150,136,0.28);">
+      
+        <li style="border-bottom: 1px solid rgba(151,150,136,0.14);">
+          <button type="button" style="width: 100%; min-height: 56px; display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 12px; align-items: center; padding: 8px 14px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+            <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;"><span style="font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">mobiletesting</span><small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">9.2K chars</small></span>
+            <span style="display: flex; align-items: center; gap: 8px;"><span style="flex: 1; height: 6px; background: #19191B; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 100.0%; background: #979688; display: block;"></span></span><span style="width: 18px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFFFFF;">16</span></span>
+          </button>
+        </li>
+      
+        <li style="border-bottom: 1px solid rgba(151,150,136,0.14);">
+          <button type="button" style="width: 100%; min-height: 56px; display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 12px; align-items: center; padding: 8px 14px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+            <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;"><span style="font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">specializedtesting</span><small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">8.3K chars</small></span>
+            <span style="display: flex; align-items: center; gap: 8px;"><span style="flex: 1; height: 6px; background: #19191B; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 81.3%; background: #979688; display: block;"></span></span><span style="width: 18px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFFFFF;">13</span></span>
+          </button>
+        </li>
+      
+        <li style="border-bottom: 1px solid rgba(151,150,136,0.14);">
+          <button type="button" style="width: 100%; min-height: 56px; display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 12px; align-items: center; padding: 8px 14px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+            <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;"><span style="font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">qarole</span><small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">8.3K chars</small></span>
+            <span style="display: flex; align-items: center; gap: 8px;"><span style="flex: 1; height: 6px; background: #19191B; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 68.8%; background: #979688; display: block;"></span></span><span style="width: 18px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFFFFF;">11</span></span>
+          </button>
+        </li>
+      
+        <li style="border-bottom: 1px solid rgba(151,150,136,0.14);">
+          <button type="button" style="width: 100%; min-height: 56px; display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 12px; align-items: center; padding: 8px 14px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+            <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;"><span style="font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">leadership</span><small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">5.5K chars</small></span>
+            <span style="display: flex; align-items: center; gap: 8px;"><span style="flex: 1; height: 6px; background: #19191B; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 62.5%; background: #979688; display: block;"></span></span><span style="width: 18px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFFFFF;">10</span></span>
+          </button>
+        </li>
+      
+        <li style="border-bottom: 1px solid rgba(151,150,136,0.14);">
+          <button type="button" style="width: 100%; min-height: 56px; display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 12px; align-items: center; padding: 8px 14px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+            <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;"><span style="font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">casestudies</span><small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">3.6K chars</small></span>
+            <span style="display: flex; align-items: center; gap: 8px;"><span style="flex: 1; height: 6px; background: #19191B; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 56.3%; background: #979688; display: block;"></span></span><span style="width: 18px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFFFFF;">9</span></span>
+          </button>
+        </li>
+      
+        <li style="border-bottom: 1px solid rgba(151,150,136,0.14);">
+          <button type="button" style="width: 100%; min-height: 56px; display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 12px; align-items: center; padding: 8px 14px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+            <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;"><span style="font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">stressbusting</span><small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">11.9K chars</small></span>
+            <span style="display: flex; align-items: center; gap: 8px;"><span style="flex: 1; height: 6px; background: #19191B; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 56.3%; background: #979688; display: block;"></span></span><span style="width: 18px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFFFFF;">9</span></span>
+          </button>
+        </li>
+      
+        <li style="border-bottom: 1px solid rgba(151,150,136,0.14);">
+          <button type="button" style="width: 100%; min-height: 56px; display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 12px; align-items: center; padding: 8px 14px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+            <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;"><span style="font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">whyalied</span><small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">3.4K chars</small></span>
+            <span style="display: flex; align-items: center; gap: 8px;"><span style="flex: 1; height: 6px; background: #19191B; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 56.3%; background: #979688; display: block;"></span></span><span style="width: 18px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFFFFF;">9</span></span>
+          </button>
+        </li>
+      
+        <li style="border-bottom: 1px solid rgba(151,150,136,0.14);">
+          <button type="button" style="width: 100%; min-height: 56px; display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 12px; align-items: center; padding: 8px 14px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+            <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;"><span style="font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">fintech</span><small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">4.3K chars</small></span>
+            <span style="display: flex; align-items: center; gap: 8px;"><span style="flex: 1; height: 6px; background: #19191B; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 43.8%; background: #979688; display: block;"></span></span><span style="width: 18px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFFFFF;">7</span></span>
+          </button>
+        </li>
+      
+        <li style="border-bottom: 1px solid rgba(151,150,136,0.14);">
+          <button type="button" style="width: 100%; min-height: 56px; display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 12px; align-items: center; padding: 8px 14px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+            <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;"><span style="font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">oracletopostgres</span><small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">11.3K chars</small></span>
+            <span style="display: flex; align-items: center; gap: 8px;"><span style="flex: 1; height: 6px; background: #19191B; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 43.8%; background: #979688; display: block;"></span></span><span style="width: 18px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFFFFF;">7</span></span>
+          </button>
+        </li>
+      
+        <li style="border-bottom: 1px solid rgba(151,150,136,0.14);">
+          <button type="button" style="width: 100%; min-height: 56px; display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 12px; align-items: center; padding: 8px 14px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+            <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;"><span style="font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">ourproducts</span><small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">15.8K chars</small></span>
+            <span style="display: flex; align-items: center; gap: 8px;"><span style="flex: 1; height: 6px; background: #19191B; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 43.8%; background: #979688; display: block;"></span></span><span style="width: 18px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFFFFF;">7</span></span>
+          </button>
+        </li>
+      
+        <li style="border-bottom: 1px solid rgba(151,150,136,0.14);">
+          <button type="button" style="width: 100%; min-height: 56px; display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 12px; align-items: center; padding: 8px 14px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+            <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;"><span style="font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">financialengineeng</span><small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">1.6K chars</small></span>
+            <span style="display: flex; align-items: center; gap: 8px;"><span style="flex: 1; height: 6px; background: #19191B; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 37.5%; background: #979688; display: block;"></span></span><span style="width: 18px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFFFFF;">6</span></span>
+          </button>
+        </li>
+      
+        <li style="border-bottom: 1px solid rgba(151,150,136,0.14);">
+          <button type="button" style="width: 100%; min-height: 56px; display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 12px; align-items: center; padding: 8px 14px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+            <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;"><span style="font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">development</span><small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">5.0K chars</small></span>
+            <span style="display: flex; align-items: center; gap: 8px;"><span style="flex: 1; height: 6px; background: #19191B; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 31.3%; background: #979688; display: block;"></span></span><span style="width: 18px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFFFFF;">5</span></span>
+          </button>
+        </li>
+      
+        <li style="border-bottom: 1px solid rgba(151,150,136,0.14);">
+          <button type="button" style="width: 100%; min-height: 56px; display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 12px; align-items: center; padding: 8px 14px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+            <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;"><span style="font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">qa</span><small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">5.6K chars</small></span>
+            <span style="display: flex; align-items: center; gap: 8px;"><span style="flex: 1; height: 6px; background: #19191B; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 31.3%; background: #979688; display: block;"></span></span><span style="width: 18px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFFFFF;">5</span></span>
+          </button>
+        </li>
+      
+        <li style="border-bottom: 1px solid rgba(151,150,136,0.14);">
+          <button type="button" style="width: 100%; min-height: 56px; display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 12px; align-items: center; padding: 8px 14px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+            <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;"><span style="font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">qaandtesting</span><small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">2.6K chars</small></span>
+            <span style="display: flex; align-items: center; gap: 8px;"><span style="flex: 1; height: 6px; background: #19191B; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 25.0%; background: #979688; display: block;"></span></span><span style="width: 18px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFFFFF;">4</span></span>
+          </button>
+        </li>
+      
+        <li style="border-bottom: 1px solid rgba(151,150,136,0.14);">
+          <button type="button" style="width: 100%; min-height: 56px; display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 12px; align-items: center; padding: 8px 14px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+            <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;"><span style="font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">qaconsulting</span><small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">2.6K chars</small></span>
+            <span style="display: flex; align-items: center; gap: 8px;"><span style="flex: 1; height: 6px; background: #19191B; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 25.0%; background: #979688; display: block;"></span></span><span style="width: 18px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFFFFF;">4</span></span>
+          </button>
+        </li>
+      
+        <li style="border-bottom: 1px solid rgba(151,150,136,0.14);">
+          <button type="button" style="width: 100%; min-height: 56px; display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 12px; align-items: center; padding: 8px 14px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+            <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;"><span style="font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">security</span><small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">2.7K chars</small></span>
+            <span style="display: flex; align-items: center; gap: 8px;"><span style="flex: 1; height: 6px; background: #19191B; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 25.0%; background: #979688; display: block;"></span></span><span style="width: 18px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFFFFF;">4</span></span>
+          </button>
+        </li>
+      
+        <li style="border-bottom: 1px solid rgba(151,150,136,0.14);">
+          <button type="button" style="width: 100%; min-height: 56px; display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 12px; align-items: center; padding: 8px 14px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+            <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;"><span style="font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">whitepapers</span><small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">0.7K chars</small></span>
+            <span style="display: flex; align-items: center; gap: 8px;"><span style="flex: 1; height: 6px; background: #19191B; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 25.0%; background: #979688; display: block;"></span></span><span style="width: 18px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFFFFF;">4</span></span>
+          </button>
+        </li>
+      
+        <li style="border-bottom: 1px solid rgba(151,150,136,0.14);">
+          <button type="button" style="width: 100%; min-height: 56px; display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 12px; align-items: center; padding: 8px 14px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+            <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;"><span style="font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">aboutus</span><small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">2.0K chars</small></span>
+            <span style="display: flex; align-items: center; gap: 8px;"><span style="flex: 1; height: 6px; background: #19191B; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 18.8%; background: #979688; display: block;"></span></span><span style="width: 18px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFFFFF;">3</span></span>
+          </button>
+        </li>
+      
+        <li style="border-bottom: 1px solid rgba(151,150,136,0.14);">
+          <button type="button" style="width: 100%; min-height: 56px; display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 12px; align-items: center; padding: 8px 14px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+            <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;"><span style="font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">aisolutions</span><small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">3.6K chars</small></span>
+            <span style="display: flex; align-items: center; gap: 8px;"><span style="flex: 1; height: 6px; background: #19191B; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 18.8%; background: #979688; display: block;"></span></span><span style="width: 18px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFFFFF;">3</span></span>
+          </button>
+        </li>
+      
+        <li style="border-bottom: 1px solid rgba(151,150,136,0.14);">
+          <button type="button" style="width: 100%; min-height: 56px; display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 12px; align-items: center; padding: 8px 14px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+            <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;"><span style="font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">supportservices</span><small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">4.2K chars</small></span>
+            <span style="display: flex; align-items: center; gap: 8px;"><span style="flex: 1; height: 6px; background: #19191B; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 18.8%; background: #979688; display: block;"></span></span><span style="width: 18px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFFFFF;">3</span></span>
+          </button>
+        </li>
+      
+        <li style="border-bottom: 1px solid rgba(151,150,136,0.14);">
+          <button type="button" style="width: 100%; min-height: 56px; display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 12px; align-items: center; padding: 8px 14px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+            <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;"><span style="font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">testenviroment</span><small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">2.2K chars</small></span>
+            <span style="display: flex; align-items: center; gap: 8px;"><span style="flex: 1; height: 6px; background: #19191B; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 18.8%; background: #979688; display: block;"></span></span><span style="width: 18px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFFFFF;">3</span></span>
+          </button>
+        </li>
+      
+        <li style="border-bottom: 1px solid rgba(151,150,136,0.14);">
+          <button type="button" style="width: 100%; min-height: 56px; display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 12px; align-items: center; padding: 8px 14px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+            <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;"><span style="font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">careers</span><small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">0.7K chars</small></span>
+            <span style="display: flex; align-items: center; gap: 8px;"><span style="flex: 1; height: 6px; background: #19191B; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 12.5%; background: #979688; display: block;"></span></span><span style="width: 18px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFFFFF;">2</span></span>
+          </button>
+        </li>
+      
+        <li style="border-bottom: 1px solid rgba(151,150,136,0.14);">
+          <button type="button" style="width: 100%; min-height: 56px; display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 12px; align-items: center; padding: 8px 14px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+            <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;"><span style="font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">hiring</span><small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">1.3K chars</small></span>
+            <span style="display: flex; align-items: center; gap: 8px;"><span style="flex: 1; height: 6px; background: #19191B; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 12.5%; background: #979688; display: block;"></span></span><span style="width: 18px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFFFFF;">2</span></span>
+          </button>
+        </li>
+      
+        <li style="border-bottom: 1px solid rgba(151,150,136,0.14);">
+          <button type="button" style="width: 100%; min-height: 56px; display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 12px; align-items: center; padding: 8px 14px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+            <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;"><span style="font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">learningcenter</span><small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">1.5K chars</small></span>
+            <span style="display: flex; align-items: center; gap: 8px;"><span style="flex: 1; height: 6px; background: #19191B; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 6.3%; background: #979688; display: block;"></span></span><span style="width: 18px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFFFFF;">1</span></span>
+          </button>
+        </li>
+      
+        <li style="border-bottom: 1px solid rgba(151,150,136,0.14);">
+          <button type="button" style="width: 100%; min-height: 56px; display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 12px; align-items: center; padding: 8px 14px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+            <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;"><span style="font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">productdevelopment</span><small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">1.1K chars</small></span>
+            <span style="display: flex; align-items: center; gap: 8px;"><span style="flex: 1; height: 6px; background: #19191B; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 6.3%; background: #979688; display: block;"></span></span><span style="width: 18px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFFFFF;">1</span></span>
+          </button>
+        </li>
+      
+        <li style="border-bottom: 1px solid rgba(151,150,136,0.14);">
+          <button type="button" style="width: 100%; min-height: 56px; display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 12px; align-items: center; padding: 8px 14px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+            <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;"><span style="font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">regulatory</span><small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">2.4K chars</small></span>
+            <span style="display: flex; align-items: center; gap: 8px;"><span style="flex: 1; height: 6px; background: #19191B; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 6.3%; background: #979688; display: block;"></span></span><span style="width: 18px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFFFFF;">1</span></span>
+          </button>
+        </li>
+      
+    </ul>
+  </div>
+
+  
+  
+
+  <nav aria-label="Main" class="glass" style="position: absolute; left: 14px; right: 14px; bottom: 14px; z-index: 7; height: 66px; padding: 6px; box-sizing: border-box; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; border-radius: 33px;">
+    <a href="Mobile.dc.html" class="tab"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M4 5h16v11H9l-5 4V5z"></path></svg>Ask</a>
+    <a href="MMap.dc.html" class="tab"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><circle cx="6" cy="7" r="1.5"></circle><circle cx="16" cy="5" r="1.5"></circle><circle cx="9" cy="16" r="1.5"></circle><circle cx="18" cy="15" r="1.5"></circle><path d="M12 11l2 2-2 2-2-2z"></path></svg>Map</a>
+    <a href="MDocs.dc.html" aria-current="page" class="tab on"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"></path><path d="M9 12h7M9 16h7"></path></svg>Docs</a>
+  </nav>
+</div>
+</div>
+</body></html>

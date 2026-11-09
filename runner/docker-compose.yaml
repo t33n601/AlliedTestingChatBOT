@@ -1,0 +1,18 @@
+# Self-hosted GitHub Actions runner.
+# GitHub -> repo Settings -> Actions -> Runners -> New self-hosted runner -> Linux, copy the token:
+#   export KB_RUNNER_TOKEN="..."  KB_REPO_URL="https://github.com/YOUR_LOGIN/kb-helper-bot"
+#   docker compose up -d
+services:
+  kb_runner:
+    image: myoung34/github-runner:latest
+    container_name: kb_runner
+    restart: unless-stopped
+    environment:
+      REPO_URL: ${KB_REPO_URL}
+      RUNNER_TOKEN: ${KB_RUNNER_TOKEN}
+      RUNNER_NAME: kb-docker-runner1
+      RUNNER_WORKDIR: /tmp/kb_runner/_work
+      LABELS: self-hosted,linux,kb
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./_work:/tmp/kb_runner/_work

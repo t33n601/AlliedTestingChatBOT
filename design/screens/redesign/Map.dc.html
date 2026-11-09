@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>KB Helper — Knowledge Map</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#19191B}
+a{color:#ECECEA}a:hover{color:#FFFFFF}
+.nav-a{color:#A9A89E;text-decoration:none;border-bottom:3px solid transparent;transition:color .2s,border-color .2s}
+.nav-a:hover{color:#FFFFFF;border-bottom-color:#5A5A5D}
+.hov-row{transition:background .15s}
+.hov-row:hover{background:rgba(255,255,255,.05)}
+.btn-red{transition:background .2s,transform .2s}
+.btn-red:hover{background:#D4513F !important;transform:translate(-1px,-1px)}
+.icon-b{transition:color .15s,background .15s}
+.icon-b:hover{color:#FFFFFF !important;background:#333336 !important}
+.dot{transition:opacity .3s,background .3s,transform .2s}
+.dot:hover{transform:scale(1.8)}
+.blink{animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.pulse{animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(95,211,138,.55)}70%{box-shadow:0 0 0 8px rgba(95,211,138,0)}100%{box-shadow:0 0 0 0 rgba(95,211,138,0)}}
+.ring{animation:ring 1.8s ease-out infinite}
+@keyframes ring{from{transform:rotate(45deg) scale(.6);opacity:1}to{transform:rotate(45deg) scale(2.8);opacity:0}}
+.dash{animation:dash 1s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-8}}
+@media (prefers-reduced-motion: reduce){.blink,.pulse,.ring,.dash{animation:none}}
+</style>
+</helmet>
+
+<div style="min-height: 100vh; color: #ECECEA; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 15.5px; line-height: 1.6; background-color: #19191B; background-image: linear-gradient(rgba(255,255,255,0.028) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.028) 1px, transparent 1px); background-size: 24px 24px;">
+  <div style="height: 6px; background: linear-gradient(90deg, #4B4B4D 0 62%, #C14031 62% 100%);"></div>
+
+  <div style="max-width: 1440px; margin: 0 auto; padding: 0 40px; box-sizing: border-box;">
+
+    <header style="display: flex; align-items: center; flex-wrap: wrap; gap: 16px 36px; padding: 22px 0 18px; border-bottom: 1px solid rgba(151,150,136,0.28);">
+      <a href="Main.dc.html" aria-label="Allied Testing — KB Helper home" style="display: flex; line-height: 0; box-shadow: 6px 6px 0 rgba(0,0,0,0.45);">
+        <img src="LOGO_IMAGE" alt="Allied Testing" style="height: 56px; width: auto; display: block;">
+      </a>
+      <nav aria-label="Main" style="display: flex; gap: 30px; flex-wrap: wrap; margin-right: auto; font-family: 'Silkscreen', 'Courier New', monospace; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase;">
+        <a href="Main.dc.html" class="nav-a" style="padding-bottom: 4px;">Assistant</a>
+        <a href="Map.dc.html" aria-current="page" style="color: #FFFFFF; text-decoration: none; padding-bottom: 4px; border-bottom: 3px solid #C14031;">Knowledge map</a>
+        <a href="Docs.dc.html" class="nav-a" style="padding-bottom: 4px;">Documents</a>
+      </nav>
+      <div style="display: flex; align-items: center; gap: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;">
+        <div style="display: flex; align-items: center; gap: 8px; padding: 7px 12px; background: #242426; border: 1px solid rgba(151,150,136,0.28);">
+          <span class="pulse" style="width: 8px; height: 8px; background: #5FD38A; display: block;"></span>
+          qwen3:1.7b · online
+        </div>
+        <div style="padding: 7px 12px; border: 1px solid rgba(151,150,136,0.28); color: #A9A89E;">nomic-embed-text</div>
+      </div>
+    </header>
+
+    <!-- heading + locate -->
+    <section style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px 40px; padding: 40px 0 28px;">
+      <div style="flex: 1 1 520px; min-width: 0;">
+        <p style="margin: 0 0 14px; font-family: 'IBM Plex Mono', monospace; font-size: 14px; letter-spacing: 0.14em; text-transform: uppercase; color: #EF6150;">&gt; 768 dimensions → 2<span class="blink">_</span></p>
+        <h1 style="margin: 0 0 14px; font-family: 'Silkscreen', 'Courier New', monospace; font-weight: 400; font-size: clamp(36px, 4.6vw, 64px); line-height: 1; text-transform: uppercase; color: #FFFFFF;">Knowledge map</h1>
+        <p style="margin: 0; max-width: 640px; color: #D6D5CF;">Every dot is one chunk of the knowledge base, placed by the meaning of its text. Close dots talk about similar things. Type a question to see where it lands and which chunks the assistant would read.</p>
+      </div>
+      <form style="flex: 0 1 480px; min-width: min(100%, 320px); display: flex; gap: 8px;">
+        <label for="locate" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">Question to locate</label>
+        <input id="locate" type="text" value="What products does the company have?" style="flex: 1; min-width: 0; height: 48px; padding: 0 14px; background: #19191B; border: 1px solid rgba(151,150,136,0.35); color: #FFFFFF; font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; outline: none; box-sizing: border-box;">
+        <button type="submit" class="btn-red" style="height: 48px; padding: 0 22px; background: #C14031; color: #FFFFFF; border: none; box-shadow: 3px 3px 0 rgba(0,0,0,0.45); font-family: 'Silkscreen', monospace; font-size: 16px; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer;">Locate</button>
+      </form>
+    </section>
+
+    <section style="display: flex; flex-wrap: wrap; gap: 20px; padding-bottom: 40px;">
+
+      <!-- the map -->
+      <div style="flex: 999 1 620px; min-width: 0; position: relative; background: #1E1E20; border: 1px solid rgba(151,150,136,0.28); border-top: 6px solid #C14031; box-shadow: 0 30px 80px rgba(0,0,0,0.45);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; padding: 12px 16px; border-bottom: 1px solid rgba(151,150,136,0.22); font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #A9A89E;">
+          <span>149 chunks · 26 documents · {{focusLabel}}</span>
+          <div style="display: flex; gap: 2px;">
+            <button type="button" class="icon-b" aria-label="Zoom in" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: #262628; border: 1px solid rgba(151,150,136,0.28); color: #D6D5CF; cursor: pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+            <button type="button" class="icon-b" aria-label="Zoom out" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: #262628; border: 1px solid rgba(151,150,136,0.28); color: #D6D5CF; cursor: pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" aria-hidden="true"><path d="M5 12h14"></path></svg></button>
+            <button type="button" class="icon-b" aria-label="Reset view" onClick="{{clear}}" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: #262628; border: 1px solid rgba(151,150,136,0.28); color: #D6D5CF; cursor: pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"></path></svg></button>
+          </div>
+        </div>
+
+        <div role="img" aria-label="Scatter map of knowledge-base chunks with the question placed among its five nearest chunks" style="position: relative; height: 720px; overflow: hidden; background-image: linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px); background-size: 48px 48px;">
+          <!-- crosshair through the question -->
+          <span style="position: absolute; left: 0; right: 0; top: 46%; height: 1px; background: rgba(239,97,80,0.18);"></span>
+          <span style="position: absolute; top: 0; bottom: 0; left: 50%; width: 1px; background: rgba(239,97,80,0.18);"></span>
+
+          <sc-for list="{{dots}}" as="d" hint-placeholder-count="149">
+            <span class="dot" style="{{d.style}}"></span>
+          </sc-for>
+
+          <sc-for list="{{labels}}" as="l" hint-placeholder-count="10">
+            <span style="{{l.style}}">{{l.name}}</span>
+          </sc-for>
+
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" style="position: absolute; inset: 0; width: 100%; height: 100%;">
+            <g stroke="#EF6150" stroke-width="1.5" fill="none" stroke-dasharray="4 4" class="dash">
+              <line x1="50" y1="46" x2="45" y2="33" vector-effect="non-scaling-stroke"></line>
+              <line x1="50" y1="46" x2="61" y2="28" vector-effect="non-scaling-stroke"></line>
+              <line x1="50" y1="46" x2="58" y2="54" vector-effect="non-scaling-stroke"></line>
+              <line x1="50" y1="46" x2="67" y2="67" vector-effect="non-scaling-stroke"></line>
+              <line x1="50" y1="46" x2="53" y2="39" vector-effect="non-scaling-stroke"></line>
+            </g>
+          </svg>
+
+          <sc-for list="{{hits}}" as="h" hint-placeholder-count="5">
+            <span style="position: absolute; left: {{h.x}}%; top: {{h.y}}%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: #EF6150; border: 2px solid #FFFFFF; box-sizing: border-box; box-shadow: 0 0 0 4px rgba(239,97,80,0.18);"></span>
+            <span style="position: absolute; left: {{h.x}}%; top: {{h.y}}%; margin: -26px 0 0 8px; padding: 1px 5px; background: #C14031; color: #FFFFFF; font: 600 11px/16px 'IBM Plex Mono', monospace;">{{h.n}}</span>
+          </sc-for>
+
+          <!-- the question -->
+          <span class="ring" style="position: absolute; left: 50%; top: 46%; width: 22px; height: 22px; margin: -11px 0 0 -11px; border: 2px solid #EF6150; box-sizing: border-box;"></span>
+          <span style="position: absolute; left: 50%; top: 46%; width: 20px; height: 20px; margin: -10px 0 0 -10px; background: #C14031; border: 2.5px solid #FFFFFF; transform: rotate(45deg); box-sizing: border-box; box-shadow: 0 6px 20px rgba(0,0,0,0.5);"></span>
+          <span style="position: absolute; left: 50%; top: 46%; transform: translate(-50%, 22px); padding: 6px 10px; background: #19191B; border: 1px solid #C14031; white-space: nowrap; font: 600 13px 'IBM Plex Mono', monospace; color: #FFFFFF; box-shadow: 4px 4px 0 rgba(0,0,0,0.45);">“What products does the company have?”</span>
+
+          <!-- hovered chunk tooltip -->
+          <div style="position: absolute; left: 63%; top: 18%; max-width: 260px; padding: 8px 12px; background: #19191B; border: 1px solid rgba(151,150,136,0.35); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <small style="display: block; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #EF6150;">productdevelopment · #2 · 60%</small>
+            <span style="font-size: 13.5px; color: #FFFFFF;">Product Development</span>
+          </div>
+
+          <span style="position: absolute; left: 16px; bottom: 12px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #8A897F;">drag to pan · scroll to zoom · click a dot to read it</span>
+        </div>
+      </div>
+
+      <!-- side panel -->
+      <aside style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; background: #222224; border: 1px solid rgba(151,150,136,0.28); border-top: 6px solid #C14031;">
+        <div style="padding: 16px 18px; border-bottom: 1px solid rgba(151,150,136,0.28);">
+          <h2 style="margin: 0 0 6px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A89E;">Nearest chunks</h2>
+          <p style="margin: 0; font-size: 16px; font-weight: 600; line-height: 1.4; color: #FFFFFF;">“What products does the company have?”</p>
+        </div>
+        <ol style="list-style: none; margin: 0; padding: 8px 10px; display: flex; flex-direction: column; border-bottom: 1px solid rgba(151,150,136,0.28);">
+          <sc-for list="{{nearest}}" as="s" hint-placeholder-count="5">
+            <li>
+              <a href="Main.dc.html" class="hov-row" style="display: grid; grid-template-columns: 22px minmax(0, 1fr) 64px; gap: 10px; align-items: center; padding: 9px 6px; text-decoration: none; color: #ECECEA; min-height: 44px; box-sizing: border-box;">
+                <span style="font: 600 11px/20px 'IBM Plex Mono', monospace; text-align: center; height: 20px; background: #C14031; color: #FFFFFF;">{{s.n}}</span>
+                <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;">
+                  <small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">{{s.doc}}</small>
+                  <span style="font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{s.title}}</span>
+                </span>
+                <span style="display: flex; align-items: center; gap: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;"><span style="flex: 1; height: 4px; background: #333336; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: {{s.score}}%; background: #EF6150; display: block;"></span></span>{{s.score}}%</span>
+              </a>
+            </li>
+          </sc-for>
+        </ol>
+
+        <div style="padding: 16px 18px 6px; display: flex; justify-content: space-between; align-items: baseline;">
+          <h2 style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A89E;">Documents</h2>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A897F;">click to isolate</span>
+        </div>
+        <ul style="list-style: none; margin: 0; padding: 0 10px 14px; display: flex; flex-direction: column;">
+          <sc-for list="{{legend}}" as="c" hint-placeholder-count="10">
+            <li>
+              <button type="button" onClick="{{c.pick}}" aria-pressed="{{c.on}}" style="{{c.style}}">
+                <span style="display: flex; align-items: center; gap: 10px;"><span style="{{c.swatch}}"></span>{{c.name}}</span>
+                <small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">{{c.count}}</small>
+              </button>
+            </li>
+          </sc-for>
+        </ul>
+      </aside>
+    </section>
+
+    <footer style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 22px 0 30px; border-top: 1px solid rgba(151,150,136,0.28); font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase; color: #8A897F;">
+      <span>Allied Testing · KB Helper · local RAG on Ollama</span>
+      <span>Built by [YOUR NAME] · CEITI</span>
+    </footer>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1180}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { focus: null };
+  }
+  rng(seed) {
+    let a = seed;
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  renderVals() {
+    const r = this.rng(42);
+    const clusters = [
+      { name: 'mobiletesting', n: 16, c: [17, 28] },
+      { name: 'specializedtesting', n: 13, c: [33, 18] },
+      { name: 'qarole', n: 11, c: [27, 52] },
+      { name: 'leadership', n: 10, c: [84, 16] },
+      { name: 'casestudies', n: 9, c: [70, 70] },
+      { name: 'stressbusting', n: 9, c: [13, 76] },
+      { name: 'whyalied', n: 9, c: [52, 36] },
+      { name: 'fintech', n: 7, c: [87, 50] },
+      { name: 'oracletopostgres', n: 7, c: [42, 84] },
+      { name: 'ourproducts', n: 7, c: [62, 24] }
+    ];
+    const focus = this.state.focus;
+    const dots = [];
+    clusters.forEach((cl) => {
+      const on = focus === cl.name;
+      const dim = focus && !on;
+      for (let i = 0; i < cl.n; i++) {
+        const x = Math.max(2, Math.min(98, cl.c[0] + (r() - 0.5) * 13));
+        const y = Math.max(3, Math.min(97, cl.c[1] + (r() - 0.5) * 15));
+        dots.push({ style: 'position: absolute; left: ' + x.toFixed(2) + '%; top: ' + y.toFixed(2) + '%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #1E1E20; cursor: pointer; background: ' + (on ? '#FFFFFF' : '#7D7C73') + '; opacity: ' + (dim ? '0.22' : '1') + ';' });
+      }
+    });
+    for (let i = 0; i < 51; i++) {
+      const x = 6 + r() * 88, y = 6 + r() * 88;
+      dots.push({ style: 'position: absolute; left: ' + x.toFixed(2) + '%; top: ' + y.toFixed(2) + '%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; border: 1.5px solid #1E1E20; background: #5C5B55; opacity: ' + (focus ? '0.22' : '1') + ';' });
+    }
+    const labels = clusters.map((cl) => {
+      const on = focus === cl.name;
+      return {
+        name: cl.name,
+        style: 'position: absolute; left: ' + cl.c[0] + '%; top: ' + cl.c[1] + '%; transform: translate(-50%, -' + (on ? 64 : 58) + 'px); font: 500 11px \'IBM Plex Mono\', monospace; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; pointer-events: none; color: ' + (on ? '#FFFFFF' : '#8A897F') + '; opacity: ' + (focus && !on ? '0.3' : '1') + ';'
+      };
+    });
+    const legend = clusters.map((cl) => {
+      const on = focus === cl.name;
+      return {
+        name: cl.name, count: cl.n, on,
+        pick: () => this.setState({ focus: on ? null : cl.name }),
+        swatch: 'width: 8px; height: 8px; border-radius: 50%; display: block; background: ' + (on ? '#FFFFFF' : '#7D7C73') + ';',
+        style: 'width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 36px; padding: 6px 8px; border: none; cursor: pointer; text-align: left; font-family: \'IBM Plex Sans\', sans-serif; font-size: 14px; color: ' + (on ? '#FFFFFF' : '#D6D5CF') + '; background: ' + (on ? '#2E2E31' : 'transparent') + '; box-shadow: ' + (on ? 'inset 3px 0 0 #C14031' : 'none') + ';'
+      };
+    });
+    return {
+      dots, labels, legend,
+      focusLabel: focus ? 'isolating ' + focus : 'all documents',
+      clear: () => this.setState({ focus: null }),
+      hits: [
+        { n: 1, x: 45, y: 33 }, { n: 2, x: 61, y: 28 }, { n: 3, x: 58, y: 54 }, { n: 4, x: 67, y: 67 }, { n: 5, x: 53, y: 39 }
+      ],
+      nearest: [
+        { n: 1, doc: 'careers', title: 'We offer', score: 63 },
+        { n: 2, doc: 'productdevelopment', title: 'Product Development', score: 60 },
+        { n: 3, doc: 'aboutus', title: 'What We Do', score: 57 },
+        { n: 4, doc: 'casestudies', title: 'Helping clients ship', score: 57 },
+        { n: 5, doc: 'whyalied', title: 'Objectivity', score: 57 }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>KB Helper — Documents</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#19191B}
+a{color:#ECECEA}a:hover{color:#FFFFFF}
+.nav-a{color:#A9A89E;text-decoration:none;border-bottom:3px solid transparent;transition:color .2s,border-color .2s}
+.nav-a:hover{color:#FFFFFF;border-bottom-color:#5A5A5D}
+.row{transition:background .15s}
+.row:hover{background:rgba(255,255,255,.035)}
+.drop{transition:border-color .2s,background .2s}
+.drop:hover{border-color:#D4513F !important;background:rgba(193,64,49,.07) !important}
+.ghost{transition:color .2s,border-color .2s}
+.ghost:hover{color:#FFFFFF !important;border-color:#979688 !important}
+.blink{animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.pulse{animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(95,211,138,.55)}70%{box-shadow:0 0 0 8px rgba(95,211,138,0)}100%{box-shadow:0 0 0 0 rgba(95,211,138,0)}}
+.stripes{background-image:repeating-linear-gradient(-45deg,rgba(255,255,255,.18) 0 8px,transparent 8px 16px);background-size:22.6px 22.6px;animation:move .8s linear infinite}
+@keyframes move{to{background-position:22.6px 0}}
+@media (prefers-reduced-motion: reduce){.blink,.pulse,.stripes{animation:none}}
+</style>
+</helmet>
+
+<div style="min-height: 100vh; color: #ECECEA; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 15.5px; line-height: 1.6; background-color: #19191B; background-image: linear-gradient(rgba(255,255,255,0.028) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.028) 1px, transparent 1px); background-size: 24px 24px;">
+  <div style="height: 6px; background: linear-gradient(90deg, #4B4B4D 0 62%, #C14031 62% 100%);"></div>
+
+  <div style="max-width: 1440px; margin: 0 auto; padding: 0 40px; box-sizing: border-box;">
+
+    <header style="display: flex; align-items: center; flex-wrap: wrap; gap: 16px 36px; padding: 22px 0 18px; border-bottom: 1px solid rgba(151,150,136,0.28);">
+      <a href="Main.dc.html" aria-label="Allied Testing — KB Helper home" style="display: flex; line-height: 0; box-shadow: 6px 6px 0 rgba(0,0,0,0.45);">
+        <img src="LOGO_IMAGE" alt="Allied Testing" style="height: 56px; width: auto; display: block;">
+      </a>
+      <nav aria-label="Main" style="display: flex; gap: 30px; flex-wrap: wrap; margin-right: auto; font-family: 'Silkscreen', 'Courier New', monospace; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase;">
+        <a href="Main.dc.html" class="nav-a" style="padding-bottom: 4px;">Assistant</a>
+        <a href="Map.dc.html" class="nav-a" style="padding-bottom: 4px;">Knowledge map</a>
+        <a href="Docs.dc.html" aria-current="page" style="color: #FFFFFF; text-decoration: none; padding-bottom: 4px; border-bottom: 3px solid #C14031;">Documents</a>
+      </nav>
+      <div style="display: flex; align-items: center; gap: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;">
+        <div style="display: flex; align-items: center; gap: 8px; padding: 7px 12px; background: #242426; border: 1px solid rgba(151,150,136,0.28);">
+          <span class="pulse" style="width: 8px; height: 8px; background: #5FD38A; display: block;"></span>
+          qwen3:1.7b · online
+        </div>
+        <div style="padding: 7px 12px; border: 1px solid rgba(151,150,136,0.28); color: #A9A89E;">nomic-embed-text</div>
+      </div>
+    </header>
+
+    <section style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px 40px; padding: 40px 0 28px;">
+      <div style="flex: 1 1 520px; min-width: 0;">
+        <p style="margin: 0 0 14px; font-family: 'IBM Plex Mono', monospace; font-size: 14px; letter-spacing: 0.14em; text-transform: uppercase; color: #EF6150;">&gt; knowledge base<span class="blink">_</span></p>
+        <h1 style="margin: 0 0 14px; font-family: 'Silkscreen', 'Courier New', monospace; font-weight: 400; font-size: clamp(36px, 4.6vw, 64px); line-height: 1; text-transform: uppercase; color: #FFFFFF;">Documents</h1>
+        <p style="margin: 0; max-width: 640px; color: #D6D5CF;">The sources the assistant answers from. Drop a PDF, DOCX, Markdown or text file: it is split into chunks, embedded with <code style="font-family: 'IBM Plex Mono', monospace; font-size: 0.9em; color: #FFFFFF; background: #2E2E31; padding: 1px 6px;">nomic-embed-text</code> and searchable seconds later.</p>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: rgba(151,150,136,0.28); border: 1px solid rgba(151,150,136,0.28); flex: 0 1 420px; min-width: min(100%, 300px);">
+        <div style="background: #19191B; padding: 12px 16px;"><div style="font-family: 'Silkscreen', monospace; font-size: 30px; line-height: 1; color: #FFFFFF;">26</div><div style="margin-top: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #A9A89E;">files</div></div>
+        <div style="background: #19191B; padding: 12px 16px;"><div style="font-family: 'Silkscreen', monospace; font-size: 30px; line-height: 1; color: #FFFFFF;">149</div><div style="margin-top: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #A9A89E;">chunks</div></div>
+        <div style="background: #19191B; padding: 12px 16px;"><div style="font-family: 'Silkscreen', monospace; font-size: 30px; line-height: 1; color: #FFFFFF;">131K</div><div style="margin-top: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #A9A89E;">characters</div></div>
+      </div>
+    </section>
+
+    <!-- ingest -->
+    <section aria-label="Add documents" style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 28px;">
+      <label class="drop" for="file" style="flex: 999 1 520px; min-width: 0; min-height: 150px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 26px; border: 2px dashed rgba(151,150,136,0.4); background: rgba(0,0,0,0.12); cursor: pointer; text-align: center; box-sizing: border-box;">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#EF6150" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"></path></svg>
+        <b style="font-family: 'Silkscreen', monospace; font-weight: 400; font-size: 22px; letter-spacing: 0.06em; text-transform: uppercase; color: #FFFFFF;">Drop a file here</b>
+        <span style="font-size: 14px; color: #A9A89E;">or click to choose · PDF, DOCX, MD, TXT up to 15 MB</span>
+        <input id="file" type="file" style="position: absolute; width: 1px; height: 1px; opacity: 0;">
+      </label>
+
+      <div style="flex: 1 1 360px; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 12px; padding: 18px 20px; background: #222224; border: 1px solid rgba(151,150,136,0.28); border-top: 6px solid #C14031;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #EF6150;">ingesting</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">7 / 12 chunks</span>
+        </div>
+        <span style="font-size: 15px; font-weight: 600; color: #FFFFFF;">[new-document].pdf</span>
+        <div style="height: 10px; background: #19191B; border: 1px solid rgba(151,150,136,0.28); position: relative; overflow: hidden;">
+          <div class="stripes" style="position: absolute; left: 0; top: 0; bottom: 0; width: 58%; background-color: #C14031;"></div>
+        </div>
+        <ol style="list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 16px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;">
+          <li style="color: #ECECEA;">✓ parse</li>
+          <li style="color: #ECECEA;">✓ split</li>
+          <li style="color: #EF6150;">▸ embed</li>
+          <li style="color: #8A897F;">○ index</li>
+        </ol>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; padding-bottom: 40px;">
+
+      <!-- ledger -->
+      <div style="flex: 999 1 620px; min-width: 0; background: #222224; border: 1px solid rgba(151,150,136,0.28);">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-bottom: 1px solid rgba(151,150,136,0.28);">
+          <div style="display: flex; align-items: center; gap: 8px; flex: 1 1 260px; max-width: 360px; height: 40px; padding: 0 12px; background: #19191B; border: 1px solid rgba(151,150,136,0.35); box-sizing: border-box;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A9A89E" stroke-width="2" stroke-linecap="square" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+            <label for="filter" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">Filter documents</label>
+            <input id="filter" type="text" placeholder="Filter documents…" style="flex: 1; min-width: 0; background: transparent; border: none; outline: none; color: #FFFFFF; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px;">
+          </div>
+          <div role="group" aria-label="Sort by" style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #A9A89E;">Sort</span>
+            <div style="display: flex;">
+              <sc-for list="{{sorts}}" as="s" hint-placeholder-count="3">
+                <button type="button" onClick="{{s.pick}}" aria-pressed="{{s.on}}" style="{{s.style}}">{{s.label}}</button>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; min-width: 560px; border-collapse: collapse;">
+            <thead>
+              <tr style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #A9A89E; text-align: left;">
+                <th scope="col" style="padding: 10px 14px; font-weight: 500; width: 44px; border-bottom: 1px solid rgba(151,150,136,0.28);">#</th>
+                <th scope="col" style="padding: 10px 14px; font-weight: 500; border-bottom: 1px solid rgba(151,150,136,0.28);">Document</th>
+                <th scope="col" style="padding: 10px 14px; font-weight: 500; width: 34%; border-bottom: 1px solid rgba(151,150,136,0.28);">Chunks</th>
+                <th scope="col" style="padding: 10px 14px; font-weight: 500; width: 96px; text-align: right; border-bottom: 1px solid rgba(151,150,136,0.28);">Chars</th>
+                <th scope="col" style="padding: 10px 14px; font-weight: 500; width: 80px; text-align: right; border-bottom: 1px solid rgba(151,150,136,0.28);">Share</th>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{rows}}" as="d" hint-placeholder-count="26">
+                <tr class="row" style="{{d.rowStyle}}">
+                  <td style="padding: 0 14px; height: 46px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A897F; border-bottom: 1px solid rgba(151,150,136,0.14);">{{d.idx}}</td>
+                  <td style="padding: 0 14px; border-bottom: 1px solid rgba(151,150,136,0.14);">
+                    <button type="button" onClick="{{d.pick}}" style="{{d.nameStyle}}">{{d.name}}</button>
+                  </td>
+                  <td style="padding: 0 14px; border-bottom: 1px solid rgba(151,150,136,0.14);">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                      <span style="flex: 1; height: 8px; background: #19191B; position: relative; display: block;"><span style="{{d.barStyle}}"></span></span>
+                      <span style="width: 22px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFFFFF;">{{d.chunks}}</span>
+                    </div>
+                  </td>
+                  <td style="padding: 0 14px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #D6D5CF; border-bottom: 1px solid rgba(151,150,136,0.14);">{{d.chars}}</td>
+                  <td style="padding: 0 14px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #A9A89E; border-bottom: 1px solid rgba(151,150,136,0.14);">{{d.share}}</td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- inspector -->
+      <aside aria-label="Document inspector" style="flex: 1 1 360px; min-width: 0; background: #262628; border: 1px solid rgba(151,150,136,0.28); border-top: 6px solid #C14031; box-shadow: 0 30px 80px rgba(0,0,0,0.45);">
+        <div style="padding: 16px 18px; border-bottom: 1px solid rgba(151,150,136,0.28); display: flex; flex-direction: column; gap: 8px;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A89E;">inspector</span>
+          <h2 style="margin: 0; font-family: 'Silkscreen', monospace; font-weight: 400; font-size: 24px; line-height: 1.1; text-transform: uppercase; color: #FFFFFF; overflow-wrap: anywhere;">{{sel.name}}</h2>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #D6D5CF;">{{sel.chunks}} chunks · {{sel.chars}} chars · {{sel.share}} of KB</span>
+          <div style="display: flex; gap: 8px; margin-top: 6px;">
+            <a href="Map.dc.html" class="ghost" style="height: 36px; display: flex; align-items: center; padding: 0 12px; border: 1px solid rgba(151,150,136,0.35); color: #D6D5CF; text-decoration: none; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;">Show on map</a>
+            <button type="button" class="ghost" style="height: 36px; padding: 0 12px; background: transparent; border: 1px solid rgba(151,150,136,0.35); color: #D6D5CF; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer;">Re-embed</button>
+            <button type="button" class="ghost" style="height: 36px; padding: 0 12px; margin-left: auto; background: transparent; border: 1px solid rgba(151,150,136,0.35); color: #EF6150; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer;">Remove</button>
+          </div>
+        </div>
+        <ol style="list-style: none; margin: 0; padding: 4px 18px 18px;">
+          <sc-for list="{{chunks}}" as="c" hint-placeholder-count="2">
+            <li style="padding: 14px 0; border-bottom: 1px solid rgba(151,150,136,0.16);">
+              <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px;">
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #EF6150;">{{c.id}}</span>
+                <h3 style="margin: 0; font-size: 15px; font-weight: 600; color: #FFFFFF;">{{c.title}}</h3>
+              </div>
+              <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #C9C8C0; white-space: pre-line;">{{c.text}}</p>
+            </li>
+          </sc-for>
+        </ol>
+      </aside>
+    </section>
+
+    <footer style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 22px 0 30px; border-top: 1px solid rgba(151,150,136,0.28); font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase; color: #8A897F;">
+      <span>Allied Testing · KB Helper · local RAG on Ollama</span>
+      <span>Built by [YOUR NAME] · CEITI</span>
+    </footer>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1880}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { sort: 0, sel: 'productdevelopment' };
+  }
+  renderVals() {
+    const docs = [
+      ['mobiletesting', 16, 9.2], ['specializedtesting', 13, 8.3], ['qarole', 11, 8.3], ['leadership', 10, 5.5],
+      ['whyalied', 9, 3.4], ['stressbusting', 9, 11.9], ['casestudies', 9, 3.6], ['ourproducts', 7, 15.8],
+      ['oracletopostgres', 7, 11.3], ['fintech', 7, 4.3], ['financialengineeng', 6, 1.6], ['qa', 5, 5.6],
+      ['development', 5, 5.0], ['whitepapers', 4, 0.7], ['security', 4, 2.7], ['qaconsulting', 4, 2.6],
+      ['qaandtesting', 4, 2.6], ['aboutus', 3, 2.0], ['testenviroment', 3, 2.2], ['supportservices', 3, 4.2],
+      ['aisolutions', 3, 3.6], ['hiring', 2, 1.3], ['careers', 2, 0.7], ['regulatory', 1, 2.4],
+      ['productdevelopment', 1, 1.1], ['learningcenter', 1, 1.5]
+    ].map((d) => ({ name: d[0], chunks: d[1], k: d[2] }));
+    const sort = this.state.sort;
+    const sorted = docs.slice().sort((a, b) =>
+      sort === 0 ? b.chunks - a.chunks || a.name.localeCompare(b.name)
+      : sort === 1 ? a.name.localeCompare(b.name)
+      : b.k - a.k);
+    const fmt = (d) => ({ chars: d.k.toFixed(1) + 'K', share: (d.chunks / 149 * 100).toFixed(1) + '%' });
+    const rows = sorted.map((d, i) => {
+      const on = this.state.sel === d.name;
+      const f = fmt(d);
+      return {
+        idx: String(i + 1).padStart(2, '0'), name: d.name, chunks: d.chunks, chars: f.chars, share: f.share,
+        pick: () => this.setState({ sel: d.name }),
+        rowStyle: on ? 'background: rgba(193,64,49,0.12); box-shadow: inset 3px 0 0 #C14031;' : '',
+        nameStyle: 'background: none; border: none; padding: 0; min-height: 44px; cursor: pointer; text-align: left; font-family: \'IBM Plex Sans\', sans-serif; font-size: 15px; font-weight: 600; color: ' + (on ? '#FFFFFF' : '#ECECEA') + ';',
+        barStyle: 'position: absolute; left: 0; top: 0; bottom: 0; width: ' + (d.chunks / 16 * 100).toFixed(1) + '%; display: block; background: ' + (on ? '#EF6150' : '#979688') + ';'
+      };
+    });
+    const s = docs.find((d) => d.name === this.state.sel) || docs[0];
+    const sel = { name: s.name, chunks: s.chunks, ...fmt(s) };
+    const chunks = s.name === 'productdevelopment'
+      ? [{ id: '#1', title: 'Product Development', text: 'Product development at Allied Testing is a value-added service aimed at application projects for financial industry enterprise clients and software development companies.\n\nOur services include:\n— Application design, development, and implementation\n— Systems integration / consolidation\n— Performance tuning and re-engineering\n— Feasibility and requirement analysis for business cases\n— Change implementation and third level support\n\nOur goal is to create a quality product, while reducing time-to-market and cutting development costs.' }]
+      : Array.from({ length: Math.min(s.chunks, 3) }, (_, i) => ({ id: '#' + (i + 1), title: '[Chunk heading]', text: '[Chunk text from ' + s.name + ' appears here]' }));
+    const sorts = ['Chunks', 'A–Z', 'Size'].map((label, i) => {
+      const on = sort === i;
+      return {
+        label, on, pick: () => this.setState({ sort: i }),
+        style: 'height: 36px; padding: 0 14px; margin-left: ' + (i ? '-1px' : '0') + '; border: 1px solid ' + (on ? '#C14031' : 'rgba(151,150,136,0.35)') + '; background: ' + (on ? '#C14031' : '#19191B') + '; color: ' + (on ? '#FFFFFF' : '#D6D5CF') + '; font-family: \'IBM Plex Sans\', sans-serif; font-size: 13px; cursor: pointer;'
+      };
+    });
+    return { rows, sel, chunks, sorts };
+  }
+}
+</script>
+</body>
+</html>

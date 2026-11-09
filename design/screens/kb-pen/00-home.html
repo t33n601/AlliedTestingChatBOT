@@ -1,0 +1,253 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"><style>
+body{margin:0;background:#19191B}
+a{color:#ECECEA}a:hover{color:#FFFFFF}
+.nav-a{color:#A9A89E;text-decoration:none;border-bottom:3px solid transparent;transition:color .2s,border-color .2s}
+.nav-a:hover{color:#FFFFFF;border-bottom-color:#5A5A5D}
+.btn-red{transition:background .2s,transform .2s,box-shadow .2s}
+.btn-red:hover{background:#D4513F !important;transform:translate(-2px,-2px);box-shadow:7px 7px 0 #000 !important}
+.btn-ghost{transition:color .2s,border-color .2s,background .2s}
+.btn-ghost:hover{color:#FFFFFF !important;border-color:#ECECEA !important;background:rgba(255,255,255,.04) !important}
+.btn-ink{transition:transform .2s,box-shadow .2s}
+.btn-ink:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 rgba(0,0,0,.55) !important}
+.q{transition:background .2s,border-color .2s,transform .2s}
+.q:hover{background:#C14031 !important;border-color:#C14031 !important;color:#FFFFFF !important;transform:translateY(-2px)}
+.q:hover .q-arrow{color:#FFFFFF !important;transform:translateX(4px)}
+.q-arrow{transition:transform .2s}
+.card-h{transition:transform .25s,border-color .25s}
+.card-h:hover{transform:translateY(-3px);border-color:rgba(239,97,80,.6) !important}
+.blink{animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.pulse{animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(95,211,138,.55)}70%{box-shadow:0 0 0 8px rgba(95,211,138,0)}100%{box-shadow:0 0 0 0 rgba(95,211,138,0)}}
+
+/* ---- the live demo: one 14s loop ---- */
+.d-ubub{animation:d-ubub 14s infinite}
+@keyframes d-ubub{0%{opacity:0;transform:translateY(8px)}3%,93%{opacity:1;transform:none}100%{opacity:0}}
+.d-type{animation:d-type 14s infinite}
+@keyframes d-type{0%,3%{clip-path:inset(0 100% 0 0);animation-timing-function:steps(36,end)}19%,100%{clip-path:inset(0 0 0 0)}}
+.d-bot{animation:d-bot 14s infinite}
+@keyframes d-bot{0%,20%{opacity:0;transform:translateY(8px)}23%,93%{opacity:1;transform:none}100%{opacity:0}}
+.d-s1{animation:d-s1 14s infinite}
+@keyframes d-s1{0%,23%{background:#2E2E31;color:#8A897F}24%,29%{background:#EF6150;color:#FFFFFF}30%,100%{background:#C14031;color:#FFFFFF}}
+.d-s2{animation:d-s2 14s infinite}
+@keyframes d-s2{0%,29%{background:#2E2E31;color:#8A897F}30%,35%{background:#EF6150;color:#FFFFFF}36%,100%{background:#C14031;color:#FFFFFF}}
+.d-s3{animation:d-s3 14s infinite}
+@keyframes d-s3{0%,35%{background:#2E2E31;color:#8A897F}36%,62%{background:#EF6150;color:#FFFFFF}63%,100%{background:#C14031;color:#FFFFFF}}
+.d-l1{animation:d-l1 14s infinite}
+@keyframes d-l1{0%,38%{opacity:0;transform:translateY(6px)}42%,93%{opacity:1;transform:none}100%{opacity:0}}
+.d-l2{animation:d-l2 14s infinite}
+@keyframes d-l2{0%,45%{opacity:0;transform:translateY(6px)}49%,93%{opacity:1;transform:none}100%{opacity:0}}
+.d-l3{animation:d-l3 14s infinite}
+@keyframes d-l3{0%,52%{opacity:0;transform:translateY(6px)}56%,93%{opacity:1;transform:none}100%{opacity:0}}
+.d-l4{animation:d-l4 14s infinite}
+@keyframes d-l4{0%,59%{opacity:0;transform:translateY(6px)}63%,93%{opacity:1;transform:none}100%{opacity:0}}
+.d-cite{animation:d-cite 14s infinite}
+@keyframes d-cite{0%,67%{box-shadow:0 0 0 0 rgba(239,97,80,0);background:#C14031}69%{box-shadow:0 0 0 6px rgba(239,97,80,.45);background:#EF6150}74%,100%{box-shadow:0 0 0 0 rgba(239,97,80,0);background:#C14031}}
+.d-src{animation:d-src 14s infinite}
+@keyframes d-src{0%,69%{opacity:0;transform:translateX(24px)}73%,93%{opacity:1;transform:none}100%{opacity:0}}
+.d-meta{animation:d-meta 14s infinite}
+@keyframes d-meta{0%,63%{opacity:0}66%,93%{opacity:1}100%{opacity:0}}
+
+@media (max-width: 640px){
+  .wrap{padding:0 16px !important}
+  .d-bot{padding-right:0 !important}
+  .d-type{white-space:normal !important}
+  .d-src{position:relative !important;right:auto !important;bottom:auto !important;width:auto !important}
+  .cta-bin{display:none}
+}
+@media (prefers-reduced-motion: reduce){
+  .blink,.pulse,.d-ubub,.d-type,.d-bot,.d-s1,.d-s2,.d-s3,.d-l1,.d-l2,.d-l3,.d-l4,.d-cite,.d-src,.d-meta{animation:none}
+}
+</style><style>html,body{margin:0;background:#19191B} #root{width:1440px} *,*::before,*::after{animation:none !important;transition:none !important}</style></head><body>
+<div id="root">
+
+
+<div style="min-height: 100vh; color: #ECECEA; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 16px; line-height: 1.6; background-color: #19191B; background-image: linear-gradient(rgba(255,255,255,0.028) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.028) 1px, transparent 1px); background-size: 24px 24px;">
+  <div style="height: 6px; background: linear-gradient(90deg, #4B4B4D 0 62%, #C14031 62% 100%);"></div>
+
+  <div class="wrap" style="max-width: 1440px; margin: 0 auto; padding: 0 40px; box-sizing: border-box;">
+
+    
+    <header style="display: flex; align-items: center; flex-wrap: wrap; gap: 16px 36px; padding: 22px 0 18px; border-bottom: 1px solid rgba(151,150,136,0.28);">
+      <a href="Home.dc.html" aria-label="Allied Testing — KB Helper home" style="display: flex; line-height: 0; box-shadow: 6px 6px 0 rgba(0,0,0,0.45);">
+        <img src="img/logo.png" alt="Allied Testing" style="height: 56px; width: auto; display: block;">
+      </a>
+      <nav aria-label="Main" style="display: flex; gap: 30px; flex-wrap: wrap; margin-right: auto; font-family: 'Silkscreen', 'Courier New', monospace; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase;">
+        <a href="Main.dc.html" class="nav-a" style="padding-bottom: 4px;">Assistant</a>
+        <a href="Map.dc.html" class="nav-a" style="padding-bottom: 4px;">Knowledge map</a>
+        <a href="Docs.dc.html" class="nav-a" style="padding-bottom: 4px;">Documents</a>
+      </nav>
+      <a href="Main.dc.html" class="btn-red" style="height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 18px; background: #C14031; color: #FFFFFF; text-decoration: none; box-shadow: 4px 4px 0 rgba(0,0,0,0.5); font-family: 'Silkscreen', monospace; font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase;">Open assistant <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"></path></svg></a>
+    </header>
+
+    
+    <section style="display: flex; flex-wrap: wrap; gap: 56px; align-items: center; padding: 76px 0 84px;">
+      <div style="flex: 1 1 520px; min-width: 0;">
+        <p style="margin: 0 0 26px; display: inline-flex; align-items: center; gap: 10px; padding: 6px 12px; border: 1px solid rgba(151,150,136,0.35); font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #ECECEA;"><span class="pulse" style="width: 8px; height: 8px; background: #5FD38A; display: block;"></span>Allied Testing knowledge assistant</p>
+        <h1 style="margin: 0 0 28px; font-family: 'Silkscreen', 'Courier New', monospace; font-weight: 400; font-size: clamp(40px, 5.4vw, 80px); line-height: 0.95; letter-spacing: 0.01em; text-transform: uppercase; color: #FFFFFF;">Ask.<br>Get answers.<br><span style="color: #EF6150;">See the proof.</span></h1>
+        <p style="margin: 0 0 38px; max-width: 540px; font-size: 19px; line-height: 1.55; color: #D6D5CF;">Everything Allied Testing knows about its services, products and expertise — answered in seconds, with a link to the exact document behind every sentence.</p>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px;">
+          <a href="Main.dc.html" class="btn-red" style="height: 58px; display: flex; align-items: center; gap: 12px; padding: 0 28px; background: #C14031; color: #FFFFFF; text-decoration: none; box-shadow: 5px 5px 0 rgba(0,0,0,0.5); font-family: 'Silkscreen', monospace; font-size: 18px; letter-spacing: 0.1em; text-transform: uppercase;">Ask a question <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"></path></svg></a>
+          <a href="#how" style="display: flex; align-items: center; gap: 8px; min-height: 44px; color: #D6D5CF; text-decoration: none; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; border-bottom: 1px solid rgba(214,213,207,0.4);">How it works ↓</a>
+        </div>
+        <p style="margin: 34px 0 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #8A897F;">English · Русский &nbsp;/&nbsp; runs locally &nbsp;/&nbsp; no sign-up</p>
+      </div>
+
+      
+      <div style="flex: 1 1 520px; min-width: 0; position: relative;">
+        <div aria-hidden="true" style="position: absolute; right: -14px; top: -14px; width: 46%; height: 52%; background-image: radial-gradient(rgba(239,97,80,0.55) 1.2px, transparent 1.4px); background-size: 12px 12px;"></div>
+        <figure role="img" aria-label="Demo: a question is asked, the assistant searches the documents and answers with a numbered citation that opens its source" style="position: relative; margin: 0; background: #242426; border: 1px solid rgba(151,150,136,0.32); border-top: 6px solid #C14031; box-shadow: 18px 18px 0 rgba(0,0,0,0.45), 0 40px 100px rgba(0,0,0,0.5);">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; border-bottom: 1px solid rgba(151,150,136,0.25);">
+            <span style="font-family: 'Silkscreen', monospace; font-size: 16px; letter-spacing: 0.06em; text-transform: uppercase; color: #FFFFFF;">KB Helper</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #8A897F;">live demo</span>
+          </div>
+          <div style="position: relative; padding: 22px 20px 20px; min-height: 420px; display: flex; flex-direction: column; gap: 16px; overflow: hidden;">
+            <div class="d-ubub" style="align-self: flex-end; max-width: 82%; background: #C14031; color: #FFFFFF; padding: 10px 16px; box-shadow: 4px 4px 0 rgba(0,0,0,0.4); font-size: 15.5px;">
+              <span class="d-type" style="display: block; white-space: nowrap;">What products does the company have?</span>
+            </div>
+
+            <div class="d-bot" style="display: flex; flex-direction: column; gap: 12px; padding-right: 150px;">
+              <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <span class="d-s1" style="padding: 4px 9px; background: #C14031; color: #FFFFFF; font: 600 11px/1.4 'IBM Plex Mono', monospace; letter-spacing: 0.1em;">✓ SEARCH</span>
+                <span class="d-s2" style="padding: 4px 9px; background: #C14031; color: #FFFFFF; font: 600 11px/1.4 'IBM Plex Mono', monospace; letter-spacing: 0.1em;">✓ READ 5</span>
+                <span class="d-s3" style="padding: 4px 9px; background: #C14031; color: #FFFFFF; font: 600 11px/1.4 'IBM Plex Mono', monospace; letter-spacing: 0.1em;">✓ WRITE</span>
+              </div>
+              <div style="font-size: 15px; line-height: 1.55; color: #ECECEA; display: flex; flex-direction: column; gap: 8px;">
+                <p class="d-l1" style="margin: 0;">Allied Testing covers the full delivery cycle:</p>
+                <p class="d-l2" style="margin: 0;"><b style="color: #FFFFFF;">Product development</b> — design, implementation, systems integration <span class="d-cite" style="display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 4px; vertical-align: 1px; background: #C14031; color: #FFFFFF; font: 600 10px/1 'IBM Plex Mono', monospace;">2</span></p>
+                <p class="d-l3" style="margin: 0;"><b style="color: #FFFFFF;">QA &amp; testing</b> — functional, mobile, stress and security <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 4px; vertical-align: 1px; background: #C14031; color: #FFFFFF; font: 600 10px/1 'IBM Plex Mono', monospace;">3</span></p>
+                <p class="d-l4" style="margin: 0;">Goal: quality products, shipped faster and cheaper <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 4px; vertical-align: 1px; background: #C14031; color: #FFFFFF; font: 600 10px/1 'IBM Plex Mono', monospace;">2</span></p>
+              </div>
+              <span class="d-meta" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #8A897F;">answered in 3.6 s · 5 sources</span>
+            </div>
+
+            
+            <div class="d-src" style="position: absolute; right: 16px; bottom: 18px; width: 210px; background: #19191B; border: 1px solid #D4513F; box-shadow: 6px 6px 0 rgba(0,0,0,0.45); padding: 12px 14px; display: flex; flex-direction: column; gap: 6px;">
+              <span style="display: flex; justify-content: space-between; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: #EF6150;"><span>source 2</span><span>60% match</span></span>
+              <b style="font-size: 14px; color: #FFFFFF;">Product Development</b>
+              <span style="font-size: 12.5px; line-height: 1.5; color: #C9C8C0;">“…application design, development and implementation, systems integration…”</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #8A897F;">productdevelopment.md</span>
+            </div>
+          </div>
+        </figure>
+      </div>
+    </section>
+
+    
+    <section aria-label="Why use it" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 20px; padding: 0 0 96px;">
+      <article class="card-h" style="background: #1F1F21; border: 1px solid rgba(151,150,136,0.28); padding: 30px 28px; display: flex; flex-direction: column; gap: 14px;">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#EF6150" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M4 5h16v11H9l-5 4V5z"></path><path d="M8 9h8M8 12h5"></path></svg>
+        <h2 style="margin: 0; font-size: 22px; line-height: 1.25; font-weight: 600; color: #FFFFFF;">Answers, not a pile of links</h2>
+        <p style="margin: 0; color: #C9C8C0;">Ask the way you'd ask a colleague. You get a short, direct answer instead of ten pages to read through yourself.</p>
+      </article>
+      <article class="card-h" style="background: #1F1F21; border: 1px solid rgba(151,150,136,0.28); padding: 30px 28px; display: flex; flex-direction: column; gap: 14px;">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#EF6150" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"></path><path d="M9 13l2 2 4-4"></path></svg>
+        <h2 style="margin: 0; font-size: 22px; line-height: 1.25; font-weight: 600; color: #FFFFFF;">Every sentence is checkable</h2>
+        <p style="margin: 0; color: #C9C8C0;">Numbered citations open the exact passage the answer came from. If it isn't in the documents, the assistant says so.</p>
+      </article>
+      <article class="card-h" style="background: #1F1F21; border: 1px solid rgba(151,150,136,0.28); padding: 30px 28px; display: flex; flex-direction: column; gap: 14px;">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#EF6150" stroke-width="2" stroke-linecap="square" aria-hidden="true"><rect x="5" y="11" width="14" height="10"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+        <h2 style="margin: 0; font-size: 22px; line-height: 1.25; font-weight: 600; color: #FFFFFF;">Private by design</h2>
+        <p style="margin: 0; color: #C9C8C0;">The model runs on your own machine. Questions and documents never leave it — no cloud API, no data sharing.</p>
+      </article>
+    </section>
+
+    
+    <section id="how" aria-labelledby="how-h" style="padding: 0 0 96px;">
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px 40px; margin-bottom: 36px;">
+        <div>
+          <p style="margin: 0 0 12px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: #EF6150;">&gt; how it works</p>
+          <h2 id="how-h" style="margin: 0; font-family: 'Silkscreen', monospace; font-weight: 400; font-size: clamp(32px, 4vw, 54px); line-height: 1; text-transform: uppercase; color: #FFFFFF;">Three steps,<br>all on screen.</h2>
+        </div>
+        <p style="margin: 0; max-width: 420px; color: #D6D5CF;">Nothing is hidden. While it works, you watch each step light up — and when it's done you can see exactly what it read.</p>
+      </div>
+
+      <ol style="list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 1px; background: rgba(151,150,136,0.28); border: 1px solid rgba(151,150,136,0.28);">
+        <li style="background: #1E1E20; padding: 32px 28px 34px; display: flex; flex-direction: column; gap: 14px;">
+          <span style="font-family: 'Silkscreen', monospace; font-size: 68px; line-height: 0.9; color: #C14031;">01</span>
+          <h3 style="margin: 0; font-size: 22px; font-weight: 600; color: #FFFFFF;">You ask</h3>
+          <p style="margin: 0; color: #C9C8C0;">In plain English or Russian. No keywords, no special syntax — just your question.</p>
+        </li>
+        <li style="background: #1E1E20; padding: 32px 28px 34px; display: flex; flex-direction: column; gap: 14px;">
+          <span style="font-family: 'Silkscreen', monospace; font-size: 68px; line-height: 0.9; color: #C14031;">02</span>
+          <h3 style="margin: 0; font-size: 22px; font-weight: 600; color: #FFFFFF;">It finds the right pages</h3>
+          <p style="margin: 0; color: #C9C8C0;">It searches by meaning, not exact words, and picks the five passages that fit your question best.</p>
+        </li>
+        <li style="background: #1E1E20; padding: 32px 28px 34px; display: flex; flex-direction: column; gap: 14px;">
+          <span style="font-family: 'Silkscreen', monospace; font-size: 68px; line-height: 0.9; color: #C14031;">03</span>
+          <h3 style="margin: 0; font-size: 22px; font-weight: 600; color: #FFFFFF;">It answers and cites</h3>
+          <p style="margin: 0; color: #C9C8C0;">The answer is written from those passages only, with a numbered link on every claim.</p>
+        </li>
+      </ol>
+    </section>
+
+    
+    <section aria-labelledby="try" style="display: flex; flex-wrap: wrap; gap: 40px; padding: 0 0 96px;">
+      <div style="flex: 1 1 340px; min-width: 0;">
+        <p style="margin: 0 0 12px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: #EF6150;">&gt; try it</p>
+        <h2 id="try" style="margin: 0 0 16px; font-family: 'Silkscreen', monospace; font-weight: 400; font-size: clamp(32px, 4vw, 54px); line-height: 1; text-transform: uppercase; color: #FFFFFF;">Not sure<br>what to ask?</h2>
+        <p style="margin: 0; max-width: 380px; color: #D6D5CF;">Start with one of these. Each opens straight in the assistant.</p>
+      </div>
+      <div style="flex: 999 1 560px; min-width: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr)); gap: 12px; align-content: start;">
+        <a href="Main.dc.html" class="q" style="min-height: 92px; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; padding: 18px 20px; background: #222224; border: 1px solid rgba(151,150,136,0.28); color: #ECECEA; text-decoration: none; font-size: 18px; line-height: 1.35;">What services do you offer?<span class="q-arrow" style="font-family: 'IBM Plex Mono', monospace; color: #EF6150;">→</span></a>
+        <a href="Main.dc.html" class="q" style="min-height: 92px; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; padding: 18px 20px; background: #222224; border: 1px solid rgba(151,150,136,0.28); color: #ECECEA; text-decoration: none; font-size: 18px; line-height: 1.35;">How do you handle security testing?<span class="q-arrow" style="font-family: 'IBM Plex Mono', monospace; color: #EF6150;">→</span></a>
+        <a href="Main.dc.html" class="q" style="min-height: 92px; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; padding: 18px 20px; background: #222224; border: 1px solid rgba(151,150,136,0.28); color: #ECECEA; text-decoration: none; font-size: 18px; line-height: 1.35;">Tell me about your QA consulting<span class="q-arrow" style="font-family: 'IBM Plex Mono', monospace; color: #EF6150;">→</span></a>
+        <a href="Main.dc.html" class="q" style="min-height: 92px; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; padding: 18px 20px; background: #222224; border: 1px solid rgba(151,150,136,0.28); color: #ECECEA; text-decoration: none; font-size: 18px; line-height: 1.35;">Какие AI-решения есть у компании?<span class="q-arrow" style="font-family: 'IBM Plex Mono', monospace; color: #EF6150;">→</span></a>
+      </div>
+    </section>
+
+    
+    <section aria-labelledby="hood" style="padding: 0 0 96px;">
+      <div style="background: #1E1E20; border: 1px solid rgba(151,150,136,0.28);">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; padding: 18px 24px; border-bottom: 1px solid rgba(151,150,136,0.28);">
+          <h2 id="hood" style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: #EF6150;">&gt; under the hood <span style="color: #8A897F;">— for engineers</span></h2>
+          <a href="Map.dc.html" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #D6D5CF; text-decoration: none; border-bottom: 1px solid rgba(214,213,207,0.4);">See the vector space ▸</a>
+        </div>
+        <dl style="margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 1px; background: rgba(151,150,136,0.2);">
+          <div style="background: #1E1E20; padding: 22px 24px;">
+            <dt style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A89E;">Knowledge base</dt>
+            <dd style="margin: 8px 0 0; font-family: 'Silkscreen', monospace; font-size: 30px; line-height: 1.1; color: #FFFFFF;">26 / 149</dd>
+            <dd style="margin: 4px 0 0; font-size: 14px; color: #C9C8C0;">documents / chunks</dd>
+          </div>
+          <div style="background: #1E1E20; padding: 22px 24px;">
+            <dt style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A89E;">Embeddings</dt>
+            <dd style="margin: 8px 0 0; font-family: 'Silkscreen', monospace; font-size: 30px; line-height: 1.1; color: #FFFFFF;">768-d</dd>
+            <dd style="margin: 4px 0 0; font-size: 14px; color: #C9C8C0;">nomic-embed-text</dd>
+          </div>
+          <div style="background: #1E1E20; padding: 22px 24px;">
+            <dt style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A89E;">Generation</dt>
+            <dd style="margin: 8px 0 0; font-family: 'Silkscreen', monospace; font-size: 30px; line-height: 1.1; color: #FFFFFF;">1.7B</dd>
+            <dd style="margin: 4px 0 0; font-size: 14px; color: #C9C8C0;">qwen3 via Ollama, streamed</dd>
+          </div>
+          <div style="background: #1E1E20; padding: 22px 24px;">
+            <dt style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A89E;">Retrieval</dt>
+            <dd style="margin: 8px 0 0; font-family: 'Silkscreen', monospace; font-size: 30px; line-height: 1.1; color: #FFFFFF;">top-k</dd>
+            <dd style="margin: 4px 0 0; font-size: 14px; color: #C9C8C0;">query rewrite + similarity search</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    
+    <section style="position: relative; overflow: hidden; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px; padding: 48px; margin-bottom: 56px; background: #C14031; box-shadow: 12px 12px 0 rgba(0,0,0,0.5);">
+      <div aria-hidden="true" class="cta-bin" style="position: absolute; left: 40%; top: -6px; font-family: 'IBM Plex Mono', monospace; font-size: 15px; line-height: 1.25; color: rgba(255,255,255,0.13); white-space: pre; pointer-events: none;">1001101011011100110101
+0110101101110110101101
+1101100111011011011101
+0011011011101101101011
+1011010110111011011010</div>
+      <div style="position: relative; display: flex; flex-direction: column; gap: 10px;">
+        <h2 style="margin: 0; font-family: 'Silkscreen', monospace; font-weight: 400; font-size: clamp(28px, 3.6vw, 48px); line-height: 1.02; text-transform: uppercase; color: #FFFFFF;">Got a question?</h2>
+        <p style="margin: 0; font-size: 17px; color: #FFFFFF;">The answer — and its source — is a few seconds away.</p>
+      </div>
+      <a href="Main.dc.html" class="btn-ink" style="position: relative; height: 58px; display: flex; align-items: center; gap: 12px; padding: 0 28px; background: #19191B; color: #FFFFFF; text-decoration: none; box-shadow: 5px 5px 0 rgba(0,0,0,0.45); font-family: 'Silkscreen', monospace; font-size: 18px; letter-spacing: 0.1em; text-transform: uppercase;">Ask a question <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"></path></svg></a>
+    </section>
+
+    <footer style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 22px 0 30px; border-top: 1px solid rgba(151,150,136,0.28); font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase; color: #8A897F;">
+      <span>Allied Testing · KB Helper · local RAG on Ollama</span>
+      <span>Built by [YOUR NAME] · CEITI</span>
+    </footer>
+  </div>
+</div>
+</div>
+</body></html>

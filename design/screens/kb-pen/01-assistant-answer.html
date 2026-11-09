@@ -1,0 +1,445 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"><style>
+body{margin:0;background:#19191B}
+a{color:#ECECEA}a:hover{color:#FFFFFF}
+.nav-a{color:#A9A89E;text-decoration:none;border-bottom:3px solid transparent;transition:color .2s,border-color .2s}
+.nav-a:hover{color:#FFFFFF;border-bottom-color:#5A5A5D}
+.hov{transition:background .15s,color .15s}
+.hov:hover{background:rgba(255,255,255,.05) !important}
+.btn-red{transition:background .2s,transform .2s,box-shadow .2s}
+.btn-red:hover{background:#D4513F !important;transform:translate(-1px,-1px);box-shadow:5px 5px 0 #000 !important}
+.ghost{transition:color .2s,border-color .2s,background .2s}
+.ghost:hover{color:#FFFFFF !important;border-color:#979688 !important}
+.icon-b{transition:color .15s,background .15s}
+.icon-b:hover{color:#FFFFFF !important;background:#333336 !important}
+.ex{transition:background .2s,border-color .2s,transform .2s}
+.ex:hover{background:#C14031 !important;border-color:#C14031 !important;color:#FFFFFF !important;transform:translateY(-2px)}
+.chip{transition:border-color .2s,color .2s}
+.chip:hover{border-color:#EF6150 !important;color:#FFFFFF !important}
+.cite{transition:background .15s,transform .15s}
+.cite:hover{background:#D4513F !important;transform:translateY(-1px)}
+.fade{animation:fade .35s ease-out}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.slide{animation:slide .3s ease-out}
+@keyframes slide{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+.blink{animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.busy{animation:busy .9s steps(2) infinite}
+@keyframes busy{50%{background:#EF6150}}
+.skel{animation:skel 1.6s ease-in-out infinite}
+@keyframes skel{50%{opacity:.4}}
+.pulse{animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(95,211,138,.55)}70%{box-shadow:0 0 0 8px rgba(95,211,138,0)}100%{box-shadow:0 0 0 0 rgba(95,211,138,0)}}
+.ring{animation:ring 1.8s ease-out infinite}
+@keyframes ring{from{transform:rotate(45deg) scale(.6);opacity:1}to{transform:rotate(45deg) scale(2.6);opacity:0}}
+.dash{animation:dash 1s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-8}}
+@media (prefers-reduced-motion: reduce){.skel,.fade,.slide,.blink,.busy,.pulse,.ring,.dash{animation:none}}
+</style><style>html,body{margin:0;background:#19191B} #root{width:1440px} *,*::before,*::after{animation:none !important;transition:none !important}</style></head><body>
+<div id="root">
+
+
+<div style="min-height: 100vh; color: #ECECEA; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 15.5px; line-height: 1.6; background-color: #19191B; background-image: linear-gradient(rgba(255,255,255,0.028) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.028) 1px, transparent 1px); background-size: 24px 24px;">
+  <div style="height: 6px; background: linear-gradient(90deg, #4B4B4D 0 62%, #C14031 62% 100%);"></div>
+
+  <div style="max-width: 1440px; margin: 0 auto; padding: 0 40px; box-sizing: border-box;">
+
+    
+    <header style="display: flex; align-items: center; flex-wrap: wrap; gap: 16px 36px; padding: 22px 0 18px; border-bottom: 1px solid rgba(151,150,136,0.28);">
+      <a href="Home.dc.html" aria-label="Allied Testing — KB Helper home" style="display: flex; line-height: 0; box-shadow: 6px 6px 0 rgba(0,0,0,0.45);">
+        <img src="img/logo.png" alt="Allied Testing" style="height: 56px; width: auto; display: block;">
+      </a>
+      <nav aria-label="Main" style="display: flex; gap: 30px; flex-wrap: wrap; margin-right: auto; font-family: 'Silkscreen', 'Courier New', monospace; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase;">
+        <a href="Main.dc.html" aria-current="page" style="color: #FFFFFF; text-decoration: none; padding-bottom: 4px; border-bottom: 3px solid #C14031;">Assistant</a>
+        <a href="Map.dc.html" class="nav-a" style="padding-bottom: 4px;">Knowledge map</a>
+        <a href="Docs.dc.html" class="nav-a" style="padding-bottom: 4px;">Documents</a>
+      </nav>
+      <div role="status" style="display: flex; align-items: center; gap: 8px; padding: 7px 12px; background: #242426; border: 1px solid rgba(151,150,136,0.28); font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #ECECEA;">
+        <span class="pulse" style="width: 8px; height: 8px; background: #5FD38A; display: block;"></span>
+        
+        qwen3:1.7b · online
+      </div>
+    </header>
+
+    
+    <section aria-label="Assistant" style="display: flex; flex-wrap: wrap; gap: 20px; align-items: stretch; padding: 24px 0 32px; min-height: calc(100vh - 200px); box-sizing: border-box;">
+
+      
+      <aside style="flex: 1 1 250px; max-width: 100%; min-width: 0; display: flex; flex-direction: column; gap: 16px;">
+        <button type="button" class="btn-red" style="height: 50px; display: flex; align-items: center; justify-content: center; gap: 10px; background: #C14031; color: #FFFFFF; border: none; box-shadow: 4px 4px 0 rgba(0,0,0,0.45); font-family: 'Silkscreen', monospace; font-size: 15px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>New chat</button>
+
+        <div style="background: #212123; border: 1px solid rgba(151,150,136,0.28);">
+          <h2 style="margin: 0; padding: 12px 14px 8px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A89E;">Recent</h2>
+          <div style="display: flex; flex-direction: column; padding: 0 6px 8px;">
+            
+            
+              
+                <button type="button" class="hov" style="display: flex; flex-direction: column; gap: 1px; padding: 9px 10px; min-height: 48px; text-align: left; border: none; cursor: pointer; font-family: inherit; background: #2E2E31; box-shadow: inset 3px 0 0 #C14031;">
+                  <span style="font-size: 14px; line-height: 1.35; color: #ECECEA; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">What products does the company have?</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A897F;">now</span>
+                </button>
+              
+                <button type="button" class="hov" style="display: flex; flex-direction: column; gap: 1px; padding: 9px 10px; min-height: 48px; text-align: left; border: none; cursor: pointer; font-family: inherit; background: transparent; box-shadow: none;">
+                  <span style="font-size: 14px; line-height: 1.35; color: #ECECEA; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">How do you handle security testing?</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A897F;">12 min ago</span>
+                </button>
+              
+                <button type="button" class="hov" style="display: flex; flex-direction: column; gap: 1px; padding: 9px 10px; min-height: 48px; text-align: left; border: none; cursor: pointer; font-family: inherit; background: transparent; box-shadow: none;">
+                  <span style="font-size: 14px; line-height: 1.35; color: #ECECEA; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Какие AI-решения есть у компании?</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A897F;">yesterday</span>
+                </button>
+              
+                <button type="button" class="hov" style="display: flex; flex-direction: column; gap: 1px; padding: 9px 10px; min-height: 48px; text-align: left; border: none; cursor: pointer; font-family: inherit; background: transparent; box-shadow: none;">
+                  <span style="font-size: 14px; line-height: 1.35; color: #ECECEA; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Tell me about your QA consulting</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A897F;">yesterday</span>
+                </button>
+              
+            
+          </div>
+        </div>
+
+        <div style="background: #212123; border: 1px solid rgba(151,150,136,0.28);">
+          <button type="button" class="hov" aria-expanded="false" style="width: 100%; min-height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px; background: transparent; border: none; cursor: pointer; text-align: left;">
+            <span style="display: flex; flex-direction: column; line-height: 1.35;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A89E;">Answer settings</span>
+              <span style="font-size: 13px; color: #D6D5CF;">Balanced · 5 sources · qwen3:1.7b</span>
+            </span>
+            <span style="font-family: 'IBM Plex Mono', monospace; color: #EF6150;">+</span>
+          </button>
+          
+        </div>
+      </aside>
+
+      
+      <div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; background: #252527; border: 1px solid rgba(151,150,136,0.28); border-top: 6px solid #C14031; box-shadow: 0 30px 80px rgba(0,0,0,0.45);">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 22px; border-bottom: 1px solid rgba(151,150,136,0.25);">
+          <h1 style="margin: 0; font-family: 'Silkscreen', monospace; font-weight: 400; font-size: 20px; letter-spacing: 0.06em; text-transform: uppercase; color: #FFFFFF;">KB Helper</h1>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #8A897F;">answers from 26 Allied Testing documents</span>
+        </div>
+
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 22px; padding: 28px 28px 20px; min-height: 520px;">
+
+          
+          
+
+          
+          
+            <div class="fade" style="display: flex; justify-content: flex-end;">
+              <div style="max-width: 78%; background: #C14031; color: #FFFFFF; padding: 12px 18px; box-shadow: 5px 5px 0 rgba(0,0,0,0.4); font-size: 16px;">What products does the company have?</div>
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="fade" style="display: flex; gap: 14px; align-items: flex-start;">
+              <div aria-hidden="true" style="width: 40px; height: 40px; flex: 0 0 40px; background: linear-gradient(90deg, #4B4B4D 0 45%, #C14031 45% 100%); box-shadow: 4px 4px 0 rgba(0,0,0,0.35);"></div>
+              <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px;">
+                <div style="display: flex; flex-wrap: wrap; gap: 6px 16px; font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; letter-spacing: 0.06em; color: #A9A89E;">
+                  <span><span style="color: #EF6150;">✓</span> understood</span>
+                  <span><span style="color: #EF6150;">✓</span> read 5 sources</span>
+                  <span><span style="color: #EF6150;">✓</span> answered in 3.6 s</span>
+                  <button type="button" class="ghost" aria-expanded="false" style="background: none; border: none; border-bottom: 1px dashed rgba(169,168,158,0.6); padding: 0; color: #A9A89E; font: inherit; letter-spacing: inherit; cursor: pointer;">how it got this</button>
+                </div>
+                
+
+                <div style="font-size: 16.5px; line-height: 1.7; color: #ECECEA;">
+                  <p style="margin: 0 0 10px;">Allied Testing covers the full delivery cycle, from building software to proving it works:</p>
+                  <ul style="margin: 0 0 10px; padding-left: 20px; display: flex; flex-direction: column; gap: 6px;">
+                    <li><strong style="color: #FFFFFF;">Product development</strong> — application design, development and implementation, systems integration, performance tuning and re-engineering <button type="button" class="cite" aria-label="Open source 2" style="display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 5px; vertical-align: 2px; background: #C14031; color: #FFFFFF; border: none; font: 600 11px/1 'IBM Plex Mono', monospace; cursor: pointer;">2</button></li>
+                    <li><strong style="color: #FFFFFF;">QA &amp; testing</strong> — functional, mobile, stress and security testing for enterprise clients <button type="button" class="cite" aria-label="Open source 3" style="display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 5px; vertical-align: 2px; background: #C14031; color: #FFFFFF; border: none; font: 600 11px/1 'IBM Plex Mono', monospace; cursor: pointer;">3</button></li>
+                    <li><strong style="color: #FFFFFF;">Feasibility &amp; support</strong> — requirement analysis for business cases, change implementation and third-level support <button type="button" class="cite" aria-label="Open source 2" style="display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 5px; vertical-align: 2px; background: #C14031; color: #FFFFFF; border: none; font: 600 11px/1 'IBM Plex Mono', monospace; cursor: pointer;">2</button></li>
+                  </ul>
+                  <p style="margin: 0;">The stated goal: quality products while reducing time-to-market and development costs <button type="button" class="cite" aria-label="Open source 2" style="display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 5px; vertical-align: 2px; background: #C14031; color: #FFFFFF; border: none; font: 600 11px/1 'IBM Plex Mono', monospace; cursor: pointer;">2</button></p>
+                </div>
+
+                <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding-top: 12px; border-top: 1px solid rgba(151,150,136,0.18);">
+                  <button type="button" class="ghost" aria-expanded="true" style="height: 34px; display: flex; align-items: center; gap: 8px; padding: 0 12px; background: transparent; border: 1px solid rgba(151,150,136,0.35); color: #D6D5CF; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer;">
+                    <span aria-hidden="true" style="display: flex; gap: 2px;"><span style="width: 4px; height: 12px; background: #EF6150; display: block;"></span><span style="width: 4px; height: 12px; background: #EF6150; display: block;"></span><span style="width: 4px; height: 12px; background: #979688; display: block;"></span><span style="width: 4px; height: 12px; background: #979688; display: block;"></span><span style="width: 4px; height: 12px; background: #979688; display: block;"></span></span>
+                    Hide sources
+                  </button>
+                  <div style="margin-left: auto; display: flex; align-items: center; gap: 2px;">
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A897F; margin-right: 6px;">Helpful?</span>
+                    <button type="button" class="icon-b" aria-label="Helpful" aria-pressed="false" style="width: 36px; height: 34px; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; background: transparent; color: #A9A89E;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M7 11v9H3v-9h4zM7 11l4-8c1.5 0 3 1 3 3v3h6l-2 11H7"></path></svg></button>
+                    <button type="button" class="icon-b" aria-label="Not helpful" style="width: 36px; height: 34px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: #A9A89E; cursor: pointer;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M17 13V4h4v9h-4zM17 13l-4 8c-1.5 0-3-1-3-3v-3H4l2-11h11"></path></svg></button>
+                    <button type="button" class="icon-b" aria-label="Copy answer" style="width: 36px; height: 34px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: #A9A89E; cursor: pointer;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><rect x="8" y="8" width="12" height="12"></rect><path d="M16 8V4H4v12h4"></path></svg></button>
+                    <button type="button" class="icon-b" aria-label="Regenerate answer" style="width: 36px; height: 34px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: #A9A89E; cursor: pointer;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"></path></svg></button>
+                  </div>
+                </div>
+
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; padding-top: 4px;">
+                  <span style="width: 100%; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #8A897F;">Ask next</span>
+                  
+                    <button type="button" class="chip" style="min-height: 40px; padding: 8px 14px; background: transparent; border: 1px solid rgba(151,150,136,0.35); color: #D6D5CF; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; cursor: pointer;">How do you handle security testing?</button>
+                  
+                    <button type="button" class="chip" style="min-height: 40px; padding: 8px 14px; background: transparent; border: 1px solid rgba(151,150,136,0.35); color: #D6D5CF; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; cursor: pointer;">Tell me more about product development</button>
+                  
+                </div>
+              </div>
+            </div>
+          
+
+          
+          
+
+          
+          
+        </div>
+
+        
+        <form style="margin: 0 22px 22px; display: flex; align-items: flex-end; gap: 8px; padding: 6px 6px 6px 16px; background: #19191B; border: 1px solid #D4513F; box-shadow: 0 0 0 3px rgba(193,64,49,0.22);">
+          <label for="ask" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">Your question</label>
+          <textarea id="ask" rows="1" placeholder="Ask about services, products, expertise…" style="flex: 1; resize: none; border: none; outline: none; background: transparent; color: #FFFFFF; font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; line-height: 1.5; padding: 10px 0; min-height: 44px; box-sizing: border-box;"></textarea>
+          <span style="align-self: center; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #8A897F; padding: 0 6px; white-space: nowrap;">↵ send</span>
+          
+          
+            <button type="button" class="btn-red" style="height: 46px; min-width: 104px; padding: 0 20px; display: flex; align-items: center; justify-content: center; gap: 10px; background: #C14031; color: #FFFFFF; border: none; box-shadow: 3px 3px 0 rgba(0,0,0,0.45); font-family: 'Silkscreen', monospace; font-size: 16px; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer;">Ask <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"></path></svg></button>
+          
+        </form>
+      </div>
+
+      
+      
+        <aside class="slide" aria-label="Sources for this answer" style="flex: 1 1 340px; min-width: 0; display: flex; flex-direction: column; background: #212123; border: 1px solid rgba(151,150,136,0.28); border-top: 6px solid #4B4B4D;">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 8px 8px 16px; border-bottom: 1px solid rgba(151,150,136,0.28);">
+            <h2 style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: #A9A89E;">Sources · 5</h2>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <a href="Map.dc.html" style="padding: 0 10px; min-height: 44px; display: flex; align-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #EF6150; text-decoration: none;">On map ▸</a>
+              <button type="button" class="icon-b" aria-label="Close sources" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: #A9A89E; cursor: pointer;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+            </div>
+          </div>
+
+          <div style="padding: 14px 16px 4px;">
+            <div aria-hidden="true" style="position: relative; height: 170px; background-color: #19191B; background-image: linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px); background-size: 17px 17px; border: 1px solid rgba(151,150,136,0.22); overflow: hidden;">
+              
+                <span style="position: absolute; left: 11.3%; top: 17.5%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 32.5%; top: 32.8%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 22.5%; top: 25.7%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 21.3%; top: 21.8%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 23.2%; top: 33.5%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 16.7%; top: 19.7%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 27.8%; top: 28.4%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 15.3%; top: 24.8%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 17.5%; top: 28.8%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 35.5%; top: 45.5%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 34.4%; top: 43.1%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 33.2%; top: 25.4%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 32.4%; top: 29.0%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 41.1%; top: 40.3%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 30.6%; top: 43.9%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 41.2%; top: 36.9%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 44.0%; top: 45.2%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 42.7%; top: 44.1%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 77.2%; top: 11.0%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 62.8%; top: 18.6%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 68.4%; top: 10.5%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 60.9%; top: 28.4%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 67.1%; top: 20.2%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 69.3%; top: 32.7%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 74.5%; top: 26.5%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 66.3%; top: 18.6%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 62.1%; top: 13.2%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 35.1%; top: 65.7%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 19.2%; top: 73.2%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 22.4%; top: 59.0%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 30.1%; top: 80.1%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 27.1%; top: 77.8%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 29.4%; top: 80.1%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 17.6%; top: 70.7%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 29.3%; top: 79.4%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 36.1%; top: 78.1%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 60.1%; top: 73.1%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 68.3%; top: 63.2%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 65.0%; top: 50.1%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 58.4%; top: 57.9%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 62.9%; top: 63.2%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 63.6%; top: 73.4%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 59.3%; top: 69.8%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 56.5%; top: 65.4%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 63.2%; top: 63.2%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 75.9%; top: 69.7%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 69.2%; top: 64.6%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 89.8%; top: 84.0%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 82.9%; top: 64.3%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 82.6%; top: 78.3%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 84.8%; top: 87.9%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 75.1%; top: 87.7%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 83.3%; top: 83.3%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 82.7%; top: 83.9%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 80.1%; top: 51.9%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 88.2%; top: 41.6%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 80.5%; top: 37.5%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 81.6%; top: 47.5%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 96.0%; top: 45.7%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 91.5%; top: 51.8%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 90.4%; top: 45.7%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 97.0%; top: 39.7%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+                <span style="position: absolute; left: 82.1%; top: 42.0%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #6E6D66;"></span>
+              
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position: absolute; inset: 0; width: 100%; height: 100%;">
+                <g stroke="#EF6150" stroke-width="1.2" fill="none" stroke-dasharray="3 3" class="dash">
+                  <line x1="50" y1="52" x2="38" y2="30" vector-effect="non-scaling-stroke"></line>
+                  <line x1="50" y1="52" x2="72" y2="78" vector-effect="non-scaling-stroke"></line>
+                  <line x1="50" y1="52" x2="78" y2="70" vector-effect="non-scaling-stroke"></line>
+                  <line x1="50" y1="52" x2="55" y2="44" vector-effect="non-scaling-stroke"></line>
+                  <line x1="50" y1="52" x2="31" y2="58" vector-effect="non-scaling-stroke"></line>
+                </g>
+              </svg>
+              
+                <span style="position: absolute; left: 38%; top: 30%; width: 9px; height: 9px; transform: translate(-50%, -50%); border-radius: 50%; background: #EF6150; border: 2px solid #FFFFFF; box-sizing: border-box;"></span>
+              
+                <span style="position: absolute; left: 72%; top: 78%; width: 13px; height: 13px; transform: translate(-50%, -50%); border-radius: 50%; background: #FFFFFF; border: 2px solid #EF6150; box-sizing: border-box;"></span>
+              
+                <span style="position: absolute; left: 78%; top: 70%; width: 9px; height: 9px; transform: translate(-50%, -50%); border-radius: 50%; background: #EF6150; border: 2px solid #FFFFFF; box-sizing: border-box;"></span>
+              
+                <span style="position: absolute; left: 55%; top: 44%; width: 9px; height: 9px; transform: translate(-50%, -50%); border-radius: 50%; background: #EF6150; border: 2px solid #FFFFFF; box-sizing: border-box;"></span>
+              
+                <span style="position: absolute; left: 31%; top: 58%; width: 9px; height: 9px; transform: translate(-50%, -50%); border-radius: 50%; background: #EF6150; border: 2px solid #FFFFFF; box-sizing: border-box;"></span>
+              
+              <span class="ring" style="position: absolute; left: 50%; top: 52%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border: 2px solid #EF6150; box-sizing: border-box;"></span>
+              <span style="position: absolute; left: 50%; top: 52%; width: 12px; height: 12px; margin: -6px 0 0 -6px; background: #C14031; border: 2px solid #FFFFFF; transform: rotate(45deg); box-sizing: border-box;"></span>
+              <span style="position: absolute; left: 8px; bottom: 5px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #8A897F;">◆ your question · ● sources read</span>
+            </div>
+          </div>
+
+          <ol style="list-style: none; margin: 0; padding: 8px 10px 14px; display: flex; flex-direction: column; gap: 2px;">
+            
+              <li style="border: 1px solid transparent;">
+                <button type="button" class="hov" aria-expanded="false" style="width: 100%; display: grid; grid-template-columns: 22px minmax(0, 1fr) 70px; gap: 10px; align-items: center; min-height: 48px; padding: 6px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+                  <span style="font: 600 11px/22px 'IBM Plex Mono', monospace; text-align: center; height: 22px; color: #FFFFFF; background: #3A3A3D;">1</span>
+                  <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;">
+                    <span style="font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">We offer</span>
+                    <small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">careers.md</small>
+                  </span>
+                  <span style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #D6D5CF;">63%<span style="width: 100%; height: 4px; background: #333336; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 63%; background: #979688; display: block;"></span></span></span>
+                </button>
+                
+              </li>
+            
+              <li style="border: 1px solid #D4513F; background: rgba(193,64,49,0.10);">
+                <button type="button" class="hov" aria-expanded="true" style="width: 100%; display: grid; grid-template-columns: 22px minmax(0, 1fr) 70px; gap: 10px; align-items: center; min-height: 48px; padding: 6px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+                  <span style="font: 600 11px/22px 'IBM Plex Mono', monospace; text-align: center; height: 22px; color: #FFFFFF; background: #C14031;">2</span>
+                  <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;">
+                    <span style="font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Product Development</span>
+                    <small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">productdevelopment.md</small>
+                  </span>
+                  <span style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #D6D5CF;">60%<span style="width: 100%; height: 4px; background: #333336; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 60%; background: #EF6150; display: block;"></span></span></span>
+                </button>
+                
+                  <div class="fade" style="padding: 2px 12px 14px 38px; display: flex; flex-direction: column; gap: 10px;">
+                    <p style="margin: 0; font-size: 13.5px; line-height: 1.6; color: #C9C8C0; white-space: pre-line;">Product development at Allied Testing is a value-added service aimed at application projects for financial industry enterprise clients and software development companies.
+
+Our services include application design, development and implementation; systems integration; performance tuning and re-engineering; feasibility and requirement analysis for business cases; change implementation and third level support.</p>
+                    <a href="Docs.dc.html" style="align-self: flex-start; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #EF6150; text-decoration: none;">Open document ▸</a>
+                  </div>
+                
+              </li>
+            
+              <li style="border: 1px solid transparent;">
+                <button type="button" class="hov" aria-expanded="false" style="width: 100%; display: grid; grid-template-columns: 22px minmax(0, 1fr) 70px; gap: 10px; align-items: center; min-height: 48px; padding: 6px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+                  <span style="font: 600 11px/22px 'IBM Plex Mono', monospace; text-align: center; height: 22px; color: #FFFFFF; background: #3A3A3D;">3</span>
+                  <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;">
+                    <span style="font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">What We Do</span>
+                    <small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">aboutus.md</small>
+                  </span>
+                  <span style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #D6D5CF;">57%<span style="width: 100%; height: 4px; background: #333336; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 57%; background: #979688; display: block;"></span></span></span>
+                </button>
+                
+              </li>
+            
+              <li style="border: 1px solid transparent;">
+                <button type="button" class="hov" aria-expanded="false" style="width: 100%; display: grid; grid-template-columns: 22px minmax(0, 1fr) 70px; gap: 10px; align-items: center; min-height: 48px; padding: 6px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+                  <span style="font: 600 11px/22px 'IBM Plex Mono', monospace; text-align: center; height: 22px; color: #FFFFFF; background: #3A3A3D;">4</span>
+                  <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;">
+                    <span style="font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">[Chunk heading]</span>
+                    <small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">casestudies.md</small>
+                  </span>
+                  <span style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #D6D5CF;">57%<span style="width: 100%; height: 4px; background: #333336; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 57%; background: #979688; display: block;"></span></span></span>
+                </button>
+                
+              </li>
+            
+              <li style="border: 1px solid transparent;">
+                <button type="button" class="hov" aria-expanded="false" style="width: 100%; display: grid; grid-template-columns: 22px minmax(0, 1fr) 70px; gap: 10px; align-items: center; min-height: 48px; padding: 6px; background: transparent; border: none; text-align: left; color: #ECECEA; cursor: pointer; font-family: inherit;">
+                  <span style="font: 600 11px/22px 'IBM Plex Mono', monospace; text-align: center; height: 22px; color: #FFFFFF; background: #3A3A3D;">5</span>
+                  <span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;">
+                    <span style="font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Objectivity</span>
+                    <small style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9A89E;">whyalied.md</small>
+                  </span>
+                  <span style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #D6D5CF;">57%<span style="width: 100%; height: 4px; background: #333336; position: relative; display: block;"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 57%; background: #979688; display: block;"></span></span></span>
+                </button>
+                
+              </li>
+            
+          </ol>
+        </aside>
+      
+    </section>
+  </div>
+</div>
+</div>
+</body></html>

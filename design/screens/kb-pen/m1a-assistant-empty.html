@@ -1,0 +1,105 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"><style>
+body{margin:0;background:#19191B}
+a{color:#ECECEA}a:hover{color:#FFFFFF}
+.blink{animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.busy{animation:busy .9s steps(2) infinite}
+@keyframes busy{50%{background:#EF6150}}
+.skel{animation:skel 1.6s ease-in-out infinite}
+@keyframes skel{50%{opacity:.4}}
+.pulse{animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(95,211,138,.55)}70%{box-shadow:0 0 0 7px rgba(95,211,138,0)}100%{box-shadow:0 0 0 0 rgba(95,211,138,0)}}
+.fade{animation:fade .3s ease-out}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.sheet{animation:up .28s ease-out}
+@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+/* liquid-glass tab bar */
+.glass{background-color:rgba(36,36,40,.42);background-image:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.04) 46%,rgba(0,0,0,.10));-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.38),inset 0 -1px 1px rgba(0,0,0,.35),inset 0 0 20px rgba(255,255,255,.05),0 14px 34px rgba(0,0,0,.55),0 2px 6px rgba(0,0,0,.35)}
+.tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:27px;text-decoration:none;color:rgba(236,236,234,.78);font-family:'Silkscreen',monospace;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;transition:background .25s,color .25s,transform .2s}
+.tab:hover{color:#FFFFFF;background:rgba(255,255,255,.07)}
+.tab:active{transform:scale(.93)}
+.tab.on{color:#FFFFFF;background:linear-gradient(180deg,rgba(239,97,80,.82),rgba(193,64,49,.66));box-shadow:inset 0 1px 0 rgba(255,255,255,.5),inset 0 -2px 5px rgba(0,0,0,.25),0 4px 16px rgba(193,64,49,.5)}
+.glass-field{background-color:rgba(30,30,32,.62);-webkit-backdrop-filter:blur(18px) saturate(170%);backdrop-filter:blur(18px) saturate(170%);border:1px solid rgba(212,81,63,.85);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 0 0 3px rgba(193,64,49,.18),0 10px 28px rgba(0,0,0,.45)}
+@media (prefers-reduced-motion: reduce){.blink,.busy,.skel,.pulse,.fade,.sheet{animation:none}}
+</style><style>html,body{margin:0;background:#19191B} #root{width:390px} *,*::before,*::after{animation:none !important;transition:none !important}</style></head><body>
+<div id="root">
+
+
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; display: flex; flex-direction: column; color: #ECECEA; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 15.5px; line-height: 1.55; background-color: #19191B; background-image: linear-gradient(rgba(255,255,255,0.028) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.028) 1px, transparent 1px); background-size: 24px 24px;">
+  <div style="height: 5px; flex: 0 0 5px; background: linear-gradient(90deg, #4B4B4D 0 62%, #C14031 62% 100%);"></div>
+
+  
+  <header style="flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px 10px 16px; border-bottom: 1px solid rgba(151,150,136,0.28);">
+    <a href="MHome.dc.html" aria-label="Allied Testing — KB Helper home" style="display: flex; line-height: 0; box-shadow: 3px 3px 0 rgba(0,0,0,0.45);"><img src="img/logo.png" alt="Allied Testing" style="height: 34px; width: auto; display: block;"></a>
+    <div style="display: flex; align-items: center; gap: 6px;">
+      <span role="status" style="display: flex; align-items: center; gap: 7px; padding: 6px 9px; background: #242426; border: 1px solid rgba(151,150,136,0.28); font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase;">
+        <span class="pulse" style="width: 7px; height: 7px; background: #5FD38A; display: block;"></span>
+        
+        online
+      </span>
+      <button type="button" aria-label="New chat" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: #C14031; border: none; color: #FFFFFF; box-shadow: 3px 3px 0 rgba(0,0,0,0.45); cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+    </div>
+  </header>
+
+  
+  <main style="flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; padding: 18px 16px 176px;">
+
+    
+    
+      <div class="fade" style="flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 14px;">
+        <div aria-hidden="true" style="width: 74px; height: 40px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; padding-right: 6px; box-sizing: border-box; background: linear-gradient(90deg, #4B4B4D 0 45%, #C14031 45% 100%); box-shadow: 4px 4px 0 rgba(0,0,0,0.4); font-family: 'IBM Plex Mono', monospace; font-size: 9px; line-height: 1.3; color: rgba(255,255,255,0.8);"><span>1011</span><span>0110</span></div>
+        <h1 style="margin: 4px 0 0; font-family: 'Silkscreen', monospace; font-weight: 400; font-size: 28px; line-height: 1.05; text-transform: uppercase; color: #FFFFFF;">What do you<br>want to know?</h1>
+        <p style="margin: 0; color: #C9C8C0;">Ask about Allied Testing's services, products or expertise. Every answer links to its source.</p>
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
+          
+            <button type="button" style="min-height: 52px; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 14px; background: #222224; border: 1px solid rgba(151,150,136,0.3); color: #ECECEA; font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; text-align: left; cursor: pointer;">What services do you offer?<span aria-hidden="true" style="font-family: 'IBM Plex Mono', monospace; color: #EF6150;">→</span></button>
+          
+            <button type="button" style="min-height: 52px; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 14px; background: #222224; border: 1px solid rgba(151,150,136,0.3); color: #ECECEA; font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; text-align: left; cursor: pointer;">How do you handle security testing?<span aria-hidden="true" style="font-family: 'IBM Plex Mono', monospace; color: #EF6150;">→</span></button>
+          
+            <button type="button" style="min-height: 52px; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 14px; background: #222224; border: 1px solid rgba(151,150,136,0.3); color: #ECECEA; font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; text-align: left; cursor: pointer;">Tell me about your QA consulting<span aria-hidden="true" style="font-family: 'IBM Plex Mono', monospace; color: #EF6150;">→</span></button>
+          
+            <button type="button" style="min-height: 52px; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 14px; background: #222224; border: 1px solid rgba(151,150,136,0.3); color: #ECECEA; font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; text-align: left; cursor: pointer;">Какие AI-решения есть у компании?<span aria-hidden="true" style="font-family: 'IBM Plex Mono', monospace; color: #EF6150;">→</span></button>
+          
+        </div>
+      </div>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+  </main>
+
+  
+  
+
+  
+  <form class="glass-field" style="position: absolute; left: 12px; right: 12px; bottom: 92px; z-index: 6; display: flex; align-items: center; gap: 8px; padding: 5px 5px 5px 14px;">
+    <label for="m-ask" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">Your question</label>
+    <input id="m-ask" type="text" placeholder="Ask in English or Russian…" style="flex: 1; min-width: 0; height: 44px; background: transparent; border: none; outline: none; color: #FFFFFF; font-family: 'IBM Plex Sans', sans-serif; font-size: 16px;">
+    
+    
+      <button type="button" aria-label="Ask" style="width: 52px; height: 46px; display: flex; align-items: center; justify-content: center; background: #C14031; color: #FFFFFF; border: none; box-shadow: 3px 3px 0 rgba(0,0,0,0.45); cursor: pointer;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"></path></svg></button>
+    
+  </form>
+
+  
+  <nav aria-label="Main" class="glass" style="position: absolute; left: 14px; right: 14px; bottom: 14px; z-index: 7; height: 66px; padding: 6px; box-sizing: border-box; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; border-radius: 33px;">
+    <a href="Mobile.dc.html" aria-current="page" class="tab on"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M4 5h16v11H9l-5 4V5z"></path></svg>Ask</a>
+    <a href="MMap.dc.html" class="tab"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><circle cx="6" cy="7" r="1.5"></circle><circle cx="16" cy="5" r="1.5"></circle><circle cx="9" cy="16" r="1.5"></circle><circle cx="18" cy="15" r="1.5"></circle><path d="M12 11l2 2-2 2-2-2z"></path></svg>Map</a>
+    <a href="MDocs.dc.html" class="tab"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"></path><path d="M9 12h7M9 16h7"></path></svg>Docs</a>
+  </nav>
+</div>
+</div>
+</body></html>
