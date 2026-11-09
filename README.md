@@ -58,22 +58,19 @@ and shows its whole pipeline (retrieve → augment → generate) as a live test 
 
 ```mermaid
 flowchart TB
-    subgraph Ingest["📥 Ingest"]
+    subgraph Ingest["📥 1 · Ingest"]
         direction LR
-        D[📄 PDF · DOCX · MD · TXT] --> C[chunking.py<br>split by headings]
-        C --> E1[nomic-embed-text<br>768-d vectors]
-        E1 --> DB[(Postgres + pgvector<br>HNSW index)]
+        D[📄 PDF · DOCX<br>MD · TXT] --> C[chunking.py<br>split by headings] --> E1[nomic-embed-text<br>768-d vectors] --> DB[(Postgres + pgvector<br>HNSW index)]
     end
-    subgraph Ask["💬 Ask"]
+    subgraph Retrieve["🔎 2 · Retrieve"]
         direction LR
-        Q[❓ Question<br>EN / RU + history] --> RW[qwen3 rewrite<br>→ English search query]
-        RW --> E2[embed query]
-        E2 --> R[cosine top-k<br>retrieve]
-        DB --> R
-        R --> A[augment prompt<br>numbered sources + tone]
-        A --> G[qwen3 generate<br>think + stream]
-        G --> UI[🖥️ Web UI<br>SSE: sources → think → tokens → done]
+        Q[❓ Question<br>EN / RU + history] --> RW[qwen3 rewrite<br>→ English query] --> E2[embed query] --> R[cosine top-k<br>from pgvector]
     end
+    subgraph Generate["💬 3 · Augment & generate"]
+        direction LR
+        A[prompt with numbered<br>sources + tone] --> G[qwen3<br>think + stream] --> UI[🖥️ Web UI · SSE<br>sources → think → tokens]
+    end
+    Ingest --> Retrieve --> Generate
 ```
 
 The answer is streamed over **Server-Sent Events** in typed events (`rewrite → sources → think* → token* → done`), so the UI can light up each pipeline step the moment it finishes. Every question is logged to `kb_queries` together with its timings and 👍/👎 feedback.
