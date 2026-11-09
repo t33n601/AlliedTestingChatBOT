@@ -57,13 +57,15 @@ and shows its whole pipeline (retrieve → augment → generate) as a live test 
 ## 🏗️ How it works
 
 ```mermaid
-flowchart LR
-    subgraph Ingest
+flowchart TB
+    subgraph Ingest["📥 Ingest"]
+        direction LR
         D[📄 PDF · DOCX · MD · TXT] --> C[chunking.py<br>split by headings]
         C --> E1[nomic-embed-text<br>768-d vectors]
         E1 --> DB[(Postgres + pgvector<br>HNSW index)]
     end
-    subgraph Ask
+    subgraph Ask["💬 Ask"]
+        direction LR
         Q[❓ Question<br>EN / RU + history] --> RW[qwen3 rewrite<br>→ English search query]
         RW --> E2[embed query]
         E2 --> R[cosine top-k<br>retrieve]
