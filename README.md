@@ -1,106 +1,177 @@
-# KB Helper — локальный RAG-бот
+<div align="center">
 
-Проект по курсу **AT AI Assistant** (31 шаг): Postgres + pgvector, эмбеддинги Ollama, API на FastAPI, чат на Gradio, тесты pytest и E2E-тест Selenium на Selenoid.
-Все имена отличаются от курсовых, чтобы не конфликтовать со старым проектом (`~/Documents/AIproject`).
+<img src="ui/favicon-source.png" width="96" alt="KB Helper logo">
 
-## Что как называется
+# KB Helper
 
-| В презентации | В этом проекте |
+**A fully local RAG assistant for the Allied Testing knowledge base.**<br>
+It answers only from the company's own documents, cites the exact passage behind every claim<br>
+and shows its whole pipeline (retrieve → augment → generate) as a live test run.
+
+[![Python](https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![PostgreSQL](https://img.shields.io/badge/Postgres-pgvector%20%C2%B7%20HNSW-4169E1?logo=postgresql&logoColor=white)](https://github.com/pgvector/pgvector)
+[![Ollama](https://img.shields.io/badge/Ollama-qwen3%20%C2%B7%20nomic--embed-000000?logo=ollama&logoColor=white)](https://ollama.com/)
+[![Tests](https://img.shields.io/badge/tests-pytest%20%2B%20Selenium-C14031?logo=pytest&logoColor=white)](#-testing)
+[![License](https://img.shields.io/badge/license-proprietary-4B4B4D)](LICENSE)
+
+<img src="docs/img/demo.gif" width="100%" alt="A question in Russian is rewritten into an English search query, the pipeline runs, the model reasons, and the answer streams in with clickable citations">
+
+<sub>A question in Russian → rewritten into an English search query → 5 chunks retrieved → the model's reasoning streams live → the answer arrives with clickable citations.</sub>
+
+</div>
+
+---
+
+## ✨ Highlights
+
+| | |
 |---|---|
-| контейнер `at_postgres`, порт 5433 | `kb_vectordb`, порт **5435** |
-| БД `at_data_db`, юзер `vlada` / `abc` | `knowledge_db`, `kbuser` / `kbpass` |
-| таблица `at_data` (page, title, context, *_vector) | `kb_chunks` (source, heading, body, *_vec) |
-| `files/` | `knowledge/` |
-| `embedding.py` · `calcEmbed()` · `updateVector()` | `vectorize.py` · `make_vector()` · `fill_vectors()` |
-| `localdb.py` · `insertInfo()` · `loadFiles()` | `loader.py` · `save_chunk()` · `import_folder()` |
-| `atassistantapi.py` · `PageInfo` · `getDbCon()`, порт 8080 | `ragserver.py` · `ChunkInfo` · `get_conn()`, порт **8091** |
-| эндпоинты `/at_data/...` | `/kb/...` |
-| `gradio_app.py` · `ask_bot()`, порт 7860 | `chat_ui.py` · `reply()`, порт **7871** |
-| `attest.py` | `test_ragserver.py` |
-| `tests/seleniumtest.py::test_open_gradio_app` | `tests/test_ui_selenium.py::test_open_chat_ui` |
-| Selenoid :4444 / дашборд :8082 | `kb_selenoid` :4445 / `kb_selenoid_ui` :8083 |
-| `venv/`, `postgres/` | `.venv/`, `pgdata/` |
+| 🔒 **100% local** | Embeddings, search and generation all run on your own machine. No data leaves it, no API keys needed. |
+| 📎 **Every answer is sourced** | The model cites `[1]`, `[2]`… Citations are clickable chips, and each source shows its similarity score. Chunks retrieved but not used are listed separately. |
+| 🧪 **Pipeline as a test run** | Every question is a numbered *run* with Retrieve / Augment / Generate steps, timings, tokens, tok/s and a pass status. |
+| 🧠 **Visible reasoning** | qwen3's thinking streams live and folds away once the answer starts. |
+| 🌍 **Ask in English or Russian** | The question and chat history are rewritten into an English search query, so follow-ups like *"how much does it cost?"* work. The answer comes back in the user's language. |
+| 🗺️ **Knowledge map** | All 149 chunks projected from 768 dimensions to 2D (t-SNE written in NumPy). Your question lands on the map with rays to the chunks it retrieved. |
+| 📂 **Live knowledge base** | Drop a PDF, DOCX, Markdown or TXT file: it is parsed, chunked, embedded and searchable seconds later. Inspect, re-embed or remove any document. |
+| 🚫 **Says "not in KB"** | If nothing relevant is found, the assistant says so instead of inventing an answer. |
+| 🎛️ **Tunable** | Tone (formal / friendly / brief / simple), top-k (1–10), reasoning on/off and any model installed in Ollama, all from the UI. |
+| 📱 **Responsive** | Three-column workspace on desktop, bottom tabs and a sources sheet on mobile, light and dark themes. |
 
-## Первый запуск (один раз)
+## 📸 Screenshots
+
+<table>
+  <tr>
+    <td colspan="2"><img src="docs/img/answer.jpg" alt="Answer with citations, pipeline and sources panel"><br><sub><b>Assistant</b>: streamed answer with citations, pipeline timings and the Evidence panel with a mini-map</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/img/map.jpg" alt="Knowledge map"><br><sub><b>Knowledge map</b>: 149 chunks by meaning, nearest chunks for a question</sub></td>
+    <td width="50%"><img src="docs/img/documents.jpg" alt="Documents"><br><sub><b>Documents</b>: upload, filter, sort, inspect, re-embed</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/img/home.jpg" alt="Start screen"><br><sub><b>Start screen</b> with example questions</sub></td>
+    <td width="50%" align="center"><img src="docs/img/mobile-home.jpg" width="45%" alt="Mobile start"> <img src="docs/img/mobile.jpg" width="45%" alt="Mobile answer"><br><sub><b>Mobile</b></sub></td>
+  </tr>
+</table>
+
+## 🏗️ How it works
+
+```mermaid
+flowchart LR
+    subgraph Ingest
+        D[📄 PDF · DOCX · MD · TXT] --> C[chunking.py<br>split by headings]
+        C --> E1[nomic-embed-text<br>768-d vectors]
+        E1 --> DB[(Postgres + pgvector<br>HNSW index)]
+    end
+    subgraph Ask
+        Q[❓ Question<br>EN / RU + history] --> RW[qwen3 rewrite<br>→ English search query]
+        RW --> E2[embed query]
+        E2 --> R[cosine top-k<br>retrieve]
+        DB --> R
+        R --> A[augment prompt<br>numbered sources + tone]
+        A --> G[qwen3 generate<br>think + stream]
+        G --> UI[🖥️ Web UI<br>SSE: sources → think → tokens → done]
+    end
+```
+
+The answer is streamed over **Server-Sent Events** in typed events (`rewrite → sources → think* → token* → done`), so the UI can light up each pipeline step the moment it finishes. Every question is logged to `kb_queries` together with its timings and 👍/👎 feedback.
+
+## 🧰 Tech stack
+
+| Layer | Tech |
+|---|---|
+| LLM & embeddings | [Ollama](https://ollama.com/): `qwen3:1.7b` (chat, reasoning), `nomic-embed-text` (768-d) |
+| Vector store | PostgreSQL + [pgvector](https://github.com/pgvector/pgvector), HNSW index on `body_vec` |
+| API | FastAPI + Uvicorn, SSE streaming, admin-token guard on every write endpoint |
+| Frontend | Vanilla JS + CSS (no framework, no build step), `marked` + `DOMPurify` for safe Markdown |
+| Visualization | t-SNE implemented in NumPy, rendered as interactive SVG (zoom, pan, isolate) |
+| Ingestion | `pypdf`, `python-docx`, heading-aware chunker |
+| Testing | pytest API integration tests, Selenium E2E on Selenoid, GitHub Actions on a self-hosted runner |
+| Infra | Docker Compose (Postgres, pgAdmin, Selenoid, Actions runner) |
+
+## 🚀 Run it locally
+
+**Requirements:** Python 3.11+, Docker, [Ollama](https://ollama.com/download).
 
 ```bash
-cd ~/Documents/secondAIproject
+# 1. models
+ollama pull nomic-embed-text
+ollama pull qwen3:1.7b
+
+# 2. python env
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-docker compose up -d kb_vectordb      # схема (pgvector + таблица) создаётся сама из schema.sql
-python loader.py                      # 149 чанков в таблицу (НЕ запускать второй раз — будут дубли)
-python vectorize.py                   # эмбеддинги для всех строк
+# 3. database (pgvector schema is created from schema.sql)
+docker compose up -d kb_vectordb
 
-docker exec kb_vectordb psql -U kbuser -d knowledge_db \
-  -c "SELECT count(*), count(body_vec) FROM kb_chunks;"   # 149 | 149
+# 4. load and embed the knowledge base (run once)
+python loader.py        # 26 documents → 149 chunks
+python vectorize.py     # embeddings for every chunk
+
+# 5. start
+uvicorn ragserver:app --port 8091
 ```
 
-## Каждый день — порядок важен
+Then open the app at `localhost:8091` and the interactive API docs (Swagger) at `localhost:8091/docs`.
+
+<details>
+<summary><b>Configuration (environment variables)</b></summary>
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `KB_DB_DSN` | local `knowledge_db` on port 5435 | Postgres connection string |
+| `OLLAMA_HOST` | `http://localhost:11434` | Ollama server |
+| `KB_CHAT_MODEL` | `qwen3:1.7b` | default chat model |
+| `KB_EMBED_MODEL` | `nomic-embed-text` | embedding model |
+| `KB_MIN_SCORE` | `0.55` | below this best-match score the assistant answers "not in the knowledge base" |
+| `KB_ADMIN_TOKEN` | *(empty)* | when set, every POST/PUT/DELETE that changes data requires the `X-Admin-Token` header |
+
+</details>
+
+<details>
+<summary><b>API overview</b></summary>
+
+| Method | Endpoint | What it does |
+|---|---|---|
+| `POST` | `/kb/chat/stream` | streamed RAG answer (SSE) |
+| `POST` | `/kb/answer` | non-streamed answer with sources |
+| `GET` | `/kb/search` · `/kb/retrieve` | semantic search / retrieval with map coordinates |
+| `GET` | `/kb/map` | 2D projection of every chunk |
+| `GET` | `/kb/stats` · `/kb/models` | KB stats, installed Ollama models |
+| `POST` | `/kb/feedback/{id}` | 👍 / 👎 for an answer |
+| `GET` · `DELETE` | `/kb/documents[/{source}]` | list, inspect, remove documents |
+| `POST` | `/kb/upload` · `/kb/documents/{source}/reembed` | add a file / re-embed a document |
+| `GET` · `POST` · `PUT` · `DELETE` | `/kb/`, `/kb/{id}` | chunk CRUD |
+
+</details>
+
+## 🧪 Testing
 
 ```bash
-docker start kb_vectordb                         # 1 — база
-# 2 — Ollama уже работает в фоне (nomic-embed-text, qwen3:1.7b)
-uvicorn ragserver:app --port 8091 --reload       # 3 — терминал A → http://localhost:8091/docs
-python chat_ui.py                                # 4 — терминал B → http://localhost:7871
+pytest test_ragserver.py -v          # 20 API integration tests: CRUD, search, streaming, map, upload, re-embed, settings
+
+./selenoid/start-selenoid.sh         # browsers in Docker
+pytest tests/test_ui_selenium.py -v  # E2E: opens the UI in a real browser and asks a question
 ```
 
-## Новый интерфейс (v2) — http://localhost:8091
+The E2E suite also runs in **GitHub Actions** on a self-hosted runner (`.github/workflows/ui-e2e.yml`, runner in `runner/docker-compose.yaml`).
 
-Тот же `uvicorn ragserver:app --port 8091` теперь отдаёт и сайт (`web/`), Gradio больше не обязателен.
+## 📁 Project structure
 
-- **Ответ печатается по словам** — `POST /kb/chat/stream` (Server-Sent Events: `rewrite → sources → think* → token* → done`).
-- **Ссылки на источники** — модель ставит `[1]`, `[2]`, в чате это кликабельные чипы; под ответом список чанков с % похожести.
-- **Reasoning** — размышления qwen3 (`think: true` в Ollama API) видны вживую и сворачиваются, когда начинается ответ.
-- **Русский язык** — вопрос и история переписываются в английский поисковый запрос (`rewrite_query`), ответ на языке вопроса. Заодно работают уточняющие вопросы («а сколько это стоит?»).
-- **Карта знаний** — все чанки на 2D-карте (t-SNE на numpy, `GET /kb/map`), вопрос появляется на карте с лучами к найденным чанкам (`GET /kb/retrieve`).
-- **Документы** — загрузка PDF/DOCX/MD/TXT (`POST /kb/upload`, разбиение в `chunking.py`), просмотр и удаление (`/kb/documents`).
-- **Пайплайн** Retrieve → Augment → Generate подсвечивается по шагам с замером времени; 👍/👎 к ответам (`POST /kb/feedback/{id}`); каждый вопрос пишется в таблицу `kb_queries`.
-- **Настройки (кнопка Tune)** — упражнения из курса прямо в интерфейсе: тон ответа (formal / friendly / brief / simple), сколько чанков искать (1–10), выбор модели из установленных в Ollama (`GET /kb/models`).
-- **Редизайн v2** (макеты: `design/screens/redesign/`): рабочее место из трёх колонок (Runs + Tune · чат с пайплайном как тест-прогон · Evidence с мини-картой), карта с зумом/панорамой и подписями кластеров, документы таблицей с фильтром/сортировкой и инспектором (`POST /kb/documents/{source}/reembed`), мобильная версия с нижними вкладками и шторкой источников.
-- **HNSW-индекс** на `body_vec` создаётся при старте.
-- **Защита записи** — если задан `KB_ADMIN_TOKEN`, все POST/PUT/DELETE требуют заголовок `X-Admin-Token` (локально переменная не задана — всё открыто, тесты работают).
-
-Настройки через env: `KB_DB_DSN`, `OLLAMA_HOST`, `KB_CHAT_MODEL`, `KB_EMBED_MODEL`, `KB_ADMIN_TOKEN`.
-
-## Тесты
-
-```bash
-pytest test_ragserver.py -v                      # 19 интеграционных тестов API (вкл. стрим, карту, загрузку, re-embed, настройки)
-
-./selenoid/start-selenoid.sh                     # браузеры в Docker, дашборд http://localhost:8083
-pytest tests/test_ui_selenium.py -v              # E2E: открывает чат и задаёт вопрос
+```
+ragserver.py         FastAPI app: RAG pipeline, SSE streaming, map, documents API
+loader.py            imports knowledge/*.md into Postgres
+chunking.py          parses PDF / DOCX / MD / TXT and splits by headings
+vectorize.py         fills embeddings for every chunk
+schema.sql           pgvector extension + kb_chunks table
+web/                 the web app (index.html, app.js, style.css)
+knowledge/           26 source documents
+chat_ui.py, ui/      the first Gradio version of the chat
+tests/, test_*.py    pytest + Selenium
+design/              design mockups and exports
 ```
 
-GitHub Actions на self-hosted runner: `runner/docker-compose.yaml` (нужны `KB_REPO_URL` и `KB_RUNNER_TOKEN`), workflow — `.github/workflows/ui-e2e.yml`.
+## 📄 License
 
-pgAdmin по желанию: `docker compose --profile gui up -d` → http://localhost:5051 (`admin@kb.local` / `kbadmin`), сервер `kb_vectordb`, порт 5432.
-
-## Дизайн чата
-
-Стиль взят из логотипа Allied Testing: графит `#4B4B4D`, красный `#C14031`, серо-стальные шестерёнки `#979688`. Прямые углы, пиксельный шрифт Silkscreen для заголовков, IBM Plex Sans/Mono для текста (Google Fonts).
-
-- `ui/logo.png`: логотип (вставляется в страницу как data URI)
-- `ui/style.css`: вся тема (цвета заданы переменными `--kb-*` в начале файла)
-- `ui/bot.svg`: аватар бота (графит + красный блок с битами)
-- `chat_ui.py`: разметка (hero, карточка чата, примеры вопросов). Красная панель в плоском стиле логотипа рисуется в SVG (`motif_svg()`): жирные белые биты, сцепленные шестерёнки с тёмным торцом и белой обводкой (`gear_train()` сам считает расстановку и фазы) и молоток с объёмным бойком, который постукивает по шестерёнке, выбивая пиксельные искры. Анимации в `ui/style.css`, при «уменьшить движение» в системе они выключаются. Цифры в hero и статус «online» берутся из `GET /kb/stats` при каждой загрузке страницы.
-
-## Отличия от кода на слайдах (исправлены баги)
-
-- `/kb/search` и `/kb/answer` объявлены **до** `/kb/{chunk_id}`, иначе FastAPI пытается прочитать «search» как id и отдаёт 422.
-- `conn`/`cur` инициализируются как `None`, чтобы `finally` не падал, если подключение к БД не удалось.
-- В GET-by-id/PUT/DELETE 404 больше не превращается в 500.
-- Векторные поля в `ChunkInfo` необязательные (API всё равно считает их сам).
-- `pydantic==2.13.4` со слайда несовместим с `gradio==5.30.0` → в requirements `pydantic>=2.0`.
-- Selenoid с новым Docker требует `DOCKER_API_VERSION=1.44` (уже в скрипте).
-
-## Траблшутинг
-
-- **address already in use** — порт занят: остановите старый сервер или смените порт.
-- **No such container** — сначала `docker compose up -d kb_vectordb`, потом `docker start kb_vectordb`.
-- **Error connecting to API** в чате — не запущен `ragserver` (шаг 3).
-- **No similar context found** — таблица пустая или нет векторов: `python vectorize.py`.
-
-## Лицензия
-
-© 2026 t33n601. Все права защищены. Использование, копирование и изменение без письменного разрешения автора запрещены — см. [LICENSE](LICENSE).
+© 2026 t33n601. **All rights reserved.** The code is published for viewing and evaluation only. Using, copying, modifying or distributing it, in whole or in part, requires the author's written permission. See [LICENSE](LICENSE).
