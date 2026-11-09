@@ -86,9 +86,17 @@
     if (!r.ok) throw new Error((data && data.detail) || `${r.status} ${r.statusText}`);
     return data;
   }
-  function toast(text, ms = 3200) {
+  function toast(text, ms = 3200, action = null) {
     const t = $("#toast");
     t.textContent = text;
+    if (action) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "toast-act";
+      b.textContent = action.label;
+      b.addEventListener("click", () => { clearTimeout(toast.timer); t.hidden = true; action.run(); });
+      t.appendChild(b);
+    }
     t.hidden = false;
     clearTimeout(toast.timer);
     toast.timer = setTimeout(() => { t.hidden = true; }, ms);
@@ -303,26 +311,286 @@
     if (d.toDateString() === now.toDateString()) return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     return d.toLocaleDateString([], { day: "numeric", month: "short" });
   }
+  function persistChats(dropOldest = () => false) {
+    for (;;) {                                       // drop the oldest unpinned chats if storage is full
+      try { localStorage.setItem("kb.chats", JSON.stringify(chats)); return; }
+      catch { if (!dropOldest()) return; }
+    }
+  }
+  const PIN_SVG = '<svg class="pin-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4h6l-1 6 4 4H6l4-4zM12 14v7"/></svg>';
+  function runRow(c) {
+    const n = (c.history || []).filter((m) => m.role === "user").length;
+    return `<div class="run${c.id === currentId ? " on" : ""}${c.pinned ? " pinned" : ""}" data-id="${esc(c.id)}" role="listitem">
+      <button type="button" class="run-main" title="${esc(c.title)}">
+        <small>${chatWhen(c.updated)} · ${n} question${n === 1 ? "" : "s"}</small><span>${esc(c.title)}</span>
+      </button>
+      <button type="button" class="run-more" aria-label="Chat options" aria-haspopup="menu" title="Options">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+      </button></div>`;
+  }
   function renderRuns() {
     const box = $("#runs");
-    const live = chats.some((c) => c.id === currentId) ? chats
-      : history.length ? [{ id: currentId, title: (history.find((m) => m.role === "user") || {}).content || "New chat", updated: Date.now(), history }, ...chats] : chats;
+    const live = chats.some((c) => c.id === currentId) || !history.length ? chats.slice() : (() => {
+      const draft = { id: currentId, title: (history.find((m) => m.role === "user") || {}).content || "New chat", updated: Date.now(), history };
+      const at = chats.filter((c) => c.pinned).length;
+      return [...chats.slice(0, at), draft, ...chats.slice(at)];
+    })();
     if (!live.length) { box.innerHTML = '<p class="runs-empty">No chats yet. Ask a question to start one.</p>'; return; }
     const q = ($("#run-search").value || "").trim().toLowerCase();
-    const shown = q ? live.filter((c) => (c.history || []).some((m) => m.role === "user" && m.content.toLowerCase().includes(q))) : live;
+    box.classList.toggle("searching", !!q);
+    const shown = q ? live.filter((c) => (c.title || "").toLowerCase().includes(q) || (c.history || []).some((m) => m.role === "user" && m.content.toLowerCase().includes(q))) : live;
     if (!shown.length) { box.innerHTML = `<p class="runs-empty">No chats match “${esc(q)}”.</p>`; return; }
-    box.innerHTML = shown.map((c) => {
-      const n = (c.history || []).filter((m) => m.role === "user").length;
-      return `<button type="button" class="run${c.id === currentId ? " on" : ""}" data-id="${esc(c.id)}">
-        <small>${chatWhen(c.updated)} · ${n} question${n === 1 ? "" : "s"}</small><span>${esc(c.title)}</span></button>`;
-    }).join("");
+    const pinned = shown.filter((c) => c.pinned), rest = shown.filter((c) => !c.pinned);
+    box.innerHTML = pinned.length
+      ? `<p class="runs-group" data-group="pinned">${PIN_SVG}Pinned</p>${pinned.map(runRow).join("")}
+         <p class="runs-group" data-group="recent">Recent</p>${rest.length ? rest.map(runRow).join("") : '<p class="runs-empty runs-drop">Drag a chat here to unpin it</p>'}`
+      : rest.map(runRow).join("");
   }
   $("#run-search").addEventListener("input", () => renderRuns());
   $("#runs").addEventListener("click", (e) => {
-    const b = e.target.closest(".run");
-    if (!b || b.dataset.id === currentId) return;
-    openChat(b.dataset.id);
+    if (RunDrag.justDropped) return;
+    const more = e.target.closest(".run-more");
+    if (more) { RunMenu.toggle(more.closest(".run").dataset.id, more); return; }
+    const b = e.target.closest(".run-main");
+    if (!b || b.closest(".run").classList.contains("editing")) return;
+    const id = b.closest(".run").dataset.id;
+    if (id !== currentId) openChat(id);
   });
+
+  /* chat actions: the ⋯ menu (pin, rename, delete) */
+  function startNewChat() {
+    if (busy) busy.abort();
+    currentId = newId();
+    history = [];
+    store.set("kb.current", currentId);
+    Pipe.reset();
+    renderHistory();
+    renderRuns();
+  }
+  const RunMenu = {
+    el: null, id: null, anchor: null,
+    build() {
+      const m = document.createElement("div");
+      m.className = "model-menu run-menu";
+      m.setAttribute("role", "menu");
+      m.hidden = true;
+      document.body.appendChild(m);
+      m.addEventListener("click", (e) => {
+        const b = e.target.closest(".mm-item");
+        if (!b) return;
+        const id = this.id;
+        this.close();
+        ({ pin: togglePin, rename: renameChat, delete: deleteChat })[b.dataset.act](id);
+      });
+      m.addEventListener("keydown", (e) => {
+        const items = $$(".mm-item", m), i = items.indexOf(document.activeElement);
+        if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+          e.preventDefault();
+          items[(i + (e.key === "ArrowDown" ? 1 : items.length - 1)) % items.length].focus();
+        } else if (e.key === "Escape") { const a = this.anchor; this.close(); a && a.focus(); }
+        else if (e.key === "Tab") this.close();
+      });
+      return (this.el = m);
+    },
+    toggle(id, anchor) {
+      if (this.id === id && !this.el.hidden) { this.close(); return; }
+      this.open(id, anchor);
+    },
+    open(id, anchor) {
+      const m = this.el || this.build();
+      const chat = chats.find((c) => c.id === id);
+      if (!chat) { toast("Ask a question first to keep this chat"); return; }
+      this.id = id; this.anchor = anchor;
+      m.innerHTML = `
+        <button type="button" role="menuitem" class="mm-item" data-act="pin"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4h6l-1 6 4 4H6l4-4zM12 14v7"/></svg>${chat.pinned ? "Unpin" : "Pin"}</button>
+        <button type="button" role="menuitem" class="mm-item" data-act="rename"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"/></svg>Rename</button>
+        <button type="button" role="menuitem" class="mm-item danger" data-act="delete"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>Delete</button>`;
+      m.hidden = false;
+      $$(".run-more.open").forEach((b) => b.classList.remove("open"));
+      anchor.classList.add("open");
+      anchor.setAttribute("aria-expanded", "true");
+      const r = anchor.getBoundingClientRect(), w = m.offsetWidth, h = m.offsetHeight;
+      const top = r.bottom + 6 + h > innerHeight - 8 ? r.top - h - 6 : r.bottom + 6;
+      m.style.left = `${Math.max(8, Math.min(r.right - w, innerWidth - w - 8))}px`;
+      m.style.top = `${Math.max(8, top)}px`;
+      $(".mm-item", m).focus({ preventScroll: true });
+    },
+    close() {
+      if (!this.el || this.el.hidden) return;
+      this.el.hidden = true;
+      $$(".run-more.open").forEach((b) => { b.classList.remove("open"); b.setAttribute("aria-expanded", "false"); });
+      this.id = null; this.anchor = null;
+    },
+  };
+  document.addEventListener("pointerdown", (e) => {
+    if (RunMenu.el && !RunMenu.el.hidden && !e.target.closest(".run-menu, .run-more")) RunMenu.close();
+  });
+  window.addEventListener("resize", () => RunMenu.close());
+  $(".rail").addEventListener("scroll", () => RunMenu.close(), true);
+
+  function togglePin(id) {
+    const chat = chats.find((c) => c.id === id);
+    if (!chat) return;
+    chats = chats.filter((c) => c !== chat);
+    chat.pinned = !chat.pinned;
+    const pinnedCount = chats.filter((c) => c.pinned).length;
+    chats.splice(chat.pinned ? pinnedCount : pinnedCount, 0, chat);   // last pinned / first recent
+    persistChats();
+    renderRuns();
+    toast(chat.pinned ? "Chat pinned" : "Chat unpinned");
+  }
+  function renameChat(id) {
+    const row = $(`.run[data-id="${CSS.escape(id)}"]`, $("#runs"));
+    const chat = chats.find((c) => c.id === id);
+    if (!row || !chat) return;
+    row.classList.add("editing");
+    const span = $(".run-main span", row);
+    const field = document.createElement("input");
+    field.className = "run-rename";
+    field.value = chat.title;
+    field.maxLength = 120;
+    field.setAttribute("aria-label", "Chat name");
+    span.replaceWith(field);
+    field.focus();
+    field.select();
+    let done = false;
+    const finish = (keep) => {
+      if (done) return;
+      done = true;
+      const v = field.value.trim();
+      if (keep && v && v !== chat.title) { chat.title = v; chat.renamed = true; persistChats(); }
+      renderRuns();
+    };
+    field.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); finish(true); }
+      else if (e.key === "Escape") { e.preventDefault(); finish(false); }
+      e.stopPropagation();
+    });
+    field.addEventListener("click", (e) => e.stopPropagation());
+    field.addEventListener("blur", () => finish(true));
+  }
+  function deleteChat(id) {
+    const at = chats.findIndex((c) => c.id === id);
+    if (at < 0) return;
+    const chat = chats[at], wasCurrent = id === currentId;
+    chats.splice(at, 1);
+    persistChats();
+    if (wasCurrent) startNewChat(); else renderRuns();
+    toast("Chat deleted", 5000, {
+      label: "Undo",
+      run() {
+        if (chats.some((c) => c.id === chat.id)) return;
+        chats.splice(Math.min(at, chats.length), 0, chat);
+        persistChats();
+        if (wasCurrent && !history.length) openChat(chat.id);
+        renderRuns();
+      },
+    });
+  }
+
+  /* drag to reorder: pointer events, so it works with a mouse and on touch screens */
+  const RunDrag = {
+    justDropped: false,
+    init() {
+      const box = $("#runs");
+      box.addEventListener("pointerdown", (e) => {
+        if (e.button !== 0 || e.target.closest(".run-more, .run-rename")) return;
+        const row = e.target.closest(".run");
+        if (!row || box.classList.contains("searching") || !chats.some((c) => c.id === row.dataset.id)) return;
+        this.arm(e, row, box);
+      });
+    },
+    arm(e, row, box) {
+      const startY = e.clientY, startX = e.clientX, pid = e.pointerId;
+      let dragging = false, line = null, target = null, holdTimer = null;
+      const touch = e.pointerType === "touch";
+      const begin = () => {
+        dragging = true;
+        RunMenu.close();
+        row.setPointerCapture(pid);
+        row.classList.add("dragging");
+        box.classList.add("sorting");
+        line = document.createElement("div");
+        line.className = "run-drop-line";
+        box.appendChild(line);
+        if (navigator.vibrate && touch) navigator.vibrate(10);
+      };
+      if (touch) holdTimer = setTimeout(begin, 280);   // on touch: press and hold, so scrolling still works
+      const move = (ev) => {
+        if (ev.pointerId !== pid) return;
+        if (!dragging) {
+          const far = Math.abs(ev.clientY - startY) > 6 || Math.abs(ev.clientX - startX) > 6;
+          if (touch) { if (far) cleanup(); return; }
+          if (!far) return;
+          begin();
+        }
+        ev.preventDefault();
+        row.style.transform = `translateY(${ev.clientY - startY}px)`;
+        target = this.dropTarget(box, row, ev.clientY);
+        const boxR = box.getBoundingClientRect();
+        line.style.top = `${target.y - boxR.top + box.scrollTop - 1}px`;
+        const rail = box.closest(".rail") || box;
+        const rr = rail.getBoundingClientRect();
+        if (ev.clientY < rr.top + 40) rail.scrollTop -= 8;
+        else if (ev.clientY > rr.bottom - 40) rail.scrollTop += 8;
+      };
+      const up = (ev) => {
+        if (ev.pointerId !== pid) return;
+        const wasDragging = dragging;
+        cleanup();
+        if (!wasDragging || !target) return;
+        this.justDropped = true;
+        setTimeout(() => { this.justDropped = false; }, 0);
+        this.drop(row.dataset.id, target);
+      };
+      const cleanup = () => {
+        clearTimeout(holdTimer);
+        removeEventListener("pointermove", move);
+        removeEventListener("pointerup", up);
+        removeEventListener("pointercancel", up);
+        row.classList.remove("dragging");
+        row.style.transform = "";
+        box.classList.remove("sorting");
+        line && line.remove();
+      };
+      addEventListener("pointermove", move, { passive: false });
+      addEventListener("pointerup", up);
+      addEventListener("pointercancel", up);
+    },
+    // where the dragged row would land: before which chat, and in which group
+    dropTarget(box, row, y) {
+      const rows = $$(".run", box).filter((r) => r !== row);
+      const recentHead = $('.runs-group[data-group="recent"]', box);
+      const recentTop = recentHead ? recentHead.getBoundingClientRect().top : Infinity;
+      const pinnedRows = rows.filter((r) => r.classList.contains("pinned"));
+      const group = recentHead ? (y < recentTop ? "pinned" : "recent") : (row.classList.contains("pinned") ? "pinned" : "recent");
+      const inGroup = group === "pinned" ? pinnedRows : rows.filter((r) => !r.classList.contains("pinned"));
+      for (const r of inGroup) {
+        const b = r.getBoundingClientRect();
+        if (y < b.top + b.height / 2) return { before: r.dataset.id, group, y: b.top };
+      }
+      const last = inGroup[inGroup.length - 1];
+      let endY;
+      if (last) endY = last.getBoundingClientRect().bottom;
+      else if (group === "pinned") endY = recentTop - 4;
+      else { const h = recentHead || box; endY = h.getBoundingClientRect().bottom; }
+      return { before: null, group, y: endY };
+    },
+    drop(id, { before, group }) {
+      const chat = chats.find((c) => c.id === id);
+      if (!chat) return;
+      const pinChanged = chat.pinned !== (group === "pinned");
+      chats = chats.filter((c) => c !== chat);
+      chat.pinned = group === "pinned";
+      let at = before ? chats.findIndex((c) => c.id === before) : -1;
+      if (at < 0) at = group === "pinned" ? chats.filter((c) => c.pinned).length : chats.length;
+      chats.splice(at, 0, chat);
+      persistChats();
+      renderRuns();
+      if (pinChanged) toast(chat.pinned ? "Chat pinned" : "Chat unpinned");
+    },
+  };
+  RunDrag.init();
 
   /* ------------------------------------------------------------ evidence (right panel) */
   const Evidence = {
@@ -406,18 +674,25 @@
     if (!hist.length) {                           // an empty chat is not worth keeping
       if (chat) chats = chats.filter((c) => c !== chat);
     } else {
-      if (!chat) { chat = { id }; chats.push(chat); }
+      if (!chat) {                                   // a new chat goes to the top of "Recent", under the pinned ones
+        chat = { id };
+        chats.splice(chats.filter((c) => c.pinned).length, 0, chat);
+      }
       const first = hist.find((m) => m.role === "user");
-      chat.title = first ? first.content : "New chat";
+      if (!chat.renamed) chat.title = first ? first.content : "New chat";
       chat.updated = Date.now();
       chat.history = hist.slice(-40);
     }
-    chats.sort((a, b) => b.updated - a.updated);
-    chats = chats.slice(0, 30);
-    for (;;) {                                       // drop the oldest chats if storage is full
-      try { localStorage.setItem("kb.chats", JSON.stringify(chats)); break; }
-      catch { if (chats.length <= 1) break; chats.pop(); }
-    }
+    // the order is the user's: no re-sorting by activity. Over 30 chats, the oldest unpinned ones go.
+    const dropOldest = () => {
+      const loose = chats.filter((c) => !c.pinned && c.id !== currentId);
+      if (!loose.length) return false;
+      const oldest = loose.reduce((a, b) => (a.updated <= b.updated ? a : b));
+      chats = chats.filter((c) => c !== oldest);
+      return true;
+    };
+    while (chats.filter((c) => !c.pinned).length > 30 && dropOldest());
+    persistChats(dropOldest);
     store.set("kb.current", currentId);
     try { localStorage.removeItem("kb.history"); } catch { /* ignore */ }
     renderRuns();

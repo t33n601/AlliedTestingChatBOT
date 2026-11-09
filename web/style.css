@@ -1366,3 +1366,62 @@ code { border-radius: 4px; background: var(--hover); color: var(--strong); }
   .tone-list small, .tone-list .mm-check { display: none; }
   .model-menu { max-height: calc(100svh - 64px - 260px); overflow-y: auto; }
 }
+
+/* ---------- chat list: ⋯ menu, pin, rename, drag to reorder ---------- */
+.run { position: relative; flex-direction: row; align-items: stretch; gap: 0; padding: 0; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.run-main {
+  flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; padding: 10px 6px 10px 12px;
+  border: none; background: transparent; color: inherit; text-align: left; cursor: pointer; font: inherit;
+}
+.run-main:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; border-radius: var(--r-sm); }
+.run-main small { display: flex; align-items: center; gap: 5px; }
+.run .pin-ic { width: 12px; height: 12px; flex: none; fill: none; stroke: var(--red); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.run-more {
+  flex: none; align-self: center; width: 30px; height: 30px; margin-right: 6px; display: grid; place-items: center;
+  border: none; border-radius: var(--r-sm); background: transparent; color: var(--muted); cursor: pointer;
+  opacity: 0; transition: opacity .15s, background .15s, color .15s;
+}
+.run-more svg { width: 16px; height: 16px; fill: currentColor; }
+.run:hover .run-more, .run.on .run-more, .run-more:focus-visible, .run-more.open { opacity: 1; }
+.run-more:hover, .run-more.open { background: var(--wash); color: var(--strong); }
+.run-more:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
+@media (hover: none) { .run-more { opacity: 1; } }
+
+.runs-group {
+  display: flex; align-items: center; gap: 6px; margin: 10px 0 4px; padding: 0 12px;
+  font: 700 10.5px/1 var(--body); letter-spacing: .16em; text-transform: uppercase; color: var(--muted);
+}
+.runs-group:first-child { margin-top: 2px; }
+.runs-group .pin-ic { width: 11px; height: 11px; fill: none; stroke: var(--red); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.runs-drop { border: 1px dashed var(--line); border-radius: var(--r-sm); text-align: center; font-size: 12.5px; }
+
+.run-rename {
+  width: 100%; margin: 1px 0 0; padding: 3px 6px; font: inherit; font-size: 14.5px; color: var(--strong);
+  background: var(--bg); border: 1px solid var(--red); border-radius: var(--r-sm); outline: none;
+}
+.run.editing .run-more { display: none; }
+
+/* drag */
+.runs { position: relative; }
+.runs.sorting { cursor: grabbing; }
+.runs.sorting .run:not(.dragging) { transition: background .15s; }
+.run.dragging { z-index: 5; background: var(--panel-2); box-shadow: var(--shadow), 0 10px 24px rgba(0,0,0,.18); cursor: grabbing; opacity: .96; }
+.run.dragging .run-more { opacity: 0; }
+.run-drop-line { position: absolute; left: 6px; right: 6px; height: 2px; background: var(--red); border-radius: 2px; pointer-events: none; z-index: 6; box-shadow: 0 0 0 2px var(--panel); }
+.run-drop-line::before { content: ""; position: absolute; left: -3px; top: -3px; width: 8px; height: 8px; border-radius: 50%; background: var(--red); }
+
+/* the ⋯ menu reuses the model-menu look, positioned next to the button */
+.run-menu { position: fixed; bottom: auto; width: 180px; animation-name: rm-in; transform-origin: top right; }
+@keyframes rm-in { from { opacity: 0; transform: translateY(-4px) scale(.98); } to { opacity: 1; transform: none; } }
+.run-menu .mm-item { gap: 10px; padding: 9px 10px; font: 500 14px/1.2 var(--body); }
+.run-menu .mm-item svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; color: var(--muted); }
+.run-menu .mm-item.danger, .run-menu .mm-item.danger svg { color: var(--danger); }
+
+/* toast with an action (Undo) */
+.toast { display: flex; align-items: center; gap: 14px; }
+.toast[hidden] { display: none; }
+.toast-act {
+  border: none; background: transparent; padding: 2px 0; cursor: pointer;
+  font: 700 12px/1 var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--red-text);
+}
+.toast-act:hover { color: var(--strong); text-decoration: underline; }
