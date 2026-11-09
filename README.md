@@ -12,7 +12,7 @@ and shows its whole pipeline (retrieve → augment → generate) as a live test 
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![PostgreSQL](https://img.shields.io/badge/Postgres-pgvector%20%C2%B7%20HNSW-4169E1?logo=postgresql&logoColor=white)](https://github.com/pgvector/pgvector)
 [![Ollama](https://img.shields.io/badge/Ollama-qwen3%20%C2%B7%20nomic--embed-000000?logo=ollama&logoColor=white)](https://ollama.com/)
-[![Tests](https://img.shields.io/badge/tests-pytest%20%2B%20Selenium-C14031?logo=pytest&logoColor=white)](#-testing)
+[![Tests](https://img.shields.io/badge/tests-20%20API%20passing%20%C2%B7%20Selenium%20E2E-2EA44F?logo=pytest&logoColor=white)](#-testing)
 [![License](https://img.shields.io/badge/license-proprietary-4B4B4D)](LICENSE)
 
 <img src="docs/img/demo.gif" width="100%" alt="A question in Russian is rewritten into an English search query, the pipeline runs, the model reasons, and the answer streams in with clickable citations">
@@ -172,7 +172,7 @@ Then open the app at `localhost:8091` and the interactive API docs (Swagger) at 
 ## 🧪 Testing
 
 ```bash
-pytest test_ragserver.py -v          # 20 API integration tests: CRUD, search, streaming, map, upload, re-embed, settings
+pytest test_ragserver.py -v          # 20 API integration tests (all passing): CRUD, search, streaming, map, upload, re-embed, settings
 
 ./selenoid/start-selenoid.sh         # browsers in Docker
 pytest tests/test_ui_selenium.py -v  # E2E: opens the UI in a real browser and asks a question
