@@ -33,3 +33,4 @@ design/screens/redesign/HANDOFF.md
 *.pem
 .kb.pid
 api.out.log
+.kb-tunnel.pid

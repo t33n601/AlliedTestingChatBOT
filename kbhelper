@@ -6,10 +6,18 @@
 #   ./kbhelper status      what is running
 #   ./kbhelper logs        follow the server log
 #   ./kbhelper install     add the `kbhelper` command to your shell, usable from any folder
+#   ./kbhelper public      also publish it through a Cloudflare Tunnel (needs KB_TUNNEL, see .env.local)
+#   ./kbhelper private     stop the tunnel
+#
+# Local settings (not in git) go to .env.local, e.g.
+#   KB_ADMIN_TOKEN=...                     protects upload / delete / re-embed
+#   KB_TUNNEL=my-app                       cloudflared tunnel name
+#   KB_PUBLIC_URL=https://example.com      shown after `kbhelper public`
 set -euo pipefail
 
 DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 cd "$DIR"
+if [ -f .env.local ]; then set -a; . ./.env.local; set +a; fi
 
 PORT="${KB_PORT:-8091}"
 URL="http://localhost:$PORT"
@@ -17,6 +25,8 @@ OLLAMA="${OLLAMA_HOST:-http://localhost:11434}"
 CHAT_MODEL="${KB_CHAT_MODEL:-qwen3:1.7b}"
 EMBED_MODEL="${KB_EMBED_MODEL:-nomic-embed-text}"
 PID_FILE="$DIR/.kb.pid"
+TUNNEL_PID="$DIR/.kb-tunnel.pid"
+TUNNEL_LOG="$DIR/tunnel.log"
 LOG="$DIR/api.log"
 DB="kb_vectordb"
 
@@ -129,6 +139,7 @@ start() {
 }
 
 stop() {
+  tunnel_up && private
   step "Stopping server"
   local pid=""
   [ -f "$PID_FILE" ] && pid=$(cat "$PID_FILE")
@@ -141,6 +152,34 @@ stop() {
   fi
   rm -f "$PID_FILE"
   wait_for 10 bash -c "! curl -sf -m 1 $URL/kb/stats" || true
+  ok
+}
+
+tunnel_up() { [ -f "$TUNNEL_PID" ] && kill -0 "$(cat "$TUNNEL_PID")" 2>/dev/null; }
+
+public() {
+  [ -n "${KB_TUNNEL:-}" ] || die "set KB_TUNNEL=<tunnel name> in .env.local (cloudflared tunnel list)"
+  command -v cloudflared >/dev/null || die "cloudflared is not installed: brew install cloudflared"
+  server_up || start
+  [ -n "${KB_ADMIN_TOKEN:-}" ] || printf "%s! KB_ADMIN_TOKEN is not set: anyone could upload or delete documents%s\n" "$red" "$off"
+  step "Tunnel ($KB_TUNNEL)"
+  if ! tunnel_up; then
+    : >"$TUNNEL_LOG"
+    nohup cloudflared tunnel --no-autoupdate run --url "http://localhost:$PORT" "$KB_TUNNEL" >>"$TUNNEL_LOG" 2>&1 &
+    echo $! >"$TUNNEL_PID"
+    wait_for 30 grep -q "Registered tunnel connection" "$TUNNEL_LOG" || die "tunnel did not connect, see $TUNNEL_LOG"
+  fi
+  ok "${KB_PUBLIC_URL:-}"
+  if [ -n "${KB_PUBLIC_URL:-}" ]; then
+    step "Public check"
+    wait_for 30 curl -sf -m 5 "$KB_PUBLIC_URL/kb/stats" && ok "$KB_PUBLIC_URL" || printf " %s(DNS may need a minute)%s\n" "$dim" "$off"
+  fi
+}
+
+private() {
+  step "Stopping tunnel"
+  tunnel_up && kill "$(cat "$TUNNEL_PID")"
+  rm -f "$TUNNEL_PID"
   ok
 }
 
@@ -165,6 +204,7 @@ status() {
   printf "  Database   "; [ "$(docker inspect -f '{{.State.Running}}' "$DB" 2>/dev/null)" = "true" ] && echo "${green}running${off}" || echo "${red}stopped${off}"
   printf "  Ollama     "; curl -sf -m 2 "$OLLAMA/api/tags" >/dev/null && echo "${green}running${off}" || echo "${red}stopped${off}"
   printf "  Server     "; server_up && echo "${green}running${off}  $URL" || echo "${red}stopped${off}"
+  printf "  Tunnel     "; tunnel_up && echo "${green}running${off}  ${KB_PUBLIC_URL:-}" || echo "${dim}off${off}"
   server_up && printf "  %s%s%s\n" "$dim" "$(curl -s "$URL/kb/stats")" "$off"
   echo
 }
@@ -176,5 +216,7 @@ case "${1:-start}" in
   status)  status ;;
   logs)    tail -f "$LOG" ;;
   install) install ;;
-  *)       echo "usage: kbhelper [start|stop|restart|status|logs|install]"; exit 1 ;;
+  public)  public ;;
+  private) private ;;
+  *)       echo "usage: kbhelper [start|stop|restart|status|logs|install|public|private]"; exit 1 ;;
 esac
