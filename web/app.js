@@ -502,17 +502,17 @@
     },
     arm(e, row, box) {
       const startY = e.clientY, startX = e.clientX, pid = e.pointerId;
-      let dragging = false, line = null, target = null, holdTimer = null;
+      let dragging = false, target = null, holdTimer = null, minDy = 0, maxDy = 0, layout = null;
       const touch = e.pointerType === "touch";
       const begin = () => {
         dragging = true;
         RunMenu.close();
+        layout = this.measure(box, row);
+        minDy = layout.boxTop - layout.rowTop;          // the row stays inside the list while dragged
+        maxDy = layout.boxBottom - layout.rowBottom;
         row.setPointerCapture(pid);
         row.classList.add("dragging");
         box.classList.add("sorting");
-        line = document.createElement("div");
-        line.className = "run-drop-line";
-        box.appendChild(line);
         if (navigator.vibrate && touch) navigator.vibrate(10);
       };
       if (touch) holdTimer = setTimeout(begin, 280);   // on touch: press and hold, so scrolling still works
@@ -525,10 +525,10 @@
           begin();
         }
         ev.preventDefault();
-        row.style.transform = `translateY(${ev.clientY - startY}px)`;
-        target = this.dropTarget(box, row, ev.clientY);
-        const boxR = box.getBoundingClientRect();
-        line.style.top = `${target.y - boxR.top + box.scrollTop - 1}px`;
+        const dy = Math.max(minDy, Math.min(maxDy, ev.clientY - startY));
+        row.style.transform = `translateY(${dy}px)`;
+        target = this.dropTarget(layout, row, layout.rowMid + dy);
+        this.makeRoom(layout, target);
         const rail = box.closest(".rail") || box;
         const rr = rail.getBoundingClientRect();
         if (ev.clientY < rr.top + 40) rail.scrollTop -= 8;
@@ -549,32 +549,47 @@
         removeEventListener("pointerup", up);
         removeEventListener("pointercancel", up);
         row.classList.remove("dragging");
-        row.style.transform = "";
         box.classList.remove("sorting");
-        line && line.remove();
+        $$(":scope > *", box).forEach((el) => { el.style.transform = ""; });
       };
       addEventListener("pointermove", move, { passive: false });
       addEventListener("pointerup", up);
       addEventListener("pointercancel", up);
     },
-    // where the dragged row would land: before which chat, and in which group
-    dropTarget(box, row, y) {
-      const rows = $$(".run", box).filter((r) => r !== row);
+    // positions at the start of the drag: decisions use these, not the rows that are sliding around
+    measure(box, row) {
+      const items = $$(":scope > *", box);
+      const r = row.getBoundingClientRect(), b = box.getBoundingClientRect();
+      const gap = parseFloat(getComputedStyle(box).rowGap) || 0;
+      const rows = items.filter((el) => el.classList.contains("run") && el !== row).map((el) => {
+        const rr = el.getBoundingClientRect();
+        return { el, id: el.dataset.id, mid: rr.top + rr.height / 2, pinned: el.classList.contains("pinned") };
+      });
       const recentHead = $('.runs-group[data-group="recent"]', box);
-      const recentTop = recentHead ? recentHead.getBoundingClientRect().top : Infinity;
-      const pinnedRows = rows.filter((r) => r.classList.contains("pinned"));
-      const group = recentHead ? (y < recentTop ? "pinned" : "recent") : (row.classList.contains("pinned") ? "pinned" : "recent");
-      const inGroup = group === "pinned" ? pinnedRows : rows.filter((r) => !r.classList.contains("pinned"));
-      for (const r of inGroup) {
-        const b = r.getBoundingClientRect();
-        if (y < b.top + b.height / 2) return { before: r.dataset.id, group, y: b.top };
-      }
-      const last = inGroup[inGroup.length - 1];
-      let endY;
-      if (last) endY = last.getBoundingClientRect().bottom;
-      else if (group === "pinned") endY = recentTop - 4;
-      else { const h = recentHead || box; endY = h.getBoundingClientRect().bottom; }
-      return { before: null, group, y: endY };
+      return {
+        items, rows, recentHead, from: items.indexOf(row), step: r.height + gap,
+        recentTop: recentHead ? recentHead.getBoundingClientRect().top : Infinity,
+        rowTop: r.top, rowBottom: r.bottom, rowMid: r.top + r.height / 2, boxTop: b.top, boxBottom: b.bottom,
+      };
+    },
+    // where the dragged row would land: before which chat, and in which group
+    dropTarget(L, row, y) {
+      const group = L.recentHead ? (y < L.recentTop ? "pinned" : "recent") : (row.classList.contains("pinned") ? "pinned" : "recent");
+      const inGroup = L.rows.filter((r) => r.pinned === (group === "pinned"));
+      const next = inGroup.find((r) => y < r.mid);
+      // the element the row is inserted in front of (end of "Pinned" = in front of the "Recent" header)
+      const anchor = next ? next.el : group === "pinned" ? L.recentHead : null;
+      return { before: next ? next.id : null, group, anchor };
+    },
+    // slide the other rows (and group headers) by one row height to open a gap where the row will land
+    makeRoom(L, target) {
+      const to = target.anchor ? L.items.indexOf(target.anchor) : L.items.length;
+      L.items.forEach((el, i) => {
+        if (i === L.from) return;
+        const wasAfter = i > L.from, nowAfter = i >= to;
+        const shift = (nowAfter ? 1 : 0) - (wasAfter ? 1 : 0);
+        el.style.transform = shift ? `translateY(${shift * L.step}px)` : "";
+      });
     },
     drop(id, { before, group }) {
       const chat = chats.find((c) => c.id === id);

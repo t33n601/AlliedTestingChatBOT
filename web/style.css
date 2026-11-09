@@ -1403,12 +1403,10 @@ code { border-radius: 4px; background: var(--hover); color: var(--strong); }
 
 /* drag */
 .runs { position: relative; }
-.runs.sorting { cursor: grabbing; }
-.runs.sorting .run:not(.dragging) { transition: background .15s; }
+.runs.sorting { cursor: grabbing; overflow: visible; }
+.runs.sorting > :not(.dragging) { transition: transform .18s ease, background .15s; }
 .run.dragging { z-index: 5; background: var(--panel-2); box-shadow: var(--shadow), 0 10px 24px rgba(0,0,0,.18); cursor: grabbing; opacity: .96; }
 .run.dragging .run-more { opacity: 0; }
-.run-drop-line { position: absolute; left: 6px; right: 6px; height: 2px; background: var(--red); border-radius: 2px; pointer-events: none; z-index: 6; box-shadow: 0 0 0 2px var(--panel); }
-.run-drop-line::before { content: ""; position: absolute; left: -3px; top: -3px; width: 8px; height: 8px; border-radius: 50%; background: var(--red); }
 
 /* the ⋯ menu reuses the model-menu look, positioned next to the button */
 .run-menu { position: fixed; bottom: auto; width: 180px; animation-name: rm-in; transform-origin: top right; }
