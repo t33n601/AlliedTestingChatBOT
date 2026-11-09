@@ -31,3 +31,4 @@ design/screens/redesign/HANDOFF.md
 .env
 .env.*
 *.pem
+.kb.pid

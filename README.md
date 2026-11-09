@@ -92,6 +92,21 @@ The answer is streamed over **Server-Sent Events** in typed events (`rewrite →
 
 **Requirements:** Python 3.11+, Docker, [Ollama](https://ollama.com/download).
 
+### One command
+
+```bash
+./kb.sh            # starts Docker, the database, Ollama and the server, then opens the app
+./kb.sh status     # what is running
+./kb.sh stop       # stop the server
+./kb.sh logs       # follow the server log
+```
+
+On the first run it also pulls the models, creates the virtualenv, loads the knowledge base and embeds it.
+
+<details>
+<summary><b>Step by step</b></summary>
+
+
 ```bash
 # 1. models
 ollama pull nomic-embed-text
@@ -113,6 +128,8 @@ uvicorn ragserver:app --port 8091
 ```
 
 Then open the app at `localhost:8091` and the interactive API docs (Swagger) at `localhost:8091/docs`.
+
+</details>
 
 <details>
 <summary><b>Configuration (environment variables)</b></summary>
@@ -159,6 +176,7 @@ The E2E suite also runs in **GitHub Actions** on a self-hosted runner (`.github/
 ## 📁 Project structure
 
 ```
+kb.sh                one-command launcher (start · stop · status · logs)
 ragserver.py         FastAPI app: RAG pipeline, SSE streaming, map, documents API
 loader.py            imports knowledge/*.md into Postgres
 chunking.py          parses PDF / DOCX / MD / TXT and splits by headings

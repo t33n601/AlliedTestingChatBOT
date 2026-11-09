@@ -1,0 +1,157 @@
+#!/usr/bin/env bash
+# KB Helper launcher: one command for the whole stack on localhost.
+#   ./kb.sh            start everything and open the browser (same as ./kb.sh start)
+#   ./kb.sh stop       stop the API server (database and Ollama keep running)
+#   ./kb.sh restart    stop + start
+#   ./kb.sh status     what is running
+#   ./kb.sh logs       follow the server log
+set -euo pipefail
+
+DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
+cd "$DIR"
+
+PORT="${KB_PORT:-8091}"
+URL="http://localhost:$PORT"
+OLLAMA="${OLLAMA_HOST:-http://localhost:11434}"
+CHAT_MODEL="${KB_CHAT_MODEL:-qwen3:1.7b}"
+EMBED_MODEL="${KB_EMBED_MODEL:-nomic-embed-text}"
+PID_FILE="$DIR/.kb.pid"
+LOG="$DIR/api.log"
+DB="kb_vectordb"
+
+red=$'\e[38;5;167m'; dim=$'\e[2m'; bold=$'\e[1m'; green=$'\e[32m'; off=$'\e[0m'
+step() { printf "%s▸%s %s" "$red" "$off" "$1"; }
+ok()   { printf " %s✓%s %s\n" "$green" "$off" "${1:-}"; }
+die()  { printf "\n%s✗ %s%s\n" "$red" "$1" "$off" >&2; exit 1; }
+
+# wait_for <seconds> <command...>: retry until the command succeeds
+wait_for() {
+  local t=$1; shift
+  for ((i = 0; i < t; i++)); do "$@" >/dev/null 2>&1 && return 0; sleep 1; printf "."; done
+  return 1
+}
+
+server_up() { curl -sf -m 2 "$URL/kb/stats" >/dev/null; }
+
+banner() {
+  printf "\n%s  ██ KB HELPER%s %s· Allied Testing knowledge assistant%s\n\n" "$bold$red" "$off" "$dim" "$off"
+}
+
+start() {
+  banner
+
+  if server_up; then
+    step "Already running"; ok "$URL"
+    open "$URL"; return
+  fi
+
+  # 1. Docker
+  step "Docker"
+  if ! docker info >/dev/null 2>&1; then
+    open -a Docker
+    wait_for 90 docker info || die "Docker did not start. Open Docker Desktop and try again."
+  fi
+  ok
+
+  # 2. database container (created on first run from docker-compose.yaml)
+  step "Database ($DB)"
+  if docker container inspect "$DB" >/dev/null 2>&1; then
+    docker start "$DB" >/dev/null
+  else
+    docker compose up -d "$DB" >/dev/null 2>&1 || die "could not create $DB"
+  fi
+  wait_for 60 docker exec "$DB" pg_isready -U kbuser -d knowledge_db || die "database is not ready"
+  ok "port 5435"
+
+  # 3. Ollama + models
+  step "Ollama"
+  if ! curl -sf -m 2 "$OLLAMA/api/tags" >/dev/null; then
+    open -a Ollama 2>/dev/null || (ollama serve >/dev/null 2>&1 &)
+    wait_for 60 curl -sf -m 2 "$OLLAMA/api/tags" || die "Ollama did not start. Install it from ollama.com."
+  fi
+  for m in "$EMBED_MODEL" "$CHAT_MODEL"; do
+    if ! curl -sf "$OLLAMA/api/tags" | grep -q "\"name\":\"$m"; then
+      printf "\n  pulling %s…\n" "$m"; ollama pull "$m" || die "could not pull $m"
+    fi
+  done
+  ok "$CHAT_MODEL · $EMBED_MODEL"
+
+  # 4. Python environment (first run only)
+  step "Python env"
+  if [ ! -x .venv/bin/uvicorn ]; then
+    printf "\n  creating .venv and installing requirements…\n"
+    python3 -m venv .venv
+    .venv/bin/pip install -q -r requirements.txt || die "pip install failed"
+  fi
+  ok
+
+  # 5. knowledge base (first run only: load + embed when the table is empty)
+  step "Knowledge base"
+  sql() { docker exec "$DB" psql -U kbuser -d knowledge_db -tAc "$1" 2>/dev/null | tr -d ' '; }
+  chunks=$(sql "SELECT count(*) FROM kb_chunks" || echo 0)
+  if [ "${chunks:-0}" = "0" ]; then
+    printf "\n  empty, loading knowledge/ …\n"
+    .venv/bin/python loader.py >/dev/null || die "loader.py failed"
+    chunks=$(sql "SELECT count(*) FROM kb_chunks")
+  fi
+  missing=$(sql "SELECT count(*) FROM kb_chunks WHERE body_vec IS NULL" || echo 0)
+  if [ "${missing:-0}" != "0" ]; then
+    printf "\n  embedding %s chunks…\n" "$missing"
+    .venv/bin/python vectorize.py >/dev/null || die "vectorize.py failed"
+  fi
+  ok "$chunks chunks"
+
+  # 6. API + web app
+  step "Server"
+  if lsof -nP -iTCP:"$PORT" -sTCP:LISTEN >/dev/null 2>&1; then
+    die "port $PORT is busy with another program (lsof -i :$PORT)"
+  fi
+  nohup .venv/bin/uvicorn ragserver:app --port "$PORT" >>"$LOG" 2>&1 &
+  echo $! >"$PID_FILE"
+  wait_for 60 server_up || die "server did not start, see: ./kb.sh logs"
+  ok "$URL"
+
+  # 7. warm the chat model so the first answer is fast
+  step "Warming up $CHAT_MODEL"
+  curl -sf -m 120 "$OLLAMA/api/generate" -d "{\"model\":\"$CHAT_MODEL\",\"keep_alive\":\"30m\"}" >/dev/null || true
+  ok
+
+  printf "\n  %sReady →%s %s%s%s\n" "$bold" "$off" "$bold$red" "$URL" "$off"
+  printf "  %sAPI docs: %s/docs · stop: kbhelper stop · logs: kbhelper logs%s\n\n" "$dim" "$URL" "$off"
+  open "$URL"
+}
+
+stop() {
+  step "Stopping server"
+  local pid=""
+  [ -f "$PID_FILE" ] && pid=$(cat "$PID_FILE")
+  if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+    kill "$pid"
+  else
+    # started by hand (e.g. uvicorn --reload in a terminal): stop whatever listens on the port
+    pid=$(lsof -nP -tiTCP:"$PORT" -sTCP:LISTEN 2>/dev/null || true)
+    [ -n "$pid" ] && kill $pid
+  fi
+  rm -f "$PID_FILE"
+  wait_for 10 bash -c "! curl -sf -m 1 $URL/kb/stats" || true
+  ok
+}
+
+status() {
+  banner
+  printf "  Docker     "; docker info >/dev/null 2>&1 && echo "${green}running${off}" || echo "${red}stopped${off}"
+  printf "  Database   "; [ "$(docker inspect -f '{{.State.Running}}' "$DB" 2>/dev/null)" = "true" ] && echo "${green}running${off}" || echo "${red}stopped${off}"
+  printf "  Ollama     "; curl -sf -m 2 "$OLLAMA/api/tags" >/dev/null && echo "${green}running${off}" || echo "${red}stopped${off}"
+  printf "  Server     "; server_up && echo "${green}running${off}  $URL" || echo "${red}stopped${off}"
+  server_up && printf "  %s%s%s\n" "$dim" "$(curl -s "$URL/kb/stats")" "$off"
+  echo
+}
+
+case "${1:-start}" in
+  start)   start ;;
+  stop)    stop ;;
+  restart) stop; start ;;
+  status)  status ;;
+  logs)    tail -f "$LOG" ;;
+  *)       echo "usage: kbhelper [start|stop|restart|status|logs]"; exit 1 ;;
+esac
