@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import threading
 import time
 from contextlib import asynccontextmanager
@@ -146,6 +147,14 @@ class ChatRequest(BaseModel):
     top_k: int = TOP_K
     tone: str = "formal"
     model: Optional[str] = None
+    answer_lang: str = "auto"      # auto (the question's language) | en | ru | ro
+
+
+LANG_NOTES = {
+    "en": "\n(Answer in English.)",
+    "ru": "\n(Отвечай на русском языке.)",
+    "ro": "\n(Răspunde în limba română.)",
+}
 
 
 def row_to_dict(row):
@@ -303,7 +312,7 @@ def index():
     so a new URL after every edit makes phones load the fresh files instead of a stale copy."""
     from fastapi.responses import HTMLResponse
     html = (WEB_DIR / "index.html").read_text(encoding="utf-8")
-    for name in ("style.css", "app.js"):
+    for name in ("style.css", "i18n.js", "app.js"):
         v = int((WEB_DIR / name).stat().st_mtime)
         html = html.replace(f'/static/{name}"', f'/static/{name}?v={v}"')
     return HTMLResponse(html, headers={"Cache-Control": "no-cache"})
@@ -492,10 +501,28 @@ def is_cyrillic(text):
     return bool(letters) and sum("\u0400" <= c <= "\u04ff" for c in letters) / len(letters) > 0.3
 
 
+RO_WORDS = {"ce", "care", "este", "sunt", "cum", "unde", "cine", "cand", "când", "despre", "pentru", "și", "si",
+            "oferiți", "oferiti", "aveți", "aveti", "câți", "cati", "câte", "cate", "angajați", "angajati",
+            "compania", "companiei", "serviciile", "servicii", "produsele", "produse", "testare", "testarea",
+            "voastră", "vostra", "voastra", "vă", "va", "faceți", "faceti", "spuneți", "spuneti", "lucrați"}
+
+
+def is_romanian(text):
+    """Romanian is written in Latin letters, so look for its diacritics or its common words."""
+    low = text.lower()
+    if any(c in low for c in "ăâîșşțţ"):
+        return True
+    words = re.findall(r"[a-z]+", low)
+    hits = sum(w in RO_WORDS for w in words)
+    return hits >= 2 or (hits == 1 and len(words) <= 3)
+
+
 def needs_translation(text):
     """The embedding model is English-centric: search non-English questions in English."""
     letters = [c for c in text if c.isalpha()]
-    return bool(letters) and sum(c.isascii() for c in letters) / len(letters) < 0.7
+    if not letters:
+        return False
+    return sum(c.isascii() for c in letters) / len(letters) < 0.7 or is_romanian(text)
 
 
 def rewrite_query(msgs):
@@ -575,8 +602,11 @@ def chat_stream(req: ChatRequest):
             if sources:   # small models follow a reminder next to the question far better
                 chat[-1]["content"] += ("\n\n(Answer from the context and cite blocks like "
                                         "[1], [2] after each fact.)")
-            if is_cyrillic(question):
-                chat[-1]["content"] += "\n(Отвечай на русском языке.)"
+            lang = req.answer_lang
+            if lang not in LANG_NOTES:
+                lang = "ru" if is_cyrillic(question) else "ro" if is_romanian(question) else None
+            if lang:
+                chat[-1]["content"] += LANG_NOTES[lang]
 
             with requests.post(f"{OLLAMA_URL}/api/chat", stream=True, timeout=600, json={
                 "model": model, "messages": chat, "stream": True, "think": req.think,

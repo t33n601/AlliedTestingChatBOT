@@ -21,6 +21,7 @@
 </head>
 <body>
   <header class="bar">
+    <button type="button" class="m-chats" id="m-chats" aria-label="Chats" title="Chats" aria-controls="rail" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16M4 16h10"/></svg></button>
     <a class="logo" href="#assistant" aria-label="Allied Testing — KB Helper home"><img src="/brand/logo.png" alt="Allied Testing"></a>
     <nav class="nav" id="nav" aria-label="Main">
       <a href="#assistant" data-view="assistant" class="on">Assistant</a>
@@ -33,7 +34,7 @@
         <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
         <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>
       </button>
-      <button type="button" class="m-new" id="m-new" aria-label="New chat" title="New chat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+      <button type="button" class="m-new" id="m-new" aria-label="New chat" title="New chat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/><path d="M17.5 3.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button>
     </div>
   </header>
 
@@ -44,8 +45,26 @@
 
       <div class="bench" aria-label="Assistant workspace">
         <!-- left rail: runs + tune -->
-        <aside class="rail">
-          <div class="panel">
+        <aside class="rail" id="rail" aria-label="Menu">
+          <div class="drawer-top">
+            <div class="drawer-brand">
+              <img src="/brand/logo.png" alt="Allied Testing">
+              <small class="d-live" id="d-live">connecting…</small>
+            </div>
+            <div class="drawer-acts">
+              <button type="button" class="round-b theme-toggle" id="d-theme" aria-label="Switch theme" title="Switch theme">
+                <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+                <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>
+              </button>
+              <button type="button" class="round-b" id="d-search" aria-label="Search chats" title="Search chats"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>
+            </div>
+          </div>
+          <nav class="drawer-nav" aria-label="Main">
+            <a href="#assistant" data-view="assistant"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4V5z"/></svg>Assistant</a>
+            <a href="#map" data-view="map"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="7" r="2"/><circle cx="17" cy="6" r="2"/><circle cx="9" cy="17" r="2"/><circle cx="18" cy="16" r="2"/></svg>Knowledge map</a>
+            <a href="#documents" data-view="documents"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h7"/></svg>Documents</a>
+          </nav>
+          <div class="panel chats-panel">
             <div class="panel-head">
               <h2>Chats</h2>
               <button class="btn-primary" id="new-chat" type="button" title="Start a new conversation"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>New chat</button>
@@ -56,6 +75,17 @@
               <input id="run-search" type="search" placeholder="Search chats" autocomplete="off">
             </label>
             <div class="runs" id="runs"><p class="runs-empty">No chats yet. Ask a question to start one.</p></div>
+          </div>
+          <div class="profile" id="profile">
+            <button type="button" class="profile-btn" id="profile-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="profile-menu" title="Account">
+              <span class="avatar" id="p-avatar" aria-hidden="true"></span>
+              <span class="p-name" id="p-name">Guest</span><span class="p-sub" id="p-sub" hidden></span>
+              <svg class="p-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="model-menu profile-menu" id="profile-menu" role="menu" aria-label="Account" hidden>
+              <button type="button" role="menuitem" class="mm-item" data-act="settings"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Settings</span></button>
+              <a role="menuitem" class="mm-item" href="/docs" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8l4 4v12H8z"/><path d="M4 8v12h4M11 12h6M11 16h6"/></svg><span>API docs</span></a>
+            </div>
           </div>
         </aside>
 
@@ -75,7 +105,7 @@
               <div class="rhomb lg" aria-hidden="true"><i class="halo"></i><span class="shape"><img src="/static/assets/hammer.png" alt=""></span></div>
               <p class="eyebrow">KB Helper · Allied Testing</p>
               <h4>What would you like to know?</h4>
-              <p>I answer from Allied Testing's own documents and show the exact sources for every answer. Ask in English or Russian.</p>
+              <p>I answer from Allied Testing's own documents and show the exact sources for every answer. Ask in English, Russian or Romanian.</p>
               <div class="examples" id="examples"></div>
             </div>
           </div>
@@ -116,7 +146,7 @@
                 </label>
               </div>
             </div>
-            <span class="hint">EN · RU</span>
+            <span class="hint">EN · RU · RO</span>
             <button class="ask" id="ask" type="submit"><span>Ask</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></button>
           </form>
         </div>
@@ -158,13 +188,15 @@
             <div class="zoom">
               <button type="button" class="icon-b" id="zoom-in" aria-label="Zoom in" title="Zoom in"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
               <button type="button" class="icon-b" id="zoom-out" aria-label="Zoom out" title="Zoom out"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
-              <button type="button" class="icon-b" id="zoom-reset" aria-label="Reset view" title="Reset view"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+              <button type="button" class="icon-b" id="zoom-reset" aria-label="Reset view" title="Reset view"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.7M4 4v5h5"/></svg></button>
+              <button type="button" class="icon-b" id="map-full" aria-label="Full screen" title="Full screen" aria-pressed="false"><svg class="i-expand" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><svg class="i-shrink" viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg></button>
             </div>
           </div>
           <div class="map-stage">
             <svg id="map" viewBox="0 0 1000 720" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Scatter map of knowledge-base chunks"></svg>
             <div class="tip" id="map-tip" hidden></div>
             <div class="map-hint" id="map-hint">drag to pan · scroll to zoom · click a dot to read it</div>
+            <div class="map-touch-hint" aria-hidden="true">Drag to move · pinch to zoom · tap a dot</div>
           </div>
         </div>
         <aside class="map-side">
@@ -263,6 +295,105 @@
     <a href="#documents" data-view="documents"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h7"/></svg>Docs</a>
   </nav>
 
+  <div class="drawer-scrim" id="drawer-scrim" aria-hidden="true"></div>
+
+  <!-- ============================================================ SETTINGS -->
+  <dialog class="settings" id="settings" aria-labelledby="set-title">
+    <div class="set-head">
+      <h2 id="set-title">Settings</h2>
+      <button type="button" class="round-b set-x" id="set-close" aria-label="Close" title="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div class="set-body">
+      <section class="set-sec">
+        <h3>Profile</h3>
+        <div class="set-profile">
+          <span class="avatar xl" id="set-avatar" aria-hidden="true"></span>
+          <div class="set-photo">
+            <div class="set-photo-acts">
+              <label class="set-btn"><input type="file" id="set-photo" accept="image/*" class="sr-only"><span id="set-photo-label">Upload photo</span></label>
+              <button type="button" class="set-btn ghost-danger" id="set-photo-rm" hidden>Remove photo</button>
+            </div>
+            <small>JPG or PNG. It stays in this browser.</small>
+          </div>
+        </div>
+        <label class="set-row set-field">
+          <span class="set-text"><b>Nickname</b><small>Shown in the menu and in the greeting</small></span>
+          <input type="text" id="set-name" maxlength="32" placeholder="Guest" autocomplete="nickname" spellcheck="false">
+        </label>
+      </section>
+
+      <section class="set-sec">
+        <h3>Language</h3>
+        <div class="set-row">
+          <span class="set-text"><b>Interface language</b><small>Menus, buttons and hints</small></span>
+          <div class="seg-mini" id="set-lang" role="radiogroup" aria-label="Interface language" data-no-i18n>
+            <button type="button" role="radio" data-v="en">English</button><button type="button" role="radio" data-v="ru">Русский</button><button type="button" role="radio" data-v="ro">Română</button>
+          </div>
+        </div>
+        <div class="set-row">
+          <span class="set-text"><b>Answer language</b><small>The language the assistant replies in</small></span>
+          <div class="seg-mini" id="set-alang" role="radiogroup" aria-label="Answer language">
+            <button type="button" role="radio" data-v="auto">Auto</button><button type="button" role="radio" data-v="en" data-no-i18n>EN</button><button type="button" role="radio" data-v="ru" data-no-i18n>RU</button><button type="button" role="radio" data-v="ro" data-no-i18n>RO</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="set-sec">
+        <h3>Appearance</h3>
+        <div class="set-row">
+          <span class="set-text"><b>Theme</b></span>
+          <div class="seg-mini" id="set-theme" role="radiogroup" aria-label="Theme">
+            <button type="button" role="radio" data-v="light">Light</button><button type="button" role="radio" data-v="dark">Dark</button><button type="button" role="radio" data-v="system">System</button>
+          </div>
+        </div>
+        <label class="set-row mm-switch">
+          <span class="set-text"><b>Show pipeline steps</b><small>Retrieve, Augment and Generate timings above the chat</small></span>
+          <input type="checkbox" id="set-pipeline"><i></i>
+        </label>
+      </section>
+
+      <section class="set-sec">
+        <h3>Chat</h3>
+        <label class="set-row mm-switch">
+          <span class="set-text"><b>Show reasoning</b><small>See how the model thinks</small></span>
+          <input type="checkbox" id="set-think"><i></i>
+        </label>
+        <label class="set-row mm-switch">
+          <span class="set-text"><b>Suggested questions</b><small>Ask next suggestions after each answer</small></span>
+          <input type="checkbox" id="set-next"><i></i>
+        </label>
+        <label class="set-row mm-switch">
+          <span class="set-text"><b>Send with Enter</b><small>When off, Enter adds a new line and Ctrl / ⌘ + Enter sends</small></span>
+          <input type="checkbox" id="set-enter"><i></i>
+        </label>
+      </section>
+
+      <section class="set-sec">
+        <h3>Knowledge base</h3>
+        <label class="set-row set-field">
+          <span class="set-text"><b>Admin token</b><small>Needed to upload, re-embed or remove documents</small></span>
+          <input type="password" id="set-token" autocomplete="off" spellcheck="false">
+        </label>
+      </section>
+
+      <section class="set-sec">
+        <h3>Your data</h3>
+        <div class="set-row">
+          <span class="set-text"><b>Export chats</b><small>Download every chat as a JSON file</small></span>
+          <button type="button" class="set-btn" id="set-export">Export</button>
+        </div>
+        <div class="set-row">
+          <span class="set-text"><b>Delete all chats</b><small>Removes the whole chat history from this browser</small></span>
+          <button type="button" class="set-btn ghost-danger" id="set-wipe">Delete all</button>
+        </div>
+      </section>
+
+      <section class="set-sec">
+        <h3>About</h3>
+        <p class="set-about"><b>KB Helper</b> · Allied Testing<br><span id="set-about">—</span><br><small>Everything runs locally: questions and answers never leave the server.</small> · <a href="/docs" target="_blank" rel="noopener">API docs</a></p>
+      </section>
+    </div>
+  </dialog>
   <div class="toast" id="toast" hidden></div>
 
   <footer class="foot">
@@ -272,6 +403,7 @@
 
   <script src="/static/vendor/marked.min.js"></script>
   <script src="/static/vendor/purify.min.js"></script>
+  <script src="/static/i18n.js"></script>
   <script src="/static/app.js"></script>
   <script>
     document.getElementById("theme-toggle").addEventListener("click", function () {

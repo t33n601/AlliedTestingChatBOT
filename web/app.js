@@ -2,6 +2,7 @@
 (() => {
   "use strict";
 
+  const { t, pl, locale } = window.KB_I18N;
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
   const el = (tag, cls, html) => {
@@ -17,14 +18,27 @@
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* private mode */ } },
   };
 
-  const EXAMPLES = [
-    "What services do you offer?",
-    "How do you handle security testing?",
-    "Tell me about your QA consulting",
-    "Какие AI-решения есть у компании?",
-  ];
+  const EXAMPLES = {
+    en: ["What services do you offer?", "How do you handle security testing?", "Tell me about your QA consulting", "What AI solutions does the company have?"],
+    ru: ["Какие услуги вы предлагаете?", "Как вы проводите тестирование безопасности?", "Расскажите о QA-консалтинге", "Какие AI-решения есть у компании?"],
+    ro: ["Ce servicii oferiți?", "Cum faceți testarea securității?", "Spuneți-mi despre consultanța QA", "Ce soluții AI are compania?"],
+  }[window.KB_I18N.lang];
   /* the "not in the knowledge base" card speaks the language of the question */
   const isRu = (text) => /[а-яё]/i.test(text || "");
+  const RO_HINT = /[ăâîșşțţ]|\b(ce|care|este|sunt|cum|unde|cine|despre|pentru|oferiți|oferiti|aveți|aveti|compania|companiei)\b/i;
+  const isRo = (text) => !isRu(text) && RO_HINT.test(text || "");
+  const NOANSWER_RO = {
+    title: "Asta nu se află în baza de cunoștințe",
+    body: (pct) => `Niciun document nu acoperă subiectul — cea mai apropiată potrivire a fost de doar ${pct}% — așa că nu voi ghici un răspuns.`,
+    again: "Întreabă altceva", add: "Adaugă un document despre asta",
+  };
+  /* language of a "not in the knowledge base" card: the chosen answer language, else the question's */
+  const noAnswerLang = (text) => {
+    const a = prefs.answerLang;
+    if (a && a !== "auto") return a;
+    return isRu(text) ? "ru" : isRo(text) ? "ro" : "en";
+  };
+  const NOANSWER = (m) => ({ ru: NOANSWER_RU, ro: NOANSWER_RO })[m.lang || (m.ru ? "ru" : "en")] || NOANSWER_EN;
   const NOANSWER_EN = {
     title: "That isn't in the knowledge base",
     body: (pct) => `None of the documents cover this — the closest match was only ${pct}% similar — so I won't guess an answer.`,
@@ -42,6 +56,10 @@
     redo: '<svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/></svg>',
   };
 
+  /* personal preferences: profile, languages, what the chat shows */
+  const prefs = Object.assign({ lang: "en", answerLang: "auto", pipeline: true, next: true, enter: true }, store.get("kb.prefs", {}));
+  const savePrefs = () => store.set("kb.prefs", prefs);
+  const profile = Object.assign({ name: "", photo: "" }, store.get("kb.profile", {}));
   let stats = null;
   let busy = null;            // AbortController of the running request
   /* chats: [{id, title, updated, history}] — every conversation is kept, New chat starts another */
@@ -83,7 +101,13 @@
     const r = await fetch(path, opts);
     let data = null;
     try { data = await r.json(); } catch { /* empty body */ }
-    if (!r.ok) throw new Error((data && data.detail) || `${r.status} ${r.statusText}`);
+    if (!r.ok) {
+      // 502/503/504 come from the tunnel when the server is briefly unreachable
+      const down = [502, 503, 504].includes(r.status);
+      const err = new Error(down ? t("The server is unreachable for a moment. Retrying…") : (data && data.detail) || `${r.status} ${r.statusText}`);
+      err.retry = down;
+      throw err;
+    }
     return data;
   }
   function toast(text, ms = 3200, action = null) {
@@ -108,12 +132,17 @@
       stats = await api("/kb/stats");
       $$("[data-stat]").forEach((n) => { n.textContent = stats[n.dataset.stat] ?? "—"; });
       live.className = "live ok";
-      live.innerHTML = `Assistant online`;
-      live.title = `${stats.chat_model} · ${stats.chunks} passages`;
+      live.innerHTML = `<span class="m-hide">${t("Assistant")} </span>${t("online")}`;
+      live.title = t("{model} · {n} passages", { model: stats.chat_model, n: stats.chunks });
+      $("#d-live").className = "d-live ok";
+      $("#d-live").textContent = `${t("Online")} · ${stats.chat_model}`;
+      $("#set-about").textContent = t("{docs} · {chunks} · model {model}", { docs: pl(stats.documents, "document"), chunks: pl(stats.chunks, "chunk"), model: stats.chat_model });
       $("#admin").hidden = !stats.admin_required;
     } catch {
       live.className = "live off";
-      live.textContent = "Assistant offline";
+      live.innerHTML = `<span class="m-hide">${t("Assistant")} </span>${t("offline")}`;
+      $("#d-live").className = "d-live off";
+      $("#d-live").textContent = t("Offline");
     }
   }
 
@@ -121,9 +150,12 @@
   function show(view) {
     if (!["assistant", "map", "documents"].includes(view)) view = "assistant";
     $$(".view").forEach((v) => v.classList.toggle("on", v.id === `view-${view}`));
-    $$("#nav a, #tabbar a").forEach((a) => a.classList.toggle("on", a.dataset.view === view));
+    $$("#nav a, #tabbar a, .drawer-nav a").forEach((a) => a.classList.toggle("on", a.dataset.view === view));
+    const changed = document.body.dataset.view !== view;
     document.body.dataset.view = view;
+    if (changed) window.scrollTo(0, 0);             // each tab opens at its top, no jump from the previous one
     Sheet.close();
+    Drawer.close();
     if (view === "map") MapView.open();
     if (view === "documents") Docs.load();
   }
@@ -135,13 +167,13 @@
       $$("#pipeline li").forEach((li) => { li.className = ""; $("small", li).textContent = "—"; });
     },
     fromMsg(msg) {      // show the timings of a finished answer
-      const t = msg.timings || {};
+      const tm = msg.timings || {};
       this.reset();
-      if (t.retrieve_ms == null) return;
-      this.set("retrieve", "done", fmtMs(t.retrieve_ms));
-      this.set("augment", "done", `${(msg.sources || []).length} chunks`);
-      if (msg.noAnswer) this.set("generate", "done", "not in KB");
-      else if (t.total_ms != null) this.set("generate", "done", `${fmtMs(t.total_ms)} · ${msg.tokens || 0} tok`);
+      if (tm.retrieve_ms == null) return;
+      this.set("retrieve", "done", fmtMs(tm.retrieve_ms));
+      this.set("augment", "done", pl((msg.sources || []).length, "chunk"));
+      if (msg.noAnswer) this.set("generate", "done", t("not in KB"));
+      else if (tm.total_ms != null) this.set("generate", "done", `${fmtMs(tm.total_ms)} · ${msg.tokens || 0} tok`);
     },
     set(step, state, note) {
       const li = $(`#pipeline li[data-step="${step}"]`);
@@ -180,8 +212,8 @@
     m.innerHTML = `<div class="rhomb sm" aria-hidden="true"><span class="shape"><img src="/static/assets/hammer.png" alt=""></span></div>
       <div class="body">
         <p class="rewrite" hidden></p>
-        <div class="think" hidden><button type="button" class="think-head">Reasoning</button><div class="think-body"></div></div>
-        <div class="answer"><span class="waiting">Searching the knowledge base…</span></div>
+        <div class="think" hidden><button type="button" class="think-head">${t("Reasoning")}</button><div class="think-body"></div></div>
+        <div class="answer"><span class="waiting">${t("Searching the knowledge base…")}</span></div>
         <button type="button" class="src-btn" data-act="evidence" hidden></button>
         <div class="meta" hidden></div>
       </div>`;
@@ -193,33 +225,33 @@
     if (!sources || !sources.length) { btn.hidden = true; return; }
     const cited = new Set([...(content || "").matchAll(/\[(\d{1,2})\]/g)].map((m) => Number(m[1])));
     btn.hidden = false;
-    btn.title = cited.size ? `${cited.size} of ${sources.length} sources cited in the answer` : "Sources the assistant read";
+    btn.title = cited.size ? t("{a} of {b} sources cited in the answer", { a: cited.size, b: pl(sources.length, "source") }) : t("Sources the assistant read");
     btn.innerHTML = `<span class="bars" aria-hidden="true">${sources.map((s, i) => `<i class="${cited.has(i + 1) ? "cited" : ""}"></i>`).join("")}</span>
-      <span><b>${sources.length}</b> sources</span><span class="chev">▸ view</span>`;
+      <span>${pl(sources.length, "source").replace(/^\d+/, (n) => `<b>${n}</b>`)}</span><span class="chev">${t("▸ view")}</span>`;
   }
 
   function fillMeta(node, msg) {
     const meta = $(".meta", node);
-    const t = msg.timings || {};
+    const tm = msg.timings || {};
     const parts = [];
-    if (t.total_ms != null) parts.push(`<b>${fmtMs(t.total_ms)}</b>`);
-    if (t.first_token_ms != null) parts.push(`first word ${fmtMs(t.first_token_ms)}`);
+    if (tm.total_ms != null) parts.push(`<b>${fmtMs(tm.total_ms)}</b>`);
+    if (tm.first_token_ms != null) parts.push(t("first word {t}", { t: fmtMs(tm.first_token_ms) }));
     if (msg.tokens) parts.push(`${msg.tokens} tok`);
-    if (t.tokens_per_sec) parts.push(`${t.tokens_per_sec} tok/s`);
-    if (msg.model) parts.push(`${esc(msg.model)}${msg.tone && msg.tone !== "formal" ? ` · ${esc(msg.tone)}` : ""}`);
+    if (tm.tokens_per_sec) parts.push(`${tm.tokens_per_sec} tok/s`);
+    if (msg.model) parts.push(`${esc(msg.model)}${msg.tone && msg.tone !== "formal" ? ` · ${esc(toneName(msg.tone))}` : ""}`);
     meta.innerHTML = parts.map((p) => `<span>${p}</span>`).join("") +
       `<span class="acts">
-        <button type="button" data-act="copy" title="Copy answer" aria-label="Copy answer">${ICONS.copy}</button>
-        ${msg.qid ? `<button type="button" data-act="up" title="Good answer" aria-label="Good answer" class="${msg.rating === 1 ? "on" : ""}">${ICONS.up}</button>
-        <button type="button" data-act="down" title="Bad answer" aria-label="Bad answer" class="${msg.rating === -1 ? "on" : ""}">${ICONS.down}</button>` : ""}
-        <button type="button" data-act="redo" title="Regenerate this answer" aria-label="Regenerate" class="redo">${ICONS.redo}</button>
+        <button type="button" data-act="copy" title="${t("Copy answer")}" aria-label="${t("Copy answer")}">${ICONS.copy}</button>
+        ${msg.qid ? `<button type="button" data-act="up" title="${t("Good answer")}" aria-label="${t("Good answer")}" class="${msg.rating === 1 ? "on" : ""}">${ICONS.up}</button>
+        <button type="button" data-act="down" title="${t("Bad answer")}" aria-label="${t("Bad answer")}" class="${msg.rating === -1 ? "on" : ""}">${ICONS.down}</button>` : ""}
+        <button type="button" data-act="redo" title="${t("Regenerate this answer")}" aria-label="${t("Regenerate")}" class="redo">${ICONS.redo}</button>
       </span>`;
     meta.hidden = false;
   }
 
   function renderBot(node, msg, live) {
     const rw = $(".rewrite", node);
-    if (msg.rewrite) { rw.hidden = false; rw.innerHTML = `searched as → <b>${esc(msg.rewrite)}</b>`; }
+    if (msg.rewrite) { rw.hidden = false; rw.innerHTML = `${t("searched as →")} <b>${esc(msg.rewrite)}</b>`; }
     const think = $(".think", node);
     if (msg.think) {
       think.hidden = false;
@@ -227,7 +259,7 @@
       const secs = msg.timings && msg.timings.first_token_ms && msg.timings.first_think_ms
         ? ` · ${((msg.timings.first_token_ms - msg.timings.first_think_ms) / 1000).toFixed(1)} s` : "";
       const thinking = !!(live && !msg.content);
-      $(".think-head", think).textContent = (thinking ? "Thinking…" : "Reasoning") + secs;
+      $(".think-head", think).textContent = (thinking ? t("Thinking…") : t("Reasoning")) + secs;
       if (think.classList.contains("streaming") !== thinking) think.classList.toggle("open", thinking);   // open while thinking, fold after
       think.classList.toggle("streaming", thinking);
       if (thinking) { const b = $(".think-body", think); b.scrollTop = b.scrollHeight; }
@@ -235,18 +267,18 @@
     const ans = $(".answer", node);
     if (msg.noAnswer) {
       const pct = Math.round((msg.noAnswer.best || 0) * 100);
-      const t = msg.noAnswer.ru ? NOANSWER_RU : NOANSWER_EN;
+      const na = NOANSWER(msg.noAnswer);
       ans.innerHTML = `<div class="noanswer">
-        <h4>${t.title}</h4>
-        <p>${t.body(pct)}</p>
+        <h4>${na.title}</h4>
+        <p>${na.body(pct)}</p>
         <div class="noanswer-acts">
-          <button type="button" data-act="new">${t.again}</button>
-          <a href="#documents">${t.add} →</a>
+          <button type="button" data-act="new">${na.again}</button>
+          <a href="#documents">${na.add} →</a>
         </div></div>`;
     } else if (msg.content) {
       ans.innerHTML = renderMarkdown(msg.content, msg.sources) + (live ? '<span class="cursor"></span>' : "");
     } else if (live && msg.sources) {
-      ans.innerHTML = msg.think ? "" : `<span class="waiting">writing…</span>`;
+      ans.innerHTML = msg.think ? "" : `<span class="waiting">${t("writing…")}</span>`;
     }
   }
 
@@ -267,8 +299,9 @@
       if (m.noAnswer && m.noAnswer.ru === undefined) m.noAnswer.ru = isRu(history[i - 1] && history[i - 1].content);
     });
     $("#empty").hidden = history.length > 0;
+    setEmpty(!history.length);
     history.forEach((m, i) => messagesEl.append(m.role === "user" ? userBubble(m.content) : addBotFromHistory(m, i)));
-    scrollDown(true);
+    if (history.length) scrollDown(true); else messagesEl.scrollTop = 0;   // an empty chat opens at its top
     const last = lastAnswerIndex();
     Evidence.show(last);
     updateRedo();
@@ -277,15 +310,18 @@
     setStatus();
   }
 
+  /* an empty chat hides the pipeline and the sources column; the first question slides them in */
+  function setEmpty(on) { document.body.classList.toggle("chat-empty", on); }
+
   function renderNext() {
     $$(".next", messagesEl).forEach((n) => n.remove());
-    if (!history.length || busy) return;
+    if (!history.length || busy || !prefs.next) return;
     const asked = new Set(history.filter((m) => m.role === "user").map((m) => m.content));
     const qs = EXAMPLES.filter((q) => !asked.has(q)).slice(0, 2);
     if (!qs.length) return;
-    const box = el("div", "next", '<span>Ask next</span>');
+    const box = el("div", "next", `<span>${t("Ask next")}</span>`);
     box.setAttribute("role", "group");
-    box.setAttribute("aria-label", "Suggested questions");
+    box.setAttribute("aria-label", t("Suggested questions"));
     qs.forEach((q) => { const b = el("button", "", esc(q)); b.type = "button"; b.addEventListener("click", () => ask(q)); box.append(b); });
     messagesEl.append(box);
   }
@@ -302,14 +338,14 @@
     s.classList.toggle("busy", !!busy);
     if (text) { s.textContent = text; return; }
     const i = lastAnswerIndex();
-    s.textContent = i < 0 ? "ready" : `run ${runId(history[i], i)} · ${history[i].noAnswer ? "not in KB" : history[i].stopped ? "stopped" : "passed"}`;
+    s.textContent = i < 0 ? t("ready") : `${t("run")} ${runId(history[i], i)} · ${t(history[i].noAnswer ? "not in KB" : history[i].stopped ? "stopped" : "passed")}`;
   }
 
   /* ------------------------------------------------------------ runs (left rail) */
   function chatWhen(t) {
     const d = new Date(t), now = new Date();
-    if (d.toDateString() === now.toDateString()) return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    return d.toLocaleDateString([], { day: "numeric", month: "short" });
+    if (d.toDateString() === now.toDateString()) return d.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
+    return d.toLocaleDateString(locale, { day: "numeric", month: "short" });
   }
   function persistChats(dropOldest = () => false) {
     for (;;) {                                       // drop the oldest unpinned chats if storage is full
@@ -322,28 +358,28 @@
     const n = (c.history || []).filter((m) => m.role === "user").length;
     return `<div class="run${c.id === currentId ? " on" : ""}${c.pinned ? " pinned" : ""}" data-id="${esc(c.id)}" role="listitem">
       <button type="button" class="run-main" title="${esc(c.title)}">
-        <small>${chatWhen(c.updated)} · ${n} question${n === 1 ? "" : "s"}</small><span>${esc(c.title)}</span>
+        <small>${chatWhen(c.updated)} · ${pl(n, "question")}</small><span>${esc(c.title)}</span>
       </button>
-      <button type="button" class="run-more" aria-label="Chat options" aria-haspopup="menu" title="Options">
+      <button type="button" class="run-more" aria-label="${t("Chat options")}" aria-haspopup="menu" title="${t("Options")}">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
       </button></div>`;
   }
   function renderRuns() {
     const box = $("#runs");
     const live = chats.some((c) => c.id === currentId) || !history.length ? chats.slice() : (() => {
-      const draft = { id: currentId, title: (history.find((m) => m.role === "user") || {}).content || "New chat", updated: Date.now(), history };
+      const draft = { id: currentId, title: (history.find((m) => m.role === "user") || {}).content || t("New chat"), updated: Date.now(), history };
       const at = chats.filter((c) => c.pinned).length;
       return [...chats.slice(0, at), draft, ...chats.slice(at)];
     })();
-    if (!live.length) { box.innerHTML = '<p class="runs-empty">No chats yet. Ask a question to start one.</p>'; return; }
+    if (!live.length) { box.innerHTML = `<p class="runs-empty">${t("No chats yet. Ask a question to start one.")}</p>`; return; }
     const q = ($("#run-search").value || "").trim().toLowerCase();
     box.classList.toggle("searching", !!q);
     const shown = q ? live.filter((c) => (c.title || "").toLowerCase().includes(q) || (c.history || []).some((m) => m.role === "user" && m.content.toLowerCase().includes(q))) : live;
-    if (!shown.length) { box.innerHTML = `<p class="runs-empty">No chats match “${esc(q)}”.</p>`; return; }
+    if (!shown.length) { box.innerHTML = `<p class="runs-empty">${t("No chats match “{q}”.", { q: esc(q) })}</p>`; return; }
     const pinned = shown.filter((c) => c.pinned), rest = shown.filter((c) => !c.pinned);
     box.innerHTML = pinned.length
-      ? `<p class="runs-group" data-group="pinned">${PIN_SVG}Pinned</p>${pinned.map(runRow).join("")}
-         <p class="runs-group" data-group="recent">Recent</p>${rest.length ? rest.map(runRow).join("") : '<p class="runs-empty runs-drop">Drag a chat here to unpin it</p>'}`
+      ? `<p class="runs-group" data-group="pinned">${PIN_SVG}${t("Pinned")}</p>${pinned.map(runRow).join("")}
+         <p class="runs-group" data-group="recent">${t("Recent")}</p>${rest.length ? rest.map(runRow).join("") : `<p class="runs-empty runs-drop">${t("Drag a chat here to unpin it")}</p>`}`
       : rest.map(runRow).join("");
   }
   $("#run-search").addEventListener("input", () => renderRuns());
@@ -354,8 +390,55 @@
     const b = e.target.closest(".run-main");
     if (!b || b.closest(".run").classList.contains("editing")) return;
     const id = b.closest(".run").dataset.id;
+    if (document.body.dataset.view !== "assistant") location.hash = "assistant";
     if (id !== currentId) openChat(id);
+    Drawer.close();
   });
+
+  /* mobile: the chat list slides in from the left */
+  const Drawer = {
+    get isOpen() { return document.body.classList.contains("drawer-open"); },
+    open() {
+      document.body.classList.add("drawer-open");
+      $("#m-chats").setAttribute("aria-expanded", "true");
+    },
+    close() {
+      if (!this.isOpen) return;
+      document.body.classList.remove("drawer-open");
+      $("#m-chats").setAttribute("aria-expanded", "false");
+      RunMenu.close();
+      if (!$("#run-search").value) $("#rail").classList.remove("search-open");
+    },
+  };
+  /* on a phone the menu lives outside the Assistant tab, so it opens from every tab */
+  (() => {
+    const rail = $("#rail"), home = document.createComment("rail"), mq = matchMedia("(max-width: 700px)");
+    rail.before(home);
+    const place = () => { if (mq.matches) document.body.append(rail); else { home.after(rail); Drawer.close(); } };
+    place();
+    mq.addEventListener("change", place);
+  })();
+  $(".drawer-nav").addEventListener("click", (e) => { if (e.target.closest("a")) Drawer.close(); });
+  $("#d-theme").addEventListener("click", () => $("#theme-toggle").click());
+  $("#d-search").addEventListener("click", () => {
+    const open = $("#rail").classList.toggle("search-open");
+    if (open) $("#run-search").focus();
+    else { $("#run-search").value = ""; renderRuns(); }
+  });
+  $("#m-chats").addEventListener("click", () => (Drawer.isOpen ? Drawer.close() : Drawer.open()));
+  $("#drawer-scrim").addEventListener("click", () => Drawer.close());
+  addEventListener("keydown", (e) => { if (e.key === "Escape") Drawer.close(); });
+  (() => {   // swipe left to close
+    let x0 = null, y0 = 0;
+    const rail = $("#rail");
+    rail.addEventListener("touchstart", (e) => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+    rail.addEventListener("touchend", (e) => {
+      if (x0 === null || !Drawer.isOpen) return;
+      const t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0;
+      x0 = null;
+      if (dx < -60 && Math.abs(dx) > Math.abs(dy) * 1.5 && !$("#runs").classList.contains("sorting")) Drawer.close();
+    }, { passive: true });
+  })();
 
   /* chat actions: the ⋯ menu (pin, rename, delete) */
   function startNewChat() {
@@ -399,12 +482,12 @@
     open(id, anchor) {
       const m = this.el || this.build();
       const chat = chats.find((c) => c.id === id);
-      if (!chat) { toast("Ask a question first to keep this chat"); return; }
+      if (!chat) { toast(t("Ask a question first to keep this chat")); return; }
       this.id = id; this.anchor = anchor;
       m.innerHTML = `
-        <button type="button" role="menuitem" class="mm-item" data-act="pin"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4h6l-1 6 4 4H6l4-4zM12 14v7"/></svg>${chat.pinned ? "Unpin" : "Pin"}</button>
-        <button type="button" role="menuitem" class="mm-item" data-act="rename"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"/></svg>Rename</button>
-        <button type="button" role="menuitem" class="mm-item danger" data-act="delete"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>Delete</button>`;
+        <button type="button" role="menuitem" class="mm-item" data-act="pin"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4h6l-1 6 4 4H6l4-4zM12 14v7"/></svg>${chat.pinned ? t("Unpin") : t("Pin")}</button>
+        <button type="button" role="menuitem" class="mm-item" data-act="rename"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"/></svg>${t("Rename")}</button>
+        <button type="button" role="menuitem" class="mm-item danger" data-act="delete"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>${t("Delete")}</button>`;
       m.hidden = false;
       $$(".run-more.open").forEach((b) => b.classList.remove("open"));
       anchor.classList.add("open");
@@ -437,7 +520,7 @@
     chats.splice(chat.pinned ? pinnedCount : pinnedCount, 0, chat);   // last pinned / first recent
     persistChats();
     renderRuns();
-    toast(chat.pinned ? "Chat pinned" : "Chat unpinned");
+    toast(chat.pinned ? t("Chat pinned") : t("Chat unpinned"));
   }
   function renameChat(id) {
     const row = $(`.run[data-id="${CSS.escape(id)}"]`, $("#runs"));
@@ -449,7 +532,7 @@
     field.className = "run-rename";
     field.value = chat.title;
     field.maxLength = 120;
-    field.setAttribute("aria-label", "Chat name");
+    field.setAttribute("aria-label", t("Chat name"));
     span.replaceWith(field);
     field.focus();
     field.select();
@@ -476,8 +559,8 @@
     chats.splice(at, 1);
     persistChats();
     if (wasCurrent) startNewChat(); else renderRuns();
-    toast("Chat deleted", 5000, {
-      label: "Undo",
+    toast(t("Chat deleted"), 5000, {
+      label: t("Undo"),
       run() {
         if (chats.some((c) => c.id === chat.id)) return;
         chats.splice(Math.min(at, chats.length), 0, chat);
@@ -602,7 +685,7 @@
       chats.splice(at, 0, chat);
       persistChats();
       renderRuns();
-      if (pinChanged) toast(chat.pinned ? "Chat pinned" : "Chat unpinned");
+      if (pinChanged) toast(chat.pinned ? t("Chat pinned") : t("Chat unpinned"));
     },
   };
   RunDrag.init();
@@ -629,14 +712,14 @@
       const numbered = sources.map((s, k) => ({ s, n: k + 1 }));
       const used = cited.size ? numbered.filter((x) => cited.has(x.n)) : numbered;
       const rest = cited.size ? numbered.filter((x) => !cited.has(x.n)) : [];
-      $("#ev-title").textContent = !sources.length ? "Sources" : cited.size ? `Sources · ${used.length} cited` : `Sources · ${sources.length}`;
+      $("#ev-title").textContent = !sources.length ? t("Sources") : cited.size ? t("Sources · {n} cited", { n: used.length }) : t("Sources · {n}", { n: sources.length });
       $("#ev-map").hidden = !sources.length;
       $("#ev-empty").hidden = !!sources.length;
       $("#ev-empty").textContent = msg && msg.noAnswer
-        ? "No sources were close enough to this question, so nothing was used for the answer."
-        : "Sources appear here with each answer: the passages the assistant read, how closely each one matches your question, and where they sit on the knowledge map.";
+        ? t("No sources were close enough to this question, so nothing was used for the answer.")
+        : t("Sources appear here with each answer: the passages the assistant read, how closely each one matches your question, and where they sit on the knowledge map.");
       list.innerHTML = used.map((x) => row(x.s, x.n, false)).join("") +
-        (rest.length ? `<li class="ev-sep" aria-hidden="true">Also retrieved · not used</li>` + rest.map((x) => row(x.s, x.n, true)).join("") : "");
+        (rest.length ? `<li class="ev-sep" aria-hidden="true">${t("Also retrieved · not used")}</li>` + rest.map((x) => row(x.s, x.n, true)).join("") : "");
       map.innerHTML = "";
       if (sources.length && msg.point) this.minimap(msg);
       renderRuns();
@@ -657,7 +740,7 @@
       });
       html += `<svg viewBox="0 0 100 100" preserveAspectRatio="none">${rays}</svg>
         <span class="qr" style="left:${q.x}%;top:${q.y}%"></span><span class="q" style="left:${q.x}%;top:${q.y}%"></span>
-        <span class="cap">◆ your question</span>`;
+        <span class="cap">${t("◆ your question")}</span>`;
       $("#ev-minimap").innerHTML = html;
     },
     open(n) {
@@ -694,7 +777,7 @@
         chats.splice(chats.filter((c) => c.pinned).length, 0, chat);
       }
       const first = hist.find((m) => m.role === "user");
-      if (!chat.renamed) chat.title = first ? first.content : "New chat";
+      if (!chat.renamed) chat.title = first ? first.content : t("New chat");
       chat.updated = Date.now();
       chat.history = hist.slice(-40);
     }
@@ -748,6 +831,7 @@
     text = text.trim();
     if (!text || busy) return;
     $("#empty").hidden = true;
+    setEmpty(false);
     $$(".next", messagesEl).forEach((n) => n.remove());
     history.push({ role: "user", content: text });
     const chatId = currentId, chatHist = history;     // the chat this question belongs to
@@ -759,9 +843,9 @@
 
     setBusy(true);
     renderRuns();
-    setStatus("running…");
+    setStatus(t("running…"));
     Pipe.reset();
-    Pipe.set("retrieve", "active", "embedding…");
+    Pipe.set("retrieve", "active", t("embedding…"));
     const payload = {
       // skip failed turns and "not in the knowledge base" turns (and the questions that led to them)
       messages: history.filter((m, i) => !m.error && !m.noAnswer && !(history[i + 1] && (history[i + 1].noAnswer || history[i + 1].error)))
@@ -770,6 +854,7 @@
       tone: settings.tone,
       top_k: settings.top_k,
       model: settings.model || undefined,
+      answer_lang: prefs.answerLang,
     };
 
     let raf = 0;
@@ -791,8 +876,8 @@
           msg.point = data.point;
           msg.timings.retrieve_ms = data.retrieve_ms;
           Pipe.set("retrieve", "done", fmtMs(data.retrieve_ms));
-          Pipe.set("augment", "done", `${data.sources.length} chunks`);
-          Pipe.set("generate", "active", "streaming…");
+          Pipe.set("augment", "done", pl(data.sources.length, "chunk"));
+          Pipe.set("generate", "active", t("streaming…"));
           fillSources(node, msg.sources);
           lastHit = { query: msg.rewrite || text, point: data.point, sources: data.sources };
           history.push(msg);                 // provisional, so the evidence panel can show it now
@@ -805,9 +890,10 @@
           if (!msg.timings.first_think_ms) msg.timings.first_think_ms = 1;
           schedule();
         } else if (event === "no_answer") {
-          msg.noAnswer = { best: data.best_score, min: data.min_score, ru: isRu(text) };
-          Pipe.set("augment", "done", "0 chunks");
-          Pipe.set("generate", "done", "not in KB");
+          const lang = noAnswerLang(text);
+          msg.noAnswer = { best: data.best_score, min: data.min_score, lang, ru: lang === "ru" };
+          Pipe.set("augment", "done", pl(0, "chunk"));
+          Pipe.set("generate", "done", t("not in KB"));
           schedule();
         } else if (event === "token") {
           msg.content += data.t;
@@ -823,17 +909,17 @@
           throw new Error(data.detail);
         }
       }
-      if (!msg.content && !msg.noAnswer) msg.content = "_The model returned an empty answer._";
+      if (!msg.content && !msg.noAnswer) msg.content = `_${t("The model returned an empty answer.")}_`;
     } catch (e) {
       if (e.name === "AbortError") {
-        msg.content = (msg.content || "") + "\n\n_— stopped —_";
+        msg.content = (msg.content || "") + `\n\n_${t("— stopped —")}_`;
         msg.stopped = true;
-        Pipe.set("generate", "fail", "stopped");
+        Pipe.set("generate", "fail", t("stopped"));
       } else {
         msg.error = true;
-        msg.content = `Something went wrong: ${e.message}`;
+        msg.content = t("Something went wrong: {e}", { e: e.message });
         node.classList.add("error");
-        $$("#pipeline li.active").forEach((li) => { li.className = "fail"; $("small", li).textContent = "error"; });
+        $$("#pipeline li.active").forEach((li) => { li.className = "fail"; $("small", li).textContent = t("error"); });
       }
     } finally {
       if (raf) cancelAnimationFrame(raf);
@@ -855,7 +941,7 @@
       save();
       setBusy(false);
       if (!msg.error) Evidence.show(history.length - 1); else renderRuns();
-      setStatus(msg.error ? "run failed" : undefined);
+      setStatus(msg.error ? t("run failed") : undefined);
       updateRedo();
       renderNext();
       scrollDown();
@@ -866,7 +952,7 @@
   function setBusy(on) {
     const btn = $("#ask");
     busy = on ? new AbortController() : null;
-    $("span", btn).textContent = on ? "Stop" : "Ask";
+    $("span", btn).textContent = on ? t("Stop") : t("Ask");
     btn.classList.toggle("stop", on);
     $("#motif").classList.toggle("busy", on);
   }
@@ -880,7 +966,9 @@
   input.addEventListener("blur", () => setTimeout(unshift, 50));
   window.visualViewport && visualViewport.addEventListener("resize", () => { if (document.activeElement !== input) unshift(); });
   input.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); $("#composer").requestSubmit(); }
+    if (e.key !== "Enter" || e.shiftKey || e.isComposing) return;
+    const mod = e.metaKey || e.ctrlKey;
+    if (prefs.enter || mod) { e.preventDefault(); $("#composer").requestSubmit(); }
   });
   $("#composer").addEventListener("submit", (e) => {
     e.preventDefault();
@@ -900,20 +988,23 @@
     Pipe.reset();
     renderHistory();
     renderRuns();
-    input.focus();
+    const wasDrawer = Drawer.isOpen;
+    Drawer.close();
+    if (!wasDrawer && !matchMedia("(max-width: 700px)").matches) input.focus();
   });
   /* settings: tone, number of sources, model */
   const settings = Object.assign({ tone: "formal", top_k: 5, model: "" }, store.get("kb.settings", {}));
   const saveSettings = () => store.set("kb.settings", settings);
+  function toneName(v) { return t(v.charAt(0).toUpperCase() + v.slice(1)); }
   function paintSettings() {
     $$("#tone button").forEach((b) => { const on = b.dataset.v === settings.tone; b.classList.toggle("on", on); b.setAttribute("aria-checked", String(on)); });
     $("#topk-dec").disabled = settings.top_k <= 1;
     $("#topk-inc").disabled = settings.top_k >= 10;
     $("#topk").value = settings.top_k;
     $("#topk-val").textContent = settings.top_k;
-    const tone = settings.tone.charAt(0).toUpperCase() + settings.tone.slice(1);
+    const tone = toneName(settings.tone);
     $("#style-summary").textContent = `${tone} · ${settings.top_k}`;
-    $("#style-btn").title = `Answer style: ${tone}, up to ${settings.top_k} source${settings.top_k === 1 ? "" : "s"}`;
+    $("#style-btn").title = t("Answer style: {tone}, up to {n}", { tone, n: pl(settings.top_k, "source") });
   }
   /* answer style: a second chip in the composer, same pop-up as the model menu */
   $("#style-btn").addEventListener("click", (e) => { e.stopPropagation(); setMenu("style", $("#style-menu").hidden); });
@@ -931,21 +1022,21 @@
   const Models = { list: [], def: "" };
   function modelHint(m) {
     const size = parseFloat((m.match(/(\d+(?:\.\d+)?)b\b/i) || [])[1]);
-    if (!size) return "Local model";
-    if (size <= 2) return "Fastest · good for quick answers";
-    if (size <= 5) return "Balanced · smarter, a bit slower";
-    return "Most capable · slowest";
+    if (!size) return t("Local model");
+    if (size <= 2) return t("Fastest · good for quick answers");
+    if (size <= 5) return t("Balanced · smarter, a bit slower");
+    return t("Most capable · slowest");
   }
   const currentModel = () => settings.model || Models.def;
   function paintModels() {
-    $("#model-name").textContent = currentModel() || "model";
+    $("#model-name").textContent = currentModel() || t("model");
     const menu = $("#model-menu");
-    menu.innerHTML = `<p class="mm-head">Model</p>` + Models.list.map((m) => `
+    menu.innerHTML = `<p class="mm-head">${t("Model")}</p>` + Models.list.map((m) => `
       <button type="button" role="option" class="mm-item${m === currentModel() ? " on" : ""}" aria-selected="${m === currentModel()}" data-m="${esc(m)}">
-        <span class="mm-text"><b>${esc(m)}${m === Models.def ? '<i class="mm-tag">default</i>' : ""}</b><small>${modelHint(m)}</small></span>
+        <span class="mm-text"><b>${esc(m)}${m === Models.def ? '<i class="mm-tag">${t("default")}</i>' : ""}</b><small>${modelHint(m)}</small></span>
         <svg class="mm-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
       </button>`).join("") +
-      (Models.list.length < 2 ? `<p class="mm-foot">Pull more models into Ollama on the server and they appear here.</p>` : "");
+      (Models.list.length < 2 ? `<p class="mm-foot">${t("Pull more models into Ollama on the server and they appear here.")}</p>` : "");
   }
   function setMenu(name, open) {                    // name: "model" | "style"; only one menu open at a time
     ["model", "style"].forEach((n) => {
@@ -977,13 +1068,13 @@
       Models.list = r.models; Models.def = r.default;
       if (settings.model && !r.models.includes(settings.model)) { settings.model = ""; saveSettings(); }
       paintModels();
-    } catch (e) { toast(`Models: ${e.message}`); }
+    } catch (e) { toast(t("Models: {e}", { e: e.message })); }
   }
   paintSettings();
   loadModels();
 
   $("#think-toggle").checked = store.get("kb.think", true);
-  $("#think-toggle").addEventListener("change", (e) => store.set("kb.think", e.target.checked));
+  $("#think-toggle").addEventListener("change", (e) => { store.set("kb.think", e.target.checked); $("#set-think").checked = e.target.checked; });
 
   EXAMPLES.forEach((q) => {
     const b = el("button", "", esc(q));
@@ -1021,7 +1112,7 @@
       renderHistory();
       if (q) ask(q.content);
     } else if (act.dataset.act === "copy") {
-      try { await navigator.clipboard.writeText(msg.noAnswer ? (msg.noAnswer.ru ? NOANSWER_RU : NOANSWER_EN).title + "." : msg.content); toast("Answer copied"); } catch { toast("Copy is not available here"); }
+      try { await navigator.clipboard.writeText(msg.noAnswer ? NOANSWER(msg.noAnswer).title + "." : msg.content); toast(t("Answer copied")); } catch { toast(t("Copy is not available here")); }
     } else if (act.dataset.act === "up" || act.dataset.act === "down") {
       const rating = act.dataset.act === "up" ? 1 : -1;
       try {
@@ -1031,7 +1122,7 @@
         msg.rating = rating;
         save();
         fillMeta(node, msg);
-        toast(rating === 1 ? "Thanks! Marked as helpful" : "Thanks! Marked as not helpful");
+        toast(rating === 1 ? t("Thanks! Marked as helpful") : t("Thanks! Marked as not helpful"));
       } catch (err) { toast(err.message); }
     }
   });
@@ -1091,9 +1182,9 @@
       vb = { x: cx - (cx - vb.x) * r, y: cy - (cy - vb.y) * r, w: nw, h: nw * H / W };
       pan(0, 0);
     }
-    function pan(dx, dy) {
-      vb.x = clamp(vb.x + dx, -W * 0.05, W * 1.05 - vb.w);
-      vb.y = clamp(vb.y + dy, -H * 0.05, H * 1.05 - vb.h);
+    function pan(dx, dy) {          // the map can be pulled until half of the view is past its edge
+      vb.x = clamp(vb.x + dx, -vb.w * 0.5, W - vb.w * 0.5);
+      vb.y = clamp(vb.y + dy, -vb.h * 0.5, H - vb.h * 0.5);
       applyView();
     }
     function toSvg(e) {
@@ -1106,26 +1197,84 @@
       const p = toSvg(e);
       zoom(e.deltaY > 0 ? 1.15 : 1 / 1.15, p.x, p.y);
     }, { passive: false });
-    let drag = null;
+    /* touch + mouse: one pointer drags the map, two pointers pinch to zoom, a double tap zooms in */
+    const unit = () => { const m = svg.getScreenCTM(); return m ? 1 / m.a : 1; };
+    const ptrs = new Map();
+    let drag = null, pinch = null, lastTap = null;
+    const pinchState = () => {
+      const [a, b] = [...ptrs.values()];
+      return { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+    };
+    function used() { stage.classList.add("used"); }       // hides the gesture hint after the first touch
     stage.addEventListener("pointerdown", (e) => {
-      if (e.button !== 0) return;
-      drag = { x: e.clientX, y: e.clientY, moved: false, id: e.pointerId };
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      used();
+      if (ptrs.size === 2) {
+        pinch = pinchState();
+        if (drag) drag.moved = true;                       // a pinch is never a tap on a dot
+        stage.classList.add("dragging"); tip.hidden = true;
+      } else if (ptrs.size === 1) {
+        drag = { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, moved: false, id: e.pointerId };
+      }
     });
     stage.addEventListener("pointermove", (e) => {
-      if (!drag) return;
+      if (!ptrs.has(e.pointerId)) return;
+      ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pinch && ptrs.size >= 2) {
+        const now = pinchState(), u = unit();
+        const at = toSvg({ clientX: now.x, clientY: now.y });
+        pan(-(now.x - pinch.x) * u, -(now.y - pinch.y) * u);
+        zoom(pinch.d / now.d, at.x, at.y);
+        pinch = now;
+        return;
+      }
+      if (!drag || e.pointerId !== drag.id) return;
       const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
-      if (!drag.moved && Math.hypot(dx, dy) < 4) return;
+      if (!drag.moved && Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 6) return;
       if (!drag.moved) { drag.moved = true; stage.setPointerCapture(drag.id); stage.classList.add("dragging"); tip.hidden = true; }
-      const m = svg.getScreenCTM();
-      const unit = m ? 1 / m.a : 1;
+      const u = unit();
       drag.x = e.clientX; drag.y = e.clientY;
-      pan(-dx * unit, -dy * unit);
+      pan(-dx * u, -dy * u);
     });
-    const endDrag = () => {
+    const endDrag = (e) => {
+      ptrs.delete(e.pointerId);
+      if (ptrs.size === 1) {                              // one finger left after a pinch: keep dragging with it
+        pinch = null;
+        const [id, p] = [...ptrs.entries()][0];
+        drag = { x: p.x, y: p.y, x0: p.x, y0: p.y, moved: true, id };
+        return;
+      }
+      if (ptrs.size) return;
+      pinch = null;
+      const wasTap = drag && !drag.moved;
       if (drag && drag.moved) { stage.classList.remove("dragging"); setTimeout(() => { drag = null; }, 0); } else drag = null;
+      // double tap on a touch screen zooms in where it happened (the mouse has dblclick)
+      if (wasTap && e.pointerType !== "mouse") {
+        const now = Date.now();
+        if (lastTap && now - lastTap.t < 320 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 30) {
+          const p = toSvg(e);
+          zoom(1 / 1.8, p.x, p.y);
+          lastTap = null;
+        } else lastTap = { t: now, x: e.clientX, y: e.clientY };
+      }
     };
     stage.addEventListener("pointerup", endDrag);
     stage.addEventListener("pointercancel", endDrag);
+    stage.addEventListener("dblclick", (e) => { const p = toSvg(e); zoom(e.shiftKey ? 1.8 : 1 / 1.8, p.x, p.y); });
+    /* full screen map (phones): more room to move around */
+    const card = stage.closest(".map-card");
+    function setFull(on) {
+      card.classList.toggle("full", on);
+      document.body.classList.toggle("map-full", on);
+      $("#map-full").setAttribute("aria-pressed", String(on));
+      $("#map-full").title = on ? t("Exit full screen") : t("Full screen");
+      $("#map-full").setAttribute("aria-label", $("#map-full").title);
+      requestAnimationFrame(applyView);
+    }
+    $("#map-full").addEventListener("click", () => setFull(!card.classList.contains("full")));
+    addEventListener("keydown", (e) => { if (e.key === "Escape" && card.classList.contains("full")) setFull(false); });
+    addEventListener("hashchange", () => { if (card.classList.contains("full")) setFull(false); });
     $("#zoom-in").addEventListener("click", () => zoom(1 / 1.4));
     $("#zoom-out").addEventListener("click", () => zoom(1.4));
     $("#zoom-reset").addEventListener("click", () => { vb = { x: 0, y: 0, w: W, h: H }; highlightDoc(null); applyView(); });
@@ -1166,7 +1315,7 @@
 
     function count() {
       const docs = Object.keys(docGroups()).length;
-      $("#map-count").textContent = `${points.length} chunks · ${docs} documents · ${selectedDoc ? `isolating ${selectedDoc}` : "all documents"}`;
+      $("#map-count").textContent = t("{chunks} · {docs} · {what}", { chunks: pl(points.length, "chunk"), docs: pl(docs, "document"), what: selectedDoc ? t("isolating {doc}", { doc: selectedDoc }) : t("all documents") });
     }
 
     function legend() {
@@ -1251,7 +1400,7 @@
       const box = $("#map-detail");
       if (!h) { box.hidden = true; return; }
       box.hidden = false;
-      box.innerHTML = `<h4>Nearest chunks</h4><h5>“${esc(h.query)}”</h5>${srcRows(h.sources)}`;
+      box.innerHTML = `<h4>${t("Nearest chunks")}</h4><h5>“${esc(h.query)}”</h5>${srcRows(h.sources)}`;
     }
 
     async function showChunk(id) {
@@ -1259,7 +1408,7 @@
       try {
         const c = await api(`/kb/${id}`);
         box.hidden = false;
-        const back = shownHit ? '<button type="button" class="link" id="map-back">◂ nearest chunks</button>' : "";
+        const back = shownHit ? `<button type="button" class="link" id="map-back">${t("◂ nearest chunks")}</button>` : "";
         box.innerHTML = `<div class="side-title"><h4>${esc(c.source)} · #${c.id}</h4>${back}</div><h5>${esc(c.heading)}</h5><p>${esc(c.body)}</p>`;
         $$(".dot.sel", svg).forEach((d) => d.classList.remove("sel"));
         const dot = $(`.dot[data-id="${id}"]`, svg);
@@ -1281,10 +1430,28 @@
       tip.style.top = `${Math.min(y, box.height - 70)}px`;
     });
     svg.addEventListener("mouseleave", () => { tip.hidden = true; });
+    /* a tap picks the dot under the finger, or the nearest one within ~22 px: dots are small on a phone */
+    function nearestDot(e) {
+      const d = e.target.closest(".dot");
+      if (d) return d;
+      const p = toSvg(e), reach = 22 * unit();
+      let best = null, bd = reach;
+      points.forEach((pt) => { const dd = Math.hypot(sx(pt.x) - p.x, sy(pt.y) - p.y); if (dd < bd) { bd = dd; best = pt; } });
+      return best ? $(`.dot[data-id="${best.id}"]`, svg) : null;
+    }
     svg.addEventListener("click", (e) => {
       if (drag && drag.moved) return;
-      const d = e.target.closest(".dot");
-      if (d) showChunk(Number(d.dataset.id));
+      const d = nearestDot(e);
+      if (!d) { tip.hidden = true; return; }
+      showChunk(Number(d.dataset.id));
+      if (card.classList.contains("full") || e.pointerType === "touch" || matchMedia("(hover: none)").matches) {
+        // no hover on touch screens: show the label next to the dot instead
+        const p = byId.get(Number(d.dataset.id)), r = d.getBoundingClientRect(), box = stage.getBoundingClientRect();
+        tip.innerHTML = `<small>${esc(p.source)} · #${p.id}</small>${esc(p.heading)}`;
+        tip.hidden = false;
+        tip.style.left = `${clamp(r.left - box.left - 120, 8, box.width - 268)}px`;
+        tip.style.top = `${r.top - box.top > box.height / 2 ? r.top - box.top - tip.offsetHeight - 12 : r.bottom - box.top + 12}px`;
+      }
     });
     $("#legend").addEventListener("click", (e) => {
       const li = e.target.closest("li");
@@ -1304,7 +1471,7 @@
         const r = await api(`/kb/retrieve?query=${encodeURIComponent(q)}&limit=5`);
         highlightDoc(null);
         hit({ query: q, point: r.point, sources: r.sources });
-        $("#map-hint").textContent = `located in ${fmtMs(r.ms)} · embedding + cosine search · drag to pan · scroll to zoom`;
+        $("#map-hint").textContent = t("located in {t} · embedding + cosine search · drag to pan · scroll to zoom", { t: fmtMs(r.ms) });
       } catch (err) { toast(err.message); }
     });
 
@@ -1322,7 +1489,7 @@
             return;
           }
           if (lastHit && lastHit !== shownHit) { highlightDoc(null); hit(lastHit); }
-        } catch (e) { toast(`Map: ${e.message}`); }
+        } catch (e) { toast(t("Map: {e}", { e: e.message })); }
       },
       isolate(src) { pendingIsolate = src; },
       refresh() { if (loaded) applyView(); },
@@ -1349,8 +1516,19 @@
         if (!current || !docs.some((d) => d.source === current)) current = docs.length ? largest().source : null;
         render();
         inspect(current);
-      } catch (e) { toast(e.message); }
+      } catch (e) { failed(e); }
     }
+    /* the list could not be loaded: say so in the table and try again shortly */
+    let retryTimer = 0;
+    function failed(e) {
+      if (!docs.length) {
+        $("#docs").innerHTML = `<tr class="none"><td colspan="5">${esc(e.message)} <button type="button" class="link" id="docs-retry">${t("Retry")}</button></td></tr>`;
+        $("#docs-retry").addEventListener("click", () => load());
+      } else toast(e.message);
+      clearTimeout(retryTimer);
+      if (e.retry || !docs.length) retryTimer = setTimeout(() => { if (document.body.dataset.view === "documents") load(); }, 4000);
+    }
+    $$("#job-steps li").forEach((li) => { li.textContent = `○ ${t(li.dataset.s)}`; });
     const largest = () => docs.slice().sort((a, b) => b.chunks - a.chunks)[0];
 
     function render() {
@@ -1369,7 +1547,7 @@
           <td><div class="bar-cell"><i style="--w:${(d.chunks / max * 100).toFixed(1)}%"></i><b>${d.chunks}</b></div></td>
           <td class="num">${fmtK(d.chars)}</td>
           <td class="num dim">${(d.chunks / total * 100).toFixed(1)}%</td>
-        </tr>`).join("") : `<tr class="none"><td colspan="5">No documents match “${esc(q)}”</td></tr>`;
+        </tr>`).join("") : `<tr class="none"><td colspan="5">${t("No documents match “{q}”", { q: esc(q) })}</td></tr>`;
     }
 
     async function inspect(source) {
@@ -1378,14 +1556,14 @@
       const d = docs.find((x) => x.source === source);
       $("#insp-acts").hidden = !d;
       if (!d) {
-        $("#insp-title").textContent = "Select a document";
-        $("#insp-meta").textContent = "click a row in the table";
+        $("#insp-title").textContent = t("Select a document");
+        $("#insp-meta").textContent = t("click a row in the table");
         $("#insp-body").innerHTML = "";
         return;
       }
       const total = docs.reduce((s, x) => s + x.chunks, 0) || 1;
       $("#insp-title").textContent = d.source;
-      $("#insp-meta").textContent = `${d.chunks} chunks · ${fmtK(d.chars)} chars · ${(d.chunks / total * 100).toFixed(1)}% of KB`;
+      $("#insp-meta").textContent = t("{chunks} · {chars} chars · {p}% of KB", { chunks: pl(d.chunks, "chunk"), chars: fmtK(d.chars), p: (d.chunks / total * 100).toFixed(1) });
       try {
         const r = await api(`/kb/documents/${encodeURIComponent(source)}`);
         if (current !== source) return;
@@ -1397,14 +1575,14 @@
     function job(state, name, meta, steps) {
       const box = $("#job");
       box.className = `job ${state}`;
-      $("#job-state").textContent = { idle: "ready", running: "ingesting", done: "ingested", failed: "failed" }[state];
+      $("#job-state").textContent = t({ idle: "ready", running: "ingesting", done: "ingested", failed: "failed" }[state]);
       $("#job-name").textContent = name;
       $("#job-meta").textContent = meta;
       const order = ["parse", "split", "embed", "index"];
       $$("#job-steps li").forEach((li) => {
         const st = steps[li.dataset.s] || "todo";
         li.className = st;
-        li.textContent = `${st === "ok" ? "✓" : st === "now" ? "▸" : "○"} ${li.dataset.s}`;
+        li.textContent = `${st === "ok" ? "✓" : st === "now" ? "▸" : "○"} ${t(li.dataset.s)}`;
       });
       return order;
     }
@@ -1414,7 +1592,7 @@
       const drop = $("#drop");
       drop.classList.add("busy");
       $("#upload-progress").hidden = false;
-      $("b", drop).textContent = `Embedding ${file.name}…`;
+      $("b", drop).textContent = t("Embedding {name}…", { name: file.name });
       job("running", file.name, `${(file.size / 1024).toFixed(1)} KB`, { parse: "now", split: "now", embed: "now" });
       const fd = new FormData();
       fd.append("file", file);
@@ -1422,17 +1600,17 @@
         const r = await api("/kb/upload", { method: "POST", body: fd, headers: adminHeaders() });
         fresh.add(r.source);
         current = r.source;
-        job("done", file.name, `${r.chunks} chunks in ${fmtMs(r.ms)}`, { parse: "ok", split: "ok", embed: "ok", index: "ok" });
-        toast(`“${r.source}” added: ${r.chunks} chunks in ${fmtMs(r.ms)}`, 4500);
+        job("done", file.name, t("{chunks} in {t}", { chunks: pl(r.chunks, "chunk"), t: fmtMs(r.ms) }), { parse: "ok", split: "ok", embed: "ok", index: "ok" });
+        toast(t("“{s}” added: {chunks} in {t}", { s: r.source, chunks: pl(r.chunks, "chunk"), t: fmtMs(r.ms) }), 4500);
         MapView.invalidate();
         await Promise.all([load(), loadStats()]);
       } catch (e) {
         job("failed", file.name, e.message, {});
-        toast(`Upload failed: ${e.message}`, 5000);
+        toast(t("Upload failed: {e}", { e: e.message }), 5000);
       } finally {
         drop.classList.remove("busy", "over");
         $("#upload-progress").hidden = true;
-        $("b", drop).textContent = "Drop a file here";
+        $("b", drop).textContent = t("Drop a file here");
         $("#file").value = "";
       }
     }
@@ -1461,18 +1639,18 @@
       if (!current) return;
       const btn = e.currentTarget;
       btn.disabled = true;
-      btn.textContent = "Embedding…";
+      btn.textContent = t("Embedding…");
       try {
         const r = await api(`/kb/documents/${encodeURIComponent(current)}/reembed`, { method: "POST", headers: adminHeaders() });
         MapView.invalidate();
-        toast(`Re-embedded “${r.source}”: ${r.chunks} chunks in ${fmtMs(r.ms)}`);
-      } catch (err) { toast(err.message); } finally { btn.disabled = false; btn.textContent = "Re-embed"; }
+        toast(t("Re-embedded “{s}”: {chunks} in {t}", { s: r.source, chunks: pl(r.chunks, "chunk"), t: fmtMs(r.ms) }));
+      } catch (err) { toast(err.message); } finally { btn.disabled = false; btn.textContent = t("Re-embed"); }
     });
     $("#insp-delete").addEventListener("click", async () => {
-      if (!current || !confirm(`Delete “${current}” and all its chunks from the knowledge base?`)) return;
+      if (!current || !confirm(t("Delete “{s}” and all its chunks from the knowledge base?", { s: current }))) return;
       try {
         const r = await api(`/kb/documents/${encodeURIComponent(current)}`, { method: "DELETE", headers: adminHeaders() });
-        toast(`Deleted “${r.source}” (${r.chunks} chunks)`);
+        toast(t("Deleted “{s}” ({chunks})", { s: r.source, chunks: pl(r.chunks, "chunk") }));
         fresh.delete(r.source);
         current = null;
         MapView.invalidate();
@@ -1484,10 +1662,174 @@
   })();
 
   const phone = matchMedia("(max-width: 700px)");
-  const setPlaceholder = () => { input.placeholder = phone.matches ? "Ask a question…" : "Ask about services, products, expertise…"; };
+  const setPlaceholder = () => { input.placeholder = phone.matches ? t("Ask a question…") : t("Ask about services, products, expertise…"); };
   phone.addEventListener("change", setPlaceholder);
   setPlaceholder();
   window.addEventListener("resize", () => { if (document.body.dataset.view === "map") MapView.refresh(); });
+
+  /* ------------------------------------------------------------ profile + settings */
+  const Profile = (() => {
+    const isAdmin = () => !!store.get("kb.admin", "");
+    const displayName = () => profile.name || t("Guest");
+    function avatar(node) {
+      node.classList.toggle("photo", !!profile.photo);
+      if (profile.photo) node.innerHTML = `<img src="${profile.photo}" alt="">`;
+      else node.innerHTML = profile.name
+        ? esc(profile.name.trim().charAt(0).toUpperCase())
+        : '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5"/><path d="M5.5 19c1.2-3.3 3.6-5 6.5-5s5.3 1.7 6.5 5"/></svg>';
+    }
+    function paint() {
+      ["#p-avatar", "#set-avatar"].forEach((sel) => avatar($(sel)));
+      $("#p-name").textContent = displayName();
+      $("#p-sub").hidden = !isAdmin();
+      $("#p-sub").textContent = `· ${t("Admin")}`;
+      $("#set-photo-label").textContent = profile.photo ? t("Change photo") : t("Upload photo");
+      $("#set-photo-rm").hidden = !profile.photo;
+      $("#empty h4").textContent = profile.name ? t("What would you like to know, {name}?", { name: profile.name }) : t("What would you like to know?");
+    }
+    const save = () => { store.set("kb.profile", profile); paint(); };
+
+    /* the photo is cropped to a square and shrunk to 192 px, so it fits easily in localStorage */
+    function readPhoto(file) {
+      if (!file || !/^image\//.test(file.type)) { toast(t("This file is not an image")); return; }
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        const side = Math.min(img.naturalWidth, img.naturalHeight), size = 192;
+        const c = document.createElement("canvas");
+        c.width = c.height = size;
+        c.getContext("2d").drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, size, size);
+        URL.revokeObjectURL(url);
+        profile.photo = c.toDataURL("image/jpeg", 0.86);
+        save();
+        toast(t("Profile saved"));
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); toast(t("This file is not an image")); };
+      img.src = url;
+    }
+
+    /* ---- menu above the profile row ---- */
+    const menu = $("#profile-menu"), btn = $("#profile-btn");
+    const setMenu = (open) => {
+      menu.hidden = !open;
+      btn.setAttribute("aria-expanded", String(open));
+      btn.classList.toggle("open", open);
+    };
+    btn.addEventListener("click", (e) => { e.stopPropagation(); setMenu(menu.hidden); });
+    menu.addEventListener("click", (e) => e.stopPropagation());
+    document.addEventListener("click", () => setMenu(false));
+    menu.addEventListener("keydown", (e) => { if (e.key === "Escape") { setMenu(false); btn.focus(); } });
+    $('[data-act="settings"]', menu).addEventListener("click", () => { setMenu(false); Settings.open(); });
+
+    function paintLang(group, v) {
+      $$("button", group).forEach((b) => { const on = b.dataset.v === v; b.classList.toggle("on", on); b.setAttribute("aria-checked", String(on)); });
+    }
+    /* the interface language needs a fresh page: the static text is translated on load */
+    function setLang(v) {
+      if (v === prefs.lang) return;
+      prefs.lang = v;
+      savePrefs();
+      try { sessionStorage.setItem("kb.reopen", Settings.isOpen() ? "settings" : ""); } catch { /* ignore */ }
+      location.reload();
+    }
+
+    /* ---- settings dialog ---- */
+    const dlg = $("#settings");
+    const themeNow = () => store.get("kb.themeMode", null) || (localStorage.getItem("kb.theme") ? document.documentElement.dataset.theme : "system");
+    const sysDark = matchMedia("(prefers-color-scheme: dark)");
+    function applyTheme(mode) {
+      store.set("kb.themeMode", mode);
+      if (mode === "system") {
+        try { localStorage.removeItem("kb.theme"); } catch { /* ignore */ }
+        document.documentElement.dataset.theme = sysDark.matches ? "dark" : "light";
+      } else {
+        try { localStorage.setItem("kb.theme", mode); } catch { /* ignore */ }
+        document.documentElement.dataset.theme = mode;
+      }
+    }
+    sysDark.addEventListener("change", () => { if (themeNow() === "system") applyTheme("system"); });
+    /* the header / drawer theme buttons pick an explicit theme */
+    $("#theme-toggle").addEventListener("click", () => setTimeout(() => { store.set("kb.themeMode", document.documentElement.dataset.theme); fill(); }, 0));
+
+    function applyPrefs() {
+      document.body.classList.toggle("no-pipeline", !prefs.pipeline);
+    }
+    function fill() {
+      $("#set-name").value = profile.name;
+      paintLang($("#set-lang"), prefs.lang);
+      paintLang($("#set-alang"), prefs.answerLang);
+      paintLang($("#set-theme"), themeNow());
+      $("#set-pipeline").checked = prefs.pipeline;
+      $("#set-think").checked = $("#think-toggle").checked;
+      $("#set-next").checked = prefs.next;
+      $("#set-enter").checked = prefs.enter;
+      $("#set-token").value = store.get("kb.admin", "");
+    }
+    const Settings = {
+      isOpen: () => dlg.open,
+      open() {
+        fill();
+        Drawer.close();
+        if (typeof dlg.showModal === "function") dlg.showModal(); else dlg.setAttribute("open", "");
+        $(".set-body", dlg).scrollTop = 0;
+      },
+      close() { if (dlg.open) dlg.close(); },
+    };
+    $("#set-close").addEventListener("click", () => Settings.close());
+    dlg.addEventListener("click", (e) => { if (e.target === dlg) Settings.close(); });   // click on the backdrop
+    $("#set-name").addEventListener("input", (e) => { profile.name = e.target.value.trim().slice(0, 32); save(); });
+    $("#set-photo").addEventListener("change", (e) => { readPhoto(e.target.files[0]); e.target.value = ""; });
+    $("#set-photo-rm").addEventListener("click", () => { profile.photo = ""; save(); });
+    $("#set-lang").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) setLang(b.dataset.v); });
+    $("#set-alang").addEventListener("click", (e) => {
+      const b = e.target.closest("button");
+      if (!b) return;
+      prefs.answerLang = b.dataset.v; savePrefs(); paintLang($("#set-alang"), prefs.answerLang);
+    });
+    $("#set-theme").addEventListener("click", (e) => {
+      const b = e.target.closest("button");
+      if (!b) return;
+      applyTheme(b.dataset.v); paintLang($("#set-theme"), b.dataset.v);
+    });
+    $("#set-pipeline").addEventListener("change", (e) => { prefs.pipeline = e.target.checked; savePrefs(); applyPrefs(); });
+    $("#set-think").addEventListener("change", (e) => { $("#think-toggle").checked = e.target.checked; store.set("kb.think", e.target.checked); });
+    $("#set-next").addEventListener("change", (e) => { prefs.next = e.target.checked; savePrefs(); renderNext(); });
+    $("#set-enter").addEventListener("change", (e) => { prefs.enter = e.target.checked; savePrefs(); });
+    $("#set-token").addEventListener("change", (e) => {
+      const v = e.target.value.trim();
+      store.set("kb.admin", v);
+      $("#admin-token").value = v;
+      paint();
+    });
+    $("#admin-token").addEventListener("change", () => setTimeout(paint, 0));
+    $("#set-export").addEventListener("click", () => {
+      if (!chats.length) { toast(t("Nothing to export yet")); return; }
+      const data = { app: "KB Helper", exported: new Date().toISOString(), chats: chats.map((c) => ({
+        title: c.title, pinned: !!c.pinned, updated: new Date(c.updated).toISOString(),
+        messages: (c.history || []).map((m) => ({ role: m.role, content: m.content, ...(m.sources ? { sources: m.sources.map((x) => `${x.source} › ${x.heading}`) } : {}) })),
+      })) };
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
+      a.download = `kb-helper-chats-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    });
+    $("#set-wipe").addEventListener("click", () => {
+      if (!chats.length) { toast(t("Nothing to export yet")); return; }
+      if (!confirm(t("Delete all {n}? This cannot be undone.", { n: pl(chats.length, "chat") }))) return;
+      chats = [];
+      persistChats();
+      startNewChat();
+      toast(t("All chats deleted"));
+    });
+
+    applyPrefs();
+    paint();
+    let reopen = "";
+    try { reopen = sessionStorage.getItem("kb.reopen") || ""; sessionStorage.removeItem("kb.reopen"); } catch { /* ignore */ }
+    if (reopen === "settings") setTimeout(() => Settings.open(), 50);
+    return { paint, Settings };
+  })();
 
   /* ------------------------------------------------------------ boot */
   fetch("/motif.svg").then((r) => r.text()).then((svgText) => {
@@ -1496,7 +1838,9 @@
     if (svg) svg.setAttribute("preserveAspectRatio", "xMidYMid slice");
   }).catch(() => {});
   loadStats();
+  document.body.classList.add("no-anim");            // the first paint lands in place, without sliding
   renderHistory();
+  requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.remove("no-anim")));
   show(location.hash.slice(1) || "assistant");
   setInterval(loadStats, 30000);
 })();
