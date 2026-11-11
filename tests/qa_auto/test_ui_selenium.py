@@ -10,6 +10,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 SELENOID_URL = os.getenv("KB_SELENOID_URL", "http://localhost:4445/wd/hub")
 # the browser runs inside Docker, so "localhost" there is the container itself
+pytestmark = pytest.mark.e2e   # run explicitly: pytest -m e2e
+
 APP_URL = os.getenv("KB_APP_URL", "http://host.docker.internal:7871")
 
 

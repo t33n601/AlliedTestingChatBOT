@@ -12,7 +12,7 @@ and shows its whole pipeline (retrieve → augment → generate) as a live test 
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![PostgreSQL](https://img.shields.io/badge/Postgres-pgvector%20%C2%B7%20HNSW-4169E1?logo=postgresql&logoColor=white)](https://github.com/pgvector/pgvector)
 [![Ollama](https://img.shields.io/badge/Ollama-qwen3%20%C2%B7%20nomic--embed-000000?logo=ollama&logoColor=white)](https://ollama.com/)
-[![Tests](https://img.shields.io/badge/tests-20%20API%20passing%20%C2%B7%20Selenium%20E2E-2EA44F?logo=pytest&logoColor=white)](#-testing)
+[![Tests](https://img.shields.io/badge/tests-100%2B%20passing%20%C2%B7%20Selenium%20E2E-2EA44F?logo=pytest&logoColor=white)](#-testing)
 [![License](https://img.shields.io/badge/license-proprietary-4B4B4D)](LICENSE)
 
 <img src="docs/img/demo.gif" width="100%" alt="A question in Russian is rewritten into an English search query, the pipeline runs, the model reasons, and the answer streams in with clickable citations">
@@ -85,7 +85,8 @@ The answer is streamed over **Server-Sent Events** in typed events (`rewrite →
 | Frontend | Vanilla JS + CSS (no framework, no build step), `marked` + `DOMPurify` for safe Markdown |
 | Visualization | t-SNE implemented in NumPy, rendered as interactive SVG (zoom, pan, isolate) |
 | Ingestion | `pypdf`, `python-docx`, heading-aware chunker |
-| Testing | pytest API integration tests, Selenium E2E on Selenoid, GitHub Actions on a self-hosted runner |
+| Testing | pytest: data-driven QA dataset (positive / negative), API tests, Selenium E2E on Selenoid, GitHub Actions on a self-hosted runner; manual test cases and bug reports |
+| Observability | [Langfuse](https://langfuse.com): traces, sessions, token usage, latency, feedback scores |
 | Infra | Docker Compose (Postgres, pgAdmin, Selenoid, Actions runner) |
 
 ## 🚀 Run it locally
@@ -147,7 +148,7 @@ Then open the app at `localhost:8091` and the interactive API docs (Swagger) at 
 | `OLLAMA_HOST` | `http://localhost:11434` | Ollama server |
 | `KB_CHAT_MODEL` | `qwen3:1.7b` | default chat model |
 | `KB_EMBED_MODEL` | `nomic-embed-text` | embedding model |
-| `KB_MIN_SCORE` | `0.55` | below this best-match score the assistant answers "not in the knowledge base" |
+| `KB_MIN_SCORE` | `0.62` | below this best-match score the assistant answers "not in the knowledge base" |
 | `KB_ADMIN_TOKEN` | *(empty)* | when set, every POST/PUT/DELETE that changes data requires the `X-Admin-Token` header |
 
 </details>
@@ -171,14 +172,51 @@ Then open the app at `localhost:8091` and the interactive API docs (Swagger) at 
 
 ## 🧪 Testing
 
-```bash
-pytest test_ragserver.py -v          # 20 API integration tests (all passing): CRUD, search, streaming, map, upload, re-embed, settings
-
-./selenoid/start-selenoid.sh         # browsers in Docker
-pytest tests/test_ui_selenium.py -v  # E2E: opens the UI in a real browser and asks a question
+```
+tests/
+├── qa_dataset.json   42 template requests: 22 positive + 20 negative (off-topic, jailbreak, injection, hallucination, validation)
+├── qa_auto/          pytest: chat scenarios from the dataset, API positive/negative, Langfuse, Selenium E2E
+└── qa_manual/        manual test cases (25 positive + 21 negative) and bug reports
 ```
 
+```bash
+pytest                         # 100+ automated tests, browser E2E excluded
+pytest -m positive             # positive scenarios only
+pytest -m negative             # negative scenarios only
+pytest -m "not llm"            # fast run without model calls
+
+./selenoid/start-selenoid.sh   # browsers in Docker
+pytest -m e2e                  # E2E: opens the UI in a real browser and asks a question
+```
+
+Known defects are linked from the dataset and reported as `xfail` until they are fixed
+(see [`tests/qa_manual/bug_reports.md`](tests/qa_manual/bug_reports.md)). More in [`tests/README.md`](tests/README.md).
+
 The E2E suite also runs in **GitHub Actions** on a self-hosted runner (`.github/workflows/ui-e2e.yml`, runner in `runner/docker-compose.yaml`).
+
+## 🔭 Observability (Langfuse)
+
+Every question is traced to [Langfuse](https://langfuse.com). Each chat is a session, and each question is one
+`kb-chat` trace with these steps:
+
+| Step | Type | What is recorded |
+|---|---|---|
+| `rewrite` | generation | question + history → English search query, tokens |
+| `retrieve` | span | search query → top-k chunks with similarity scores |
+| `no_answer` | event | best score below the threshold (the model is not called) |
+| `answer` | generation | full prompt with numbered sources → answer, tokens, time to first token |
+| `has_citations` · `user_feedback` | scores | whether the answer cites `[n]`; 👍 / 👎 from the UI |
+
+Tags `lang:*`, `tone:*`, `answered` / `no_answer` and `client:*` make filtering easy.
+
+```bash
+cp langfuse.example.yml langfuse.yml   # paste public_key / secret_key from Langfuse → Settings → API Keys
+python langfuse_tracing.py             # checks the keys and sends a test trace
+./kbhelper restart                     # tracing on: /kb/stats shows "langfuse": true (then ./kbhelper public if the site is public)
+```
+
+Without keys tracing is off and costs nothing. Events are sent in batches from a background thread, so
+Langfuse never slows down or breaks an answer.
 
 ## 📁 Project structure
 
@@ -188,11 +226,13 @@ ragserver.py         FastAPI app: RAG pipeline, SSE streaming, map, documents AP
 loader.py            imports knowledge/*.md into Postgres
 chunking.py          parses PDF / DOCX / MD / TXT and splits by headings
 vectorize.py         fills embeddings for every chunk
+langfuse_tracing.py  Langfuse tracing (keys in langfuse.yml, template langfuse.example.yml)
 schema.sql           pgvector extension + kb_chunks table
 web/                 the web app (index.html, app.js, style.css)
 knowledge/           26 source documents
 chat_ui.py, ui/      the first Gradio version of the chat
-tests/, test_*.py    pytest + Selenium
+tests/               qa_dataset.json, qa_auto/ (pytest), qa_manual/ (test cases, bug reports)
+pytest.ini           test paths and markers: positive, negative, llm, e2e
 design/              design mockups and exports
 ```
 

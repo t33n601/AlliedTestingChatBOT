@@ -855,6 +855,7 @@
       top_k: settings.top_k,
       model: settings.model || undefined,
       answer_lang: prefs.answerLang,
+      session_id: currentId,
     };
 
     let raf = 0;
