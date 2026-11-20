@@ -12,7 +12,7 @@ and shows its whole pipeline (retrieve → augment → generate) as a live test 
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![PostgreSQL](https://img.shields.io/badge/Postgres-pgvector%20%C2%B7%20HNSW-4169E1?logo=postgresql&logoColor=white)](https://github.com/pgvector/pgvector)
 [![Ollama](https://img.shields.io/badge/Ollama-qwen3%20%C2%B7%20nomic--embed-000000?logo=ollama&logoColor=white)](https://ollama.com/)
-[![Tests](https://img.shields.io/badge/tests-100%2B%20passing%20%C2%B7%20Selenium%20E2E-2EA44F?logo=pytest&logoColor=white)](#-testing)
+[![Tests](https://img.shields.io/badge/tests-150%2B%20passing%20%C2%B7%20Selenium%20E2E-2EA44F?logo=pytest&logoColor=white)](#-testing)
 [![License](https://img.shields.io/badge/license-proprietary-4B4B4D)](LICENSE)
 
 <img src="docs/img/demo.gif" width="100%" alt="A question in Russian is rewritten into an English search query, the pipeline runs, the model reasons, and the answer streams in with clickable citations">
@@ -34,6 +34,8 @@ and shows its whole pipeline (retrieve → augment → generate) as a live test 
 | 🌍 **Ask in English or Russian** | The question and chat history are rewritten into an English search query, so follow-ups like *"how much does it cost?"* work. The answer comes back in the user's language. |
 | 🗺️ **Knowledge map** | All 149 chunks projected from 768 dimensions to 2D (t-SNE written in NumPy). Your question lands on the map with rays to the chunks it retrieved. |
 | 📂 **Live knowledge base** | Drop a PDF, DOCX, Markdown or TXT file: it is parsed, chunked, embedded and searchable seconds later. Inspect, re-embed or remove any document. |
+| ✅ **Quality page** | One click sends all 42 cases of the QA dataset through the real pipeline and shows pass rate, retrieval hit rate, citations, answer language, safety, leaks blocked and answer time. Every case opens with each check, the answer and its sources. Run history and 👍/👎 from real users sit next to it. |
+| 🛡️ **Answer guard** | An output filter on the stream removes sentences that quote the system prompt or print a credential, and adds `[n]` to list items the model left uncited. |
 | 🚫 **Says "not in KB"** | If nothing relevant is found, the assistant says so instead of inventing an answer. |
 | 🎛️ **Tunable** | Tone (formal / friendly / brief / simple), top-k (1–10), reasoning on/off and any model installed in Ollama, all from the UI. |
 | 📱 **Responsive** | Three-column workspace on desktop, bottom tabs and a sources sheet on mobile, light and dark themes. |
@@ -180,7 +182,7 @@ tests/
 ```
 
 ```bash
-pytest                         # 100+ automated tests, browser E2E excluded
+pytest                         # 150+ automated tests, browser E2E excluded
 pytest -m positive             # positive scenarios only
 pytest -m negative             # negative scenarios only
 pytest -m "not llm"            # fast run without model calls
@@ -188,6 +190,11 @@ pytest -m "not llm"            # fast run without model calls
 ./selenoid/start-selenoid.sh   # browsers in Docker
 pytest -m e2e                  # E2E: opens the UI in a real browser and asks a question
 ```
+
+The same dataset checks run from the UI: the **Quality** tab (`#quality`) starts a run in the background, follows it case
+by case and keeps the history (`/kb/eval/*`, admin token needed to start a run). Both use `qa_eval.py`, so a case that
+fails on the page fails in pytest too. The page has already paid for itself: it showed a leak that the tests missed
+(BUG-009, BUG-010 in the bug reports).
 
 Known defects are linked from the dataset and reported as `xfail` until they are fixed
 (see [`tests/qa_manual/bug_reports.md`](tests/qa_manual/bug_reports.md)). More in [`tests/README.md`](tests/README.md).
@@ -224,6 +231,9 @@ thread, so Langfuse never slows down or breaks an answer.
 ```
 kbhelper             one-command launcher for macOS / Linux (kbhelper.cmd on Windows)
 ragserver.py         FastAPI app: RAG pipeline, SSE streaming, map, documents API
+answer_guard.py      output filter: removes leaked instructions, adds missing [n] citations
+quality.py           Quality page API: background runs of the QA dataset, run history, user feedback
+qa_eval.py           dataset checks shared by pytest and the Quality page
 loader.py            imports knowledge/*.md into Postgres
 chunking.py          parses PDF / DOCX / MD / TXT and splits by headings
 vectorize.py         fills embeddings for every chunk

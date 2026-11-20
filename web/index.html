@@ -27,6 +27,7 @@
       <a href="#assistant" data-view="assistant" class="on">Assistant</a>
       <a href="#map" data-view="map">Knowledge map</a>
       <a href="#documents" data-view="documents">Documents</a>
+      <a href="#quality" data-view="quality">Quality</a>
     </nav>
     <div class="chips">
       <span class="live" id="live">connecting…</span>
@@ -63,6 +64,7 @@
             <a href="#assistant" data-view="assistant"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4V5z"/></svg>Assistant</a>
             <a href="#map" data-view="map"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="7" r="2"/><circle cx="17" cy="6" r="2"/><circle cx="9" cy="17" r="2"/><circle cx="18" cy="16" r="2"/></svg>Knowledge map</a>
             <a href="#documents" data-view="documents"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h7"/></svg>Documents</a>
+            <a href="#quality" data-view="quality"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6v3H9zM6 4.5h3M15 4.5h3V21H6V4.5"/><path d="M9 13.5l2 2 4-4"/></svg>Quality</a>
           </nav>
           <div class="panel chats-panel">
             <div class="panel-head">
@@ -287,12 +289,97 @@
         </aside>
       </div>
     </section>
+
+    <!-- ============================================================ QUALITY -->
+    <section class="view" id="view-quality">
+      <div class="section-head">
+        <div class="section-text">
+          <p class="kicker">&gt; eval suite<span class="blink">_</span></p>
+          <h2>Quality</h2>
+          <p class="sub">The assistant is tested like any other software. One click sends every case of the QA dataset
+            through the real pipeline and checks the answer: the right document found, citations, answer language,
+            honest “not in the knowledge base”, refusals and leaks. These are the same checks the pytest suite runs.</p>
+        </div>
+        <div class="mini-stats">
+          <div><b id="qs-rate">—</b><small>pass rate</small></div>
+          <div><b id="qs-passed">—</b><small>cases passed</small></div>
+          <div><b id="qs-when">—</b><small>last run</small></div>
+        </div>
+      </div>
+
+      <div class="q-row">
+        <div class="q-metrics" id="q-metrics" aria-label="Metrics of the selected run"></div>
+        <div class="job q-job" id="q-job">
+          <div class="job-top"><span class="job-state" id="q-state">ready</span><span class="job-meta" id="q-meta"></span></div>
+          <span class="job-name" id="q-name">No runs yet</span>
+          <div class="job-bar"><i id="q-bar"></i></div>
+          <div class="q-acts">
+            <button type="button" class="ask" id="q-run"><span>Run all cases</span></button>
+            <button type="button" class="ghost" id="q-rerun" hidden>Re-run failed</button>
+            <button type="button" class="ghost" id="q-cancel" hidden>Stop</button>
+          </div>
+          <p class="q-hint" id="q-hint" hidden>Running tests needs the admin token: enter it in Settings.</p>
+        </div>
+      </div>
+
+      <div class="q-row">
+        <div class="q-panel q-history">
+          <div class="side-title"><h4>History</h4><small id="q-hist-note">pass rate of each run · click to open</small></div>
+          <div class="q-bars" id="q-bars"></div>
+        </div>
+        <div class="q-panel q-feedback">
+          <div class="side-title"><h4>Real users</h4><small>thumbs under answers</small></div>
+          <div class="q-fb" id="q-fb"></div>
+        </div>
+      </div>
+
+      <div class="docs-wrap">
+        <div class="ledger">
+          <div class="ledger-tools">
+            <label class="filter">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+              <span class="sr-only">Filter cases</span>
+              <input id="q-filter" type="text" placeholder="Filter cases…" autocomplete="off">
+            </label>
+            <div class="sort" role="group" aria-label="Show">
+              <span>Show</span>
+              <div class="seg-inline" id="q-show">
+                <button type="button" data-v="all" class="on" aria-pressed="true">All</button>
+                <button type="button" data-v="failed" aria-pressed="false">Failed</button>
+                <button type="button" data-v="positive" aria-pressed="false">Positive</button>
+                <button type="button" data-v="negative" aria-pressed="false">Negative</button>
+              </div>
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table class="doc-table q-table">
+              <thead><tr><th scope="col" class="c-n">#</th><th scope="col">Case</th><th scope="col" class="c-cat">Category</th><th scope="col" class="c-checks">Checks</th><th scope="col" class="c-num">Time</th><th scope="col" class="c-st">Result</th></tr></thead>
+              <tbody id="q-cases"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <aside class="inspector" id="q-insp" aria-label="Case inspector">
+          <div class="insp-head">
+            <span class="insp-kicker">test case</span>
+            <h3 id="qi-title">Select a case</h3>
+            <span class="insp-meta" id="qi-meta">click a row in the table</span>
+            <div class="insp-acts" id="qi-acts" hidden>
+              <button type="button" class="ghost" id="qi-run">Run this case</button>
+              <button type="button" class="ghost" id="qi-ask">Ask in chat</button>
+            </div>
+          </div>
+          <div class="qi-body" id="qi-body"></div>
+        </aside>
+      </div>
+    </section>
   </main>
 
   <nav class="tabbar" id="tabbar" aria-label="Main">
     <a href="#assistant" data-view="assistant" class="on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4V5z"/></svg>Assistant</a>
     <a href="#map" data-view="map"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="7" r="1.5"/><circle cx="16" cy="5" r="1.5"/><circle cx="9" cy="16" r="1.5"/><circle cx="18" cy="15" r="1.5"/><path d="M12 11l2 2-2 2-2-2z"/></svg>Map</a>
     <a href="#documents" data-view="documents"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h7"/></svg>Docs</a>
+    <a href="#quality" data-view="quality"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6v3H9zM6 4.5h3M15 4.5h3V21H6V4.5"/><path d="M9 13.5l2 2 4-4"/></svg>Quality</a>
   </nav>
 
   <div class="drawer-scrim" id="drawer-scrim" aria-hidden="true"></div>

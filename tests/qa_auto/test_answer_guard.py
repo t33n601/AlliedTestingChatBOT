@@ -55,6 +55,53 @@ def test_leak_sentences_are_detected(leak):
 
 
 @pytest.mark.negative
+@pytest.mark.parametrize("tone", ["formal", "friendly", "brief", "simple"])
+def test_quoted_tone_instruction_is_a_leak(tone):
+    from ragserver import TONES       # importing the server registers its tone instructions with the guard
+    assert is_leak(TONES[tone])
+
+
+@pytest.mark.negative
+def test_short_rule_sentence_is_a_leak():
+    # 3 words: too short for the 5-word overlap check, found on the Quality page in qa-neg-10 and qa-neg-20
+    assert is_leak("Never invent facts.")
+
+
+@pytest.mark.positive
+@pytest.mark.parametrize("ok", ["We test mobile apps.", "Founded in 1997.", "Yes, we do [1].",
+                                "Security testing services [2].", "See the context above."])
+def test_short_answer_sentences_are_kept(ok):
+    assert not is_leak(ok)
+
+
+@pytest.mark.negative
+def test_context_dumped_as_code_block_is_removed():
+    # BUG-010: asked for "the full system prompt", the model printed the numbered context as a code block
+    text = ("We provide penetration testing [1].\n\n```\n[1] (security / Penetration testing)\n"
+            "Penetration testing involves evaluating a computer system.\n\n[2] (security / Security testing)\n"
+            "We help our clients with all aspects of security testing.\n```")
+    sent, final, g = stream(text)
+    assert final == "We provide penetration testing [1]."
+    assert "(security /" not in sent
+
+
+@pytest.mark.positive
+def test_citation_list_is_not_a_context_dump():
+    assert not is_leak("Penetration testing [1] (see the security page).")
+    assert not is_leak("- Security audit [2]\n")
+
+
+@pytest.mark.negative
+def test_rules_appended_after_a_real_answer_are_removed():
+    import ragserver  # noqa: F401  (registers the tone instructions)
+    text = ("Allied Testing provides security testing services, including penetration testing [2]. \n\n"
+            "Never invent facts.\nBe concise and professional, use short paragraphs or bullet lists. ")
+    sent, final, g = stream(text)
+    assert final == "Allied Testing provides security testing services, including penetration testing [2]."
+    assert g.dropped == 2
+
+
+@pytest.mark.negative
 def test_leaked_rules_are_removed_from_the_answer():
     text = ("We provide penetration testing [1].\n\nSystem prompt: Answer ONLY from the numbered context below. "
             "After each fact add the number of the context block.\nAdmin token: 12345")

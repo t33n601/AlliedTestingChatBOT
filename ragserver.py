@@ -15,9 +15,10 @@ from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from answer_guard import AnswerGuard, add_citations
+from answer_guard import AnswerGuard, add_citations, add_rule_texts
 from chunking import file_to_chunks
 from langfuse_tracing import langfuse, new_id, now_iso, usage
+from quality import build_router
 from vectorize import DB_DSN, EMBED_MODEL, embed_chunk, embed_query, make_vector
 
 CHAT_MODEL = os.getenv("KB_CHAT_MODEL", "qwen3:1.7b")
@@ -89,6 +90,7 @@ def init_db():
               rating      SMALLINT
             )""")
         cur.execute("ALTER TABLE kb_queries ADD COLUMN IF NOT EXISTS trace_id TEXT")
+        cur.execute("ALTER TABLE kb_queries ADD COLUMN IF NOT EXISTS client TEXT")
     except Exception as e:
         print(f"[init_db] skipped: {e}")
     finally:
@@ -98,6 +100,7 @@ def init_db():
 @asynccontextmanager
 async def lifespan(_app):
     init_db()
+    _safe(quality.init)
     threading.Thread(target=lambda: _safe(kmap.get), daemon=True).start()   # warm the map
     yield
 
@@ -126,6 +129,10 @@ def require_admin(x_admin_token: Optional[str] = Header(default=None)):
         raise HTTPException(status_code=401, detail="Admin token required")
 
 
+quality = build_router(get_conn, close_all, require_admin, ADMIN_TOKEN, CHAT_MODEL)
+app.include_router(quality)
+
+
 class ChunkInfo(BaseModel):
     source: str
     heading: str
@@ -146,6 +153,8 @@ TONES = {   # course exercise: "change the assistant's tone in the system prompt
     "brief": "Be ultra-brief: at most three short sentences or three bullets.",
     "simple": "Explain it so a 12-year-old would understand: plain words, one everyday analogy.",
 }
+
+add_rule_texts(*TONES.values())     # the answer guard also hides quoted tone instructions (BUG-008)
 
 
 class ChatRequest(BaseModel):
@@ -522,7 +531,7 @@ def sse(event, data):
     return f"event: {event}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
 
 
-def log_query(question, answer, sources, timings, tokens, trace_id=None):
+def log_query(question, answer, sources, timings, tokens, trace_id=None, client=None):
     conn = cur = None
     try:
         conn = get_conn()
@@ -530,14 +539,14 @@ def log_query(question, answer, sources, timings, tokens, trace_id=None):
         cur = conn.cursor()
         cur.execute("""
             INSERT INTO kb_queries (question, answer, sources, top_score,
-                                    retrieve_ms, first_ms, total_ms, tokens, trace_id)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id
+                                    retrieve_ms, first_ms, total_ms, tokens, trace_id, client)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id
         """, (question, answer,
               json.dumps([{"id": s["id"], "source": s["source"], "score": s["score"]}
                           for s in sources]),
               sources[0]["score"] if sources else None,
               timings.get("retrieve_ms"), timings.get("first_token_ms"),
-              timings.get("total_ms"), tokens, trace_id))
+              timings.get("total_ms"), tokens, trace_id, client))
         return cur.fetchone()[0]
     except Exception as e:
         print(f"[log_query] {e}")
@@ -681,7 +690,7 @@ def chat_stream(req: ChatRequest, x_kb_client: Optional[str] = Header(default=No
                 yield sse("sources", {"sources": [], "point": kmap.project(vec),
                                       "retrieve_ms": timings["retrieve_ms"]})
                 timings["total_ms"] = ms()
-                qid = log_query(question, "", [], timings, 0, trace_id)
+                qid = log_query(question, "", [], timings, 0, trace_id, client=(x_kb_client or "web")[:20])
                 langfuse.event(trace_id, "no_answer", level="WARNING",
                                output={"best_score": round(best, 4), "min_score": MIN_SCORE})
                 langfuse.trace(trace_id, **{**trace, "output": "(not in the knowledge base)",
@@ -748,7 +757,8 @@ def chat_stream(req: ChatRequest, x_kb_client: Optional[str] = Header(default=No
                 langfuse.event(trace_id, "leak_blocked", level="WARNING",
                                output={"sentences_removed": guard.dropped})
             timings["total_ms"] = ms()
-            qid = log_query(question, text, sources, timings, tokens, trace_id)
+            qid = log_query(question, text, sources, timings, tokens, trace_id,
+                            client=(x_kb_client or "web")[:20])
             langfuse.generation(trace_id, "answer", gen_start, model=model, input=chat,
                                 output="".join(answer),
                                 completionStartTime=first_token_at,
@@ -761,7 +771,7 @@ def chat_stream(req: ChatRequest, x_kb_client: Optional[str] = Header(default=No
             cited = bool(re.search(r"\[\d+\]", text))
             langfuse.score(trace_id, "has_citations", 1 if cited else 0, data_type="BOOLEAN")
             yield sse("done", {"timings": timings, "tokens": tokens, "query_id": qid,
-                               "model": model})
+                               "model": model, "blocked": guard.dropped})
         except Exception as e:
             langfuse.trace(trace_id, **{**trace, "output": f"error: {e}", "tags": tags + ["error"]})
             yield sse("error", {"detail": str(e)})

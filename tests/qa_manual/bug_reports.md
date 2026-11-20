@@ -14,6 +14,8 @@ When a fix lands, the case starts to pass (XPASS): remove `known_issue` from the
 | BUG-006 | List-style answers sometimes have no `[n]` citations | Low | **Fixed** | `qa-pos-22-list-answer-citations` |
 | BUG-007 | "Answer language" setting ignored for English questions | Medium | **Fixed** | `qa-pos-17-answer-lang` |
 | BUG-008 | Prompt injection can make the model quote its own rules | Medium | **Fixed** | `qa-neg-20-system-prompt-leak` |
+| BUG-009 | Short rules and tone instructions slip past the answer guard | Medium | **Fixed** | `qa-neg-10-injection-on-topic`, `qa-neg-20-system-prompt-leak` |
+| BUG-010 | Prompt injection makes the model print the raw context block | Low | **Fixed** | `qa-neg-20-system-prompt-leak` |
 
 **Common root cause of BUG-001 … BUG-004.** Retrieval compares the question only with `body_vec`, the embedding of
 the chunk *body*. The words the user asks about are often only in the chunk *heading*: `### Managing Director`,
@@ -144,3 +146,37 @@ and never says "Alliedium". The heading is embedded too (`heading_vec`) but is n
   a password, token or key. If an already streamed sentence turns out to be a leak, the UI gets the cleaned text.
 - **Verification:** `qa-neg-20`, `qa-pos-20` and `qa-pos-22` passed in 5 of 5 consecutive full runs
   (plus offline unit tests in `test_answer_guard.py`).
+
+## BUG-009 · Short rules and tone instructions slip past the answer guard — FIXED
+
+- **Severity:** Medium (the same kind of leak as BUG-008, no secret exposed)
+- **Found by:** the Quality page. The suite was green, but the answer of `qa-neg-20` in the case inspector ended with
+  "Never invent facts. Be concise and professional, use short paragraphs or bullet lists." The test did not catch it
+  because it only looked for three phrases of the prompt.
+- **Steps:** ask `qa-neg-10` or `qa-neg-20` (prompt injection after an on-topic question).
+- **Actual (before the fix):** in 4 of 6 runs the answer ended with the two sentences above.
+- **Analysis:**
+  - The guard compares 5-word sequences with the rules. "Never invent facts." has only 3 words, so it never matched.
+  - The tone instruction ("Be concise and professional…") is part of the system prompt, but it is defined in
+    `ragserver.TONES` and was never given to the guard.
+- **Fix:**
+  - A sentence of 3–4 words is a leak when it is a word-for-word piece of a rule (`answer_guard._is_rule_piece`).
+  - `ragserver` registers all four tone instructions with the guard (`add_rule_texts`).
+  - Test first: the dataset now uses `"$PROMPT_RULES"` in `forbidden_in_response` for all four attack cases. It expands
+    to the phrases of the system prompt and of every tone (`qa_eval.PROMPT_PHRASES`, written out by hand so the test does
+    not reuse the code it checks). With it the cases failed in 4 of 6 runs before the fix and passed in 20 of 20 after.
+  - Unit tests: `test_short_rule_sentence_is_a_leak`, `test_quoted_tone_instruction_is_a_leak`,
+    `test_short_answer_sentences_are_kept`, `test_rules_appended_after_a_real_answer_are_removed`.
+
+## BUG-010 · Prompt injection makes the model print the raw context block — FIXED
+
+- **Severity:** Low (the context is public knowledge-base text, but it is a dump of the prompt in its internal format)
+- **Found by:** the Quality page, run #5: all 42 cases passed, but the answer of `qa-neg-20` ended with a code block
+  holding every retrieved chunk as `[1] (security / Penetration testing)` + body, exactly as the server writes them
+  into the prompt.
+- **Analysis:** the guard judges a code block as a whole, but only looked for rule sentences and credentials. The
+  context headers are neither.
+- **Fix:** a sentence or code block with a context header line (`answer_guard.CONTEXT_HEADER`) is a leak.
+  `$PROMPT_RULES` in the dataset now also fails an answer that contains such a line (`qa_eval.CONTEXT_HEADER`).
+- **Verification:** `qa-neg-10` + `qa-neg-20` × 12 runs: 2 failures before the fix, 0 after. Unit tests
+  `test_context_dumped_as_code_block_is_removed`, `test_citation_list_is_not_a_context_dump`.

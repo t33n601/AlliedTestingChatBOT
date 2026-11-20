@@ -148,7 +148,7 @@
 
   /* ------------------------------------------------------------ routing */
   function show(view) {
-    if (!["assistant", "map", "documents"].includes(view)) view = "assistant";
+    if (!["assistant", "map", "documents", "quality"].includes(view)) view = "assistant";
     $$(".view").forEach((v) => v.classList.toggle("on", v.id === `view-${view}`));
     $$("#nav a, #tabbar a, .drawer-nav a").forEach((a) => a.classList.toggle("on", a.dataset.view === view));
     const changed = document.body.dataset.view !== view;
@@ -158,6 +158,7 @@
     Drawer.close();
     if (view === "map") MapView.open();
     if (view === "documents") Docs.load();
+    if (view === "quality") Quality.load();
   }
   window.addEventListener("hashchange", () => show(location.hash.slice(1)));
 
@@ -1670,6 +1671,274 @@
   phone.addEventListener("change", setPlaceholder);
   setPlaceholder();
   window.addEventListener("resize", () => { if (document.body.dataset.view === "map") MapView.refresh(); });
+
+  /* ------------------------------------------------------------ quality: the QA dataset as a live test run */
+  const Quality = (() => {
+    let cases = [];            // the dataset: id, type, category, lang, intent, prompt
+    let runs = [];             // recent runs, newest first (summaries only)
+    let run = null;            // the run on screen, with every result
+    let current = null;        // selected case id
+    let filterBy = store.get("kb.qshow", "all");
+    let pollTimer = 0, loaded = false;
+
+    const CATEGORIES = {
+      company_facts: "Company facts", services: "Services", products: "Products", multilingual: "Multilingual",
+      multi_turn: "Multi-turn", citations: "Citations", settings: "Settings", off_topic: "Off-topic",
+      input_validation: "Input validation", jailbreak_defense: "Jailbreak defense", prompt_injection: "Prompt injection",
+      hallucination_defense: "Hallucination defense", robustness: "Robustness",
+    };
+    const CHECKS = {
+      http_status: "HTTP status", stream: "Stream", answered: "Answered from the KB", not_in_kb: "Says “not in the KB”",
+      refusal: "Safe refusal", retrieval: "Right document found", max_sources: "Source limit", keywords: "Expected facts",
+      no_leak: "Nothing leaked", citations: "Citations", language: "Answer language",
+    };
+    const INTENTS = {
+      kb_answer: "answer from the KB", no_answer: "“not in the KB”", honest_unknown: "must not invent",
+      safe_refusal: "refuse safely", rejected: "reject the request",
+    };
+    const cat = (c) => t(CATEGORIES[c] || c);
+    const scopeLabel = (sc) => (CATEGORIES[sc] ? cat(sc) : /^\d+ cases$/.test(sc) ? t("{n} cases", { n: parseInt(sc, 10) }) : sc.replace(/^qa-/, ""));
+    const pct = (r) => (r && r.n ? Math.round((100 * r.ok) / r.n) : null);
+    const canRun = () => !(stats && stats.admin_required) || !!adminHeaders()["X-Admin-Token"];
+    function ago(iso) {
+      if (!iso) return "—";
+      const s = Math.round((new Date(iso) - Date.now()) / 1000);
+      const rtf = new Intl.RelativeTimeFormat(locale, { numeric: "auto", style: "short" });
+      const a = Math.abs(s);
+      return a < 60 ? rtf.format(s, "second") : a < 3600 ? rtf.format(Math.round(s / 60), "minute")
+        : a < 86400 ? rtf.format(Math.round(s / 3600), "hour") : rtf.format(Math.round(s / 86400), "day");
+    }
+
+    /* short enough for a big number: "now", "13:26" today, "18 Nov" before */
+    function when(iso) {
+      const d = new Date(iso);
+      if (Date.now() - d < 60000) return t("now");
+      return d.toDateString() === new Date().toDateString()
+        ? d.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })
+        : d.toLocaleDateString(locale, { day: "numeric", month: "short" });
+    }
+
+    async function load() {
+      try {
+        const [ds, rs] = await Promise.all([cases.length ? null : api("/kb/eval/dataset"), api("/kb/eval/runs")]);
+        if (ds) cases = ds.cases;
+        runs = rs.runs;
+        const id = rs.running || (run && runs.some((r) => r.id === run.id) ? run.id : runs[0] && runs[0].id);
+        if (id) await open(id, true); else paint();
+        loaded = true;
+        if (rs.running) poll();
+      } catch (e) {
+        $("#q-cases").innerHTML = `<tr class="none"><td colspan="6">${esc(e.message)}</td></tr>`;
+      }
+      feedback();
+    }
+    async function open(id, keepCase) {
+      run = await api(`/kb/eval/runs/${id}`);
+      if (!keepCase) current = null;
+      paint();
+    }
+    function poll() {
+      clearTimeout(pollTimer);
+      pollTimer = setTimeout(async () => {
+        if (!run) return;
+        try {
+          run = await api(`/kb/eval/runs/${run.id}`);
+          const i = runs.findIndex((r) => r.id === run.id);
+          if (i >= 0) runs[i] = { ...runs[i], ...run };
+          // follow the case that is running now
+          if (run.status === "running" && follow) current = nextCase();
+          paint();
+          if (run.status === "running") poll();
+          else { follow = false; load(); toast(t("Run finished: {p} of {n} passed", { p: run.summary.passed, n: run.summary.total })); }
+        } catch { poll(); }
+      }, 1200);
+    }
+    let follow = false;
+    const ids = () => (run && run.case_ids) || cases.map((c) => c.id);
+    const result = (id) => run && (run.results || []).find((r) => r.id === id);
+    const nextCase = () => ids().find((id) => !result(id)) || current;
+
+    async function start(body) {
+      if (!canRun()) { toast(t("Running tests needs the admin token: enter it in Settings.")); return; }
+      try {
+        const r = await api("/kb/eval/runs", { method: "POST", headers: { "Content-Type": "application/json", ...adminHeaders() }, body: JSON.stringify(body || {}) });
+        follow = true;
+        await open(r.id);
+        current = nextCase();
+        runs.unshift(run);
+        paint();
+        poll();
+      } catch (e) { toast(e.message); }
+    }
+
+    /* ---- painting ---- */
+    function paint() {
+      const s = run && run.summary;
+      const going = run && run.status === "running";
+      const done = s ? s.total : 0;
+      $("#qs-rate").textContent = s && s.total ? `${Math.round((100 * s.passed) / s.total)}%` : "—";
+      $("#qs-passed").textContent = s && s.total ? `${s.passed}/${s.total}` : "—";
+      $("#qs-when").textContent = run ? (going ? t("now") : when(run.finished_at || run.started_at)) : "—";
+
+      // run card
+      const job = $("#q-job");
+      job.className = `job q-job${going ? " running" : run ? (run.status === "done" ? " done" : " failed") : ""}`;
+      $("#q-state").textContent = !run ? t("ready") : going ? t("running {i} of {n}", { i: Math.min(done + 1, run.total), n: run.total })
+        : run.status === "done" ? t("finished") : t(run.status);
+      $("#q-meta").textContent = run ? `${t("run")} #${run.id} · ${run.model}` : "";
+      $("#q-name").textContent = !run ? t("No runs yet") : run.scope === "all" ? t("All {n} cases", { n: run.total })
+        : scopeLabel(run.scope);
+      $("#q-bar").style.width = run ? `${Math.round((100 * done) / (run.total || 1))}%` : "0";
+      const failed = run && !going ? (run.results || []).filter((r) => !r.passed) : [];
+      $("#q-run").disabled = !!going;
+      $("#q-cancel").hidden = !going;
+      $("#q-rerun").hidden = going || !failed.length;
+      $("#q-rerun").textContent = t("Re-run {n} failed", { n: failed.length });
+      $("#q-hint").hidden = canRun();
+
+      metrics(s);
+      bars();
+      table();
+      inspect();
+    }
+
+    function metrics(s) {
+      const card = (val, label, sub, tone) => `<div class="${tone || ""}"><b>${val}</b><small>${label}</small><span>${sub}</span></div>`;
+      const rateCard = (r, label, what) => {
+        const p = pct(r);
+        return card(p == null ? "—" : `${p}%`, label, r && r.n ? `${r.ok}/${r.n} ${what}` : t("no data"), p == null ? "" : p === 100 ? "good" : p < 80 ? "bad" : "");
+      };
+      $("#q-metrics").innerHTML = !s || !s.total
+        ? card("—", t("Retrieval"), t("run the suite to see metrics")) + card("—", t("Citations"), "") + card("—", t("Language"), "")
+          + card("—", t("Safety"), "") + card("—", t("Leaks blocked"), "") + card("—", t("Answer time"), "")
+        : rateCard(s.retrieval, t("Retrieval"), t("right document found"))
+          + rateCard(s.citations, t("Citations"), t("answers cite sources"))
+          + rateCard(s.language, t("Language"), t("in the right language"))
+          + rateCard(s.safety, t("Safety"), t("attacks & off-topic handled"))
+          + card(String(s.leaks_blocked || 0), t("Leaks blocked"), t("sentences removed by the guard"))
+          + card(fmtMs(s.avg_ms), t("Answer time"), s.p95_ms ? t("average · p95 {v}", { v: fmtMs(s.p95_ms) }) : t("average"));
+    }
+
+    function bars() {
+      const list = runs.slice(0, 24).reverse();
+      $("#q-bars").innerHTML = list.length ? list.map((r) => {
+        const s = r.summary || {};
+        const p = s.total ? Math.round((100 * s.passed) / s.total) : 0;
+        const label = `#${r.id} · ${r.scope === "all" ? t("all cases") : scopeLabel(r.scope)} · ${s.passed || 0}/${s.total || 0} · ${ago(r.started_at)}`;
+        return `<button type="button" data-id="${r.id}" class="${run && run.id === r.id ? "on" : ""}${r.status === "running" ? " going" : ""}${r.scope !== "all" ? " part" : ""}" title="${esc(label)}" aria-label="${esc(label)}">
+          <i style="--h:${Math.max(p, 3)}%"></i><small>${s.total ? p : "…"}</small></button>`;
+      }).join("") : `<p class="q-empty">${t("No runs yet. Press “Run all cases”.")}</p>`;
+    }
+
+    function table() {
+      const q = $("#q-filter").value.trim().toLowerCase();
+      const order = ids();
+      const rows = cases.filter((c) => order.includes(c.id) || !run).map((c) => ({ c, r: result(c.id) }))
+        .filter(({ c, r }) => (filterBy === "all" || (filterBy === "failed" ? r && !r.passed : c.type === filterBy))
+          && (!q || `${c.id} ${c.prompt} ${c.category}`.toLowerCase().includes(q)));
+      const going = run && run.status === "running";
+      const now = going ? nextCase() : null;
+      $("#q-cases").innerHTML = rows.length ? rows.map(({ c, r }, i) => {
+        const st = r ? (r.passed ? `<span class="q-st pass">${t("pass")}</span>` : `<span class="q-st fail">${t("fail")}</span>`)
+          : c.id === now ? `<span class="q-st now">${t("running")}</span>` : `<span class="q-st">${going ? t("queued") : "—"}</span>`;
+        const dots = r ? r.checks.map((k) => `<i class="${k.ok ? "ok" : "no"}" title="${esc(t(CHECKS[k.name] || k.name))}"></i>`).join("") : "";
+        return `<tr data-id="${c.id}" class="${c.id === current ? "on" : ""}${r && !r.passed ? " failed" : ""}">
+          <td class="idx">${String(i + 1).padStart(2, "0")}</td>
+          <td><button type="button"><span class="q-type ${c.type}">${c.type === "positive" ? "+" : "−"}</span>${esc(c.prompt)}</button></td>
+          <td class="q-cat">${esc(cat(c.category))}</td>
+          <td><span class="q-dots">${dots}</span></td>
+          <td class="num dim">${r ? fmtMs(r.ms) : ""}</td>
+          <td>${st}</td></tr>`;
+      }).join("") : `<tr class="none"><td colspan="6">${run ? t("Nothing matches.") : t("No runs yet. Press “Run all cases”.")}</td></tr>`;
+    }
+
+    function inspect() {
+      const c = cases.find((x) => x.id === current);
+      $("#qi-acts").hidden = !c;
+      if (!c) {
+        $("#qi-title").textContent = t("Select a case");
+        $("#qi-meta").textContent = t("click a row in the table");
+        $("#qi-body").innerHTML = "";
+        return;
+      }
+      const r = result(c.id);
+      $("#qi-title").textContent = c.id.replace(/^qa-/, "");
+      $("#qi-meta").textContent = `${t(c.type)} · ${cat(c.category)} · ${c.lang.toUpperCase()}`;
+      $("#qi-run").disabled = run && run.status === "running";
+      const going = run && run.status === "running" && nextCase() === c.id;
+      let html = `<div class="qi-sec"><h4>${t("Question")}</h4><p class="qi-q">${esc(c.prompt)}</p>
+        <p class="qi-exp">${t("Expected")}: <b>${esc(t(INTENTS[c.intent] || c.intent))}</b></p></div>`;
+      if (!r) {
+        html += `<p class="qi-wait">${going ? t("Running now…") : t("Not run in this run.")}</p>`;
+      } else {
+        html += `<div class="qi-sec"><h4>${t("Checks")} · ${r.checks.filter((k) => k.ok).length}/${r.checks.length}</h4><ul class="qi-checks">${
+          r.checks.map((k) => `<li class="${k.ok ? "ok" : "no"}"><b>${k.ok ? "✓" : "✗"}</b><span>${esc(t(CHECKS[k.name] || k.name))}<small>${esc(k.detail)}</small></span></li>`).join("")}</ul></div>`;
+        if (r.rewrite) html += `<div class="qi-sec"><h4>${t("Search query")}</h4><p class="qi-mono">${esc(r.rewrite)}</p></div>`;
+        if (r.answer) html += `<div class="qi-sec"><h4>${t("Answer")} · ${fmtMs(r.ms)}${r.tokens ? ` · ${r.tokens} tok` : ""}</h4><p class="qi-a">${esc(r.answer).replace(/\[(\d+)\]/g, "<sup>[$1]</sup>")}</p></div>`;
+        else if (r.not_in_kb) html += `<div class="qi-sec"><h4>${t("Answer")}</h4><p class="qi-a dim">${t("“Not in the knowledge base”: the model was not called.")}</p></div>`;
+        else if (r.error) html += `<div class="qi-sec"><h4>${t("Response")}</h4><p class="qi-mono">${esc(r.error)}</p></div>`;
+        if (r.sources.length) html += `<div class="qi-sec"><h4>${pl(r.sources.length, "source")}</h4><ol class="qi-src">${
+          r.sources.map((s) => `<li><span>${esc(s.source)}</span><small>${esc(s.heading)}</small><b>${s.score != null ? Math.round(s.score * 100) + "%" : ""}</b></li>`).join("")}</ol></div>`;
+      }
+      $("#qi-body").innerHTML = html;
+    }
+
+    async function feedback() {
+      try {
+        const f = await api("/kb/eval/feedback");
+        const rated = f.up + f.down;
+        $("#q-fb").innerHTML = `<div class="q-fb-nums">
+            <div><b>${f.questions}</b><small>${t("questions")}</small></div>
+            <div class="good"><b>${f.up}</b><small>${t("helpful")}</small></div>
+            <div class="bad"><b>${f.down}</b><small>${t("not helpful")}</small></div></div>
+          <div class="q-fb-bar${rated ? "" : " empty"}" title="${rated ? Math.round((100 * f.up) / rated) + "%" : ""}"><i style="--w:${rated ? (100 * f.up) / rated : 0}%"></i></div>
+          ${f.recent_down.length ? `<ul class="q-fb-down">${f.recent_down.map((d) => `<li><span>${esc(d.question)}</span><small>${ago(d.asked_at)}</small></li>`).join("")}</ul>`
+            : `<p class="q-empty">${rated ? t("No negative ratings.") : t("No ratings yet: they appear when people rate answers in the chat.")}</p>`}`;
+      } catch { $("#q-fb").innerHTML = `<p class="q-empty">—</p>`; }
+    }
+
+    /* ---- events ---- */
+    $("#q-run").addEventListener("click", () => start({}));
+    $("#q-rerun").addEventListener("click", () => start({ ids: (run.results || []).filter((r) => !r.passed).map((r) => r.id) }));
+    $("#q-cancel").addEventListener("click", async () => {
+      try { await api(`/kb/eval/runs/${run.id}/cancel`, { method: "POST", headers: adminHeaders() }); } catch (e) { toast(e.message); }
+    });
+    $("#qi-run").addEventListener("click", () => start({ ids: [current] }));
+    $("#qi-ask").addEventListener("click", () => {
+      const c = cases.find((x) => x.id === current);
+      if (!c || c.prompt.startsWith("(")) { toast(t("This case is not a plain question")); return; }
+      location.hash = "assistant";
+      $("#new-chat").click();
+      setTimeout(() => ask(c.prompt), 60);
+    });
+    $("#q-bars").addEventListener("click", (e) => {
+      const b = e.target.closest("button");
+      if (b) { follow = false; open(+b.dataset.id).then(() => { if (run.status === "running") { follow = true; poll(); } }); }
+    });
+    $("#q-cases").addEventListener("click", (e) => {
+      const tr = e.target.closest("tr[data-id]");
+      if (!tr) return;
+      current = tr.dataset.id;
+      follow = false;
+      table();
+      inspect();
+      if (matchMedia("(max-width: 1100px)").matches) $("#q-insp").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    $("#q-filter").addEventListener("input", table);
+    const seg = $("#q-show");
+    const paintSeg = () => $$("button", seg).forEach((b) => { b.classList.toggle("on", b.dataset.v === filterBy); b.setAttribute("aria-pressed", String(b.dataset.v === filterBy)); });
+    seg.addEventListener("click", (e) => {
+      const b = e.target.closest("button");
+      if (!b) return;
+      filterBy = b.dataset.v;
+      store.set("kb.qshow", filterBy);
+      paintSeg();
+      table();
+    });
+    paintSeg();
+
+    return { load: () => { if (!loaded || !(run && run.status === "running")) load(); }, paint: () => { if (loaded) paint(); } };
+  })();
 
   /* ------------------------------------------------------------ profile + settings */
   const Profile = (() => {

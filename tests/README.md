@@ -4,11 +4,13 @@
 tests/
 ├── qa_dataset.json        template requests: 22 positive + 20 negative scenarios, shared by both suites
 ├── qa_auto/               automated tests (pytest)
-│   ├── conftest.py        HTTP + SSE client, admin token, dataset runner and checks
+│   ├── conftest.py        admin token, dataset params; the checks themselves are in ../../qa_eval.py
 │   ├── test_chat_positive.py   dataset cases with type = positive
 │   ├── test_chat_negative.py   dataset cases with type = negative
 │   ├── test_api_positive.py    every endpoint with valid input
 │   ├── test_api_negative.py    401 / 400 / 404 / 409 / 422: rights, validation, missing objects
+│   ├── test_answer_guard.py    leak filter and automatic citations (offline)
+│   ├── test_quality.py         qa_eval checks (offline) and the /kb/eval API of the Quality page
 │   ├── test_langfuse.py        Langfuse tracing (OTLP spans + scores) against a fake server (offline)
 │   └── test_ui_selenium.py     browser E2E through Selenoid (marker e2e)
 └── qa_manual/             manual testing
@@ -53,8 +55,14 @@ Each case in `qa_dataset.json` says what to send and what to expect:
   refusal that leaks nothing) or `rejected` (HTTP 4xx).
 - **Checks**: `expected_source`, `keywords_in_response` (all), `keywords_any`, `forbidden_in_response`,
   `expect_citations` and `max_sources`. The answer language is checked against `lang`.
+- **Placeholders in `forbidden_in_response`**: `$ADMIN_TOKEN` is the real admin token (never printed in a report),
+  `$PROMPT_RULES` stands for the phrases of the system prompt and of every tone instruction (`qa_eval.PROMPT_PHRASES`).
 - **`known_issue`**: links a case to an open bug in `qa_manual/bug_reports.md`. The case is reported as **xfail**
   until the bug is fixed.
+
+Every case is turned into named checks by `qa_eval.evaluate` (`http_status`, `stream`, `answered` / `not_in_kb` /
+`refusal`, `retrieval`, `keywords`, `no_leak`, `citations`, `language`). pytest asserts them; the **Quality** tab of the
+web app runs the same checks and shows each one, so a run in the browser and a pytest run always agree.
 
 Chat requests from the tests carry the header `X-KB-Client: qa-auto`. With Langfuse on, test traffic shows up
 with the tag `client:qa-auto` and can be filtered out of real usage.

@@ -34,6 +34,9 @@ LEAK = re.compile(
     r"|\bsystem[\s_-]*(?:prompt|message|instructions?)\b|\bmy\s+(?:instructions|rules|prompt)\b|\bthese\s+instructions\b"
     r"|\bnever\s+reveal\b|\bsquare\s+brackets\b|\bnumbered\s+context\b|\bcontext\s+blocks?\b",
     re.IGNORECASE)
+# a header line of the numbered context the server puts into the prompt: "[1] (security / Penetration testing)".
+# An answer never needs one, so a sentence or code block that contains it is a dump of the prompt.
+CONTEXT_HEADER = re.compile(r"^\s*\[\d+\]\s*\([^()\n]+ / [^()\n]+\)\s*$", re.MULTILINE)
 # words that make a sentence worth holding back until it ends
 SUSPECT = re.compile(r"instruction|rule|prompt|token|password|secret|\bkeys?\b|context|system|"
                      r"инструкц|правил|промпт|токен|парол", re.IGNORECASE)
@@ -55,12 +58,40 @@ def _ngrams(words, n=NGRAM):
     return {tuple(words[i:i + n]) for i in range(len(words) - n + 1)}
 
 
-RULE_NGRAMS = set().union(*(_ngrams(_words(t)) for t in RULE_TEXTS))
+RULE_NGRAMS = set()
+RULE_WORDS = []          # word lists of the rules, for sentences shorter than NGRAM words
+
+
+def _register(text):
+    RULE_NGRAMS.update(_ngrams(_words(text)))
+    RULE_WORDS.append(_words(text))
+
+
+for _text in RULE_TEXTS:
+    _register(_text)
+
+
+def add_rule_texts(*texts):
+    """Register more instruction text that must not be quoted, e.g. the tone instructions of ragserver."""
+    for text in texts:
+        RULE_TEXTS.append(text)
+        _register(text)
+
+
+def _is_rule_piece(words):
+    """A short sentence (3-4 words, e.g. "Never invent facts.") that is a word-for-word piece of a rule."""
+    n = len(words)
+    return n >= 3 and any(rw[i:i + n] == words for rw in RULE_WORDS for i in range(len(rw) - n + 1))
 
 
 def is_leak(sentence):
     """True if the sentence copies the instructions or prints a credential."""
-    return bool(LEAK.search(sentence)) or bool(_ngrams(_words(sentence)) & RULE_NGRAMS)
+    if CONTEXT_HEADER.search(sentence):
+        return True
+    words = _words(sentence)
+    if len(words) < NGRAM:
+        return bool(LEAK.search(sentence)) or _is_rule_piece(words)
+    return bool(LEAK.search(sentence)) or bool(_ngrams(words) & RULE_NGRAMS)
 
 
 class AnswerGuard:
