@@ -1,6 +1,7 @@
 """E2E test: opens the Gradio chat in a real Chrome served by Selenoid.
 Needs: Selenoid on :4445 (selenoid/start-selenoid.sh) and chat_ui.py running."""
 import os
+import urllib.request
 
 import pytest
 from selenium import webdriver
@@ -17,6 +18,10 @@ APP_URL = os.getenv("KB_APP_URL", "http://host.docker.internal:7871")
 
 @pytest.fixture
 def browser():
+    try:
+        urllib.request.urlopen(SELENOID_URL.rsplit("/wd/hub", 1)[0] + "/status", timeout=3)
+    except OSError:
+        pytest.skip(f"Selenoid is not running at {SELENOID_URL} (start it: ./selenoid/start-selenoid.sh)")
     options = webdriver.ChromeOptions()
     options.set_capability("selenoid:options", {
         "enableVNC": True,

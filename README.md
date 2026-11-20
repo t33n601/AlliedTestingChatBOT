@@ -215,8 +215,9 @@ python langfuse_tracing.py             # checks the keys and sends a test trace
 ./kbhelper restart                     # tracing on: /kb/stats shows "langfuse": true (then ./kbhelper public if the site is public)
 ```
 
-Without keys tracing is off and costs nothing. Events are sent in batches from a background thread, so
-Langfuse never slows down or breaks an answer.
+Without keys tracing is off and costs nothing. Steps are sent as OpenTelemetry spans (OTLP/JSON to
+`/api/public/otel/v1/traces`, no extra SDK) and scores to `/api/public/scores`, in batches from a background
+thread, so Langfuse never slows down or breaks an answer.
 
 ## 📁 Project structure
 

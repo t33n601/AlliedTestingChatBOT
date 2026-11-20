@@ -14,9 +14,12 @@ Keys are read from langfuse.yml (gitignored, see langfuse.example.yml) or from t
 LANGFUSE_PUBLIC_KEY / LANGFUSE_SECRET_KEY / LANGFUSE_HOST environment variables.
 Without keys tracing is off and every call here is a cheap no-op.
 
-Events go to the public ingestion API (POST /api/public/ingestion) from a background
-thread, so tracing never slows down or breaks an answer.
+Spans go to the OpenTelemetry endpoint (POST /api/public/otel/v1/traces, OTLP/JSON) and
+scores to POST /api/public/scores, from a background thread, so tracing never slows down
+or breaks an answer. Langfuse Cloud no longer accepts traces through the old ingestion API.
 """
+import hashlib
+import json
 import os
 import queue
 import threading
@@ -55,11 +58,50 @@ def now_iso():
 
 
 def new_id():
-    return str(uuid.uuid4())
+    """A trace id: 32 hex characters, as OpenTelemetry requires."""
+    return uuid.uuid4().hex
+
+
+def otel_trace_id(trace_id):
+    """Old ids were UUIDs with dashes (still stored in kb_queries.trace_id)."""
+    return str(trace_id).replace("-", "").lower()
+
+
+def _span_id():
+    return uuid.uuid4().hex[:16]
+
+
+def _root_span_id(trace_id):
+    return hashlib.sha256(trace_id.encode()).hexdigest()[:16]
+
+
+def _ns(iso=None):
+    if not iso:
+        return time.time_ns()
+    dt = datetime.fromisoformat(str(iso).replace("Z", "+00:00"))
+    return int(dt.timestamp() * 1e9)
+
+
+def _text(v):
+    return v if isinstance(v, str) else json.dumps(v, ensure_ascii=False, default=str)
+
+
+def _attr(key, value):
+    if isinstance(value, bool):
+        v = {"boolValue": value}
+    elif isinstance(value, int):
+        v = {"intValue": str(value)}
+    elif isinstance(value, float):
+        v = {"doubleValue": value}
+    elif isinstance(value, (list, tuple)) and all(isinstance(x, str) for x in value):
+        v = {"arrayValue": {"values": [{"stringValue": x} for x in value]}}
+    else:
+        v = {"stringValue": _text(value)}
+    return {"key": key, "value": v}
 
 
 class Langfuse:
-    """Minimal batched client for the Langfuse ingestion API."""
+    """Minimal batched Langfuse client: OTLP/JSON spans + the scores API."""
 
     def __init__(self, cfg=None, flush_interval=1.0, batch_size=50):
         cfg = load_config() if cfg is None else cfg
@@ -77,13 +119,13 @@ class Langfuse:
         self._q = queue.Queue()
         self._worker = None
         self._lock = threading.Lock()
+        self._traces = {}          # trace id -> {"start": ns, "fields": {...}} until the trace has an output
 
     # ------------------------------------------------------------ transport
-    def _enqueue(self, kind, body):
+    def _enqueue(self, kind, item):
         if not self.enabled:
             return
-        body.setdefault("environment", self.environment)
-        self._q.put({"id": new_id(), "type": kind, "timestamp": now_iso(), "body": body})
+        self._q.put((kind, item))
         with self._lock:
             if self._worker is None or not self._worker.is_alive():
                 self._worker = threading.Thread(target=self._run, name="langfuse", daemon=True)
@@ -105,21 +147,29 @@ class Langfuse:
             for _ in batch:
                 self._q.task_done()
 
-    def _send(self, batch):
+    def _post(self, path, payload):
         try:
-            r = requests.post(f"{self.host}/api/public/ingestion", json={"batch": batch},
+            r = requests.post(f"{self.host}{path}", json=payload,
                               auth=(self.public_key, self.secret_key), timeout=10)
             if r.status_code >= 300:
-                self.last_error = f"HTTP {r.status_code}: {r.text[:200]}"
-            else:
-                errors = (r.json() or {}).get("errors") or []
-                self.last_error = f"{len(errors)} rejected: {errors[0]}" if errors else None
-                self.sent += len(batch) - len(errors)
-            if self.last_error:
-                print(f"[langfuse] {self.last_error}")
+                raise RuntimeError(f"HTTP {r.status_code}: {r.text[:200]}")
+            return True
         except Exception as e:
             self.last_error = str(e)
-            print(f"[langfuse] {e}")
+            print(f"[langfuse] {path}: {e}")
+            return False
+
+    def _send(self, batch):
+        self.last_error = None
+        spans = [item for kind, item in batch if kind == "span"]
+        if spans and self._post("/api/public/otel/v1/traces", {"resourceSpans": [{
+                "resource": {"attributes": [_attr("service.name", "kb-helper"),
+                                            _attr("deployment.environment", self.environment)]},
+                "scopeSpans": [{"scope": {"name": "kb-helper"}, "spans": spans}]}]}):
+            self.sent += len(spans)
+        for kind, item in batch:
+            if kind == "score" and self._post("/api/public/scores", item):
+                self.sent += 1
 
     def flush(self, timeout=10.0):
         """Block until everything queued so far is sent (tests, shutdown)."""
@@ -141,28 +191,89 @@ class Langfuse:
             return False
 
     # ------------------------------------------------------------ objects
+    def _shared(self, fields):
+        """Trace attributes repeated on every span, so sessions and tags filter observations too."""
+        out = []
+        if fields.get("sessionId"):
+            out.append(_attr("langfuse.session.id", str(fields["sessionId"])))
+        if fields.get("userId"):
+            out.append(_attr("langfuse.user.id", str(fields["userId"])))
+        if fields.get("tags"):
+            out.append(_attr("langfuse.trace.tags", [str(x) for x in fields["tags"]]))
+        return out
+
+    def _span(self, trace_id, span_id, parent, name, start_ns, end_ns, attrs, error=False):
+        attrs = [_attr("langfuse.environment", self.environment)] + attrs
+        span = {"traceId": trace_id, "spanId": span_id, "name": name, "kind": 1,
+                "startTimeUnixNano": str(start_ns), "endTimeUnixNano": str(max(end_ns, start_ns)),
+                "attributes": attrs, "status": {"code": 2} if error else {}}
+        if parent:
+            span["parentSpanId"] = parent
+        self._enqueue("span", span)
+
     def trace(self, trace_id, **fields):
-        """Create or update (upsert by id) a trace."""
-        self._enqueue("trace-create", {"id": trace_id, "timestamp": now_iso(), **_clean(fields)})
+        """Set trace fields. Calls merge; the trace (its root span) is sent once it has an output."""
+        if not self.enabled:
+            return
+        tid = otel_trace_id(trace_id)
+        with self._lock:
+            t = self._traces.setdefault(tid, {"start": time.time_ns(), "fields": {}})
+            t["fields"].update(_clean(fields))
+            if "output" not in t["fields"] and len(self._traces) < 1000:
+                return
+            self._traces.pop(tid, None)
+        f = t["fields"]
+        attrs = [_attr("langfuse.trace.name", f.get("name", "trace"))]
+        for key, attr in (("input", "langfuse.trace.input"), ("output", "langfuse.trace.output"),
+                          ("input", "langfuse.observation.input"), ("output", "langfuse.observation.output")):
+            if key in f:
+                attrs.append(_attr(attr, _text(f[key])))
+        attrs += self._shared(f)
+        for k, v in (f.get("metadata") or {}).items():
+            attrs.append(_attr(f"langfuse.trace.metadata.{k}", _text(v)))
+        error = "error" in (f.get("tags") or [])
+        self._span(tid, _root_span_id(tid), None, f.get("name", "trace"), t["start"], time.time_ns(),
+                   attrs, error)
+
+    def _observation(self, kind, trace_id, name, start, end, fields):
+        if not self.enabled:
+            return
+        tid = otel_trace_id(trace_id)
+        f = _clean(fields)
+        with self._lock:
+            pending = dict(self._traces.get(tid, {}).get("fields", {}))
+        attrs = [_attr("langfuse.observation.type", kind)] + self._shared(pending)
+        for key, attr in (("input", "langfuse.observation.input"), ("output", "langfuse.observation.output"),
+                          ("model", "langfuse.observation.model.name"),
+                          ("modelParameters", "langfuse.observation.model.parameters"),
+                          ("usage", "langfuse.observation.usage_details"),
+                          ("completionStartTime", "langfuse.observation.completion_start_time"),
+                          ("level", "langfuse.observation.level"),
+                          ("statusMessage", "langfuse.observation.status_message")):
+            if key in f:
+                attrs.append(_attr(attr, _text(f[key])))
+        for k, v in (f.get("metadata") or {}).items():
+            attrs.append(_attr(f"langfuse.observation.metadata.{k}", _text(v)))
+        start_ns = _ns(start)
+        self._span(tid, _span_id(), _root_span_id(tid), name, start_ns, _ns(end) if end else time.time_ns(),
+                   attrs, f.get("level") == "ERROR")
 
     def span(self, trace_id, name, start, end=None, **fields):
-        self._enqueue("span-create", {"id": new_id(), "traceId": trace_id, "name": name,
-                                      "startTime": start, "endTime": end or now_iso(), **_clean(fields)})
+        self._observation("span", trace_id, name, start, end, fields)
 
     def generation(self, trace_id, name, start, end=None, **fields):
-        self._enqueue("generation-create", {"id": new_id(), "traceId": trace_id, "name": name,
-                                            "startTime": start, "endTime": end or now_iso(),
-                                            **_clean(fields)})
+        self._observation("generation", trace_id, name, start, end, fields)
 
     def event(self, trace_id, name, **fields):
-        self._enqueue("event-create", {"id": new_id(), "traceId": trace_id, "name": name,
-                                       "startTime": now_iso(), **_clean(fields)})
+        now = now_iso()
+        self._observation("event", trace_id, name, now, now, fields)
 
     def score(self, trace_id, name, value, comment=None, data_type="NUMERIC", score_id=None):
         # a fixed id per (trace, name) means a changed 👍/👎 overwrites the old score
-        self._enqueue("score-create", _clean({"id": score_id or f"{trace_id}-{name}", "traceId": trace_id,
-                                              "name": name, "value": value, "dataType": data_type,
-                                              "comment": comment}))
+        tid = otel_trace_id(trace_id)
+        self._enqueue("score", _clean({"id": score_id or f"{tid}-{name}", "traceId": tid, "name": name,
+                                       "value": value, "dataType": data_type, "comment": comment,
+                                       "environment": self.environment}))
 
 
 def _clean(d):
@@ -173,7 +284,7 @@ def usage(prompt_tokens, completion_tokens):
     if not (prompt_tokens or completion_tokens):
         return None
     p, c = prompt_tokens or 0, completion_tokens or 0
-    return {"input": p, "output": c, "total": p + c, "unit": "TOKENS"}
+    return {"input": p, "output": c, "total": p + c}
 
 
 langfuse = Langfuse()
@@ -189,8 +300,9 @@ if __name__ == "__main__":
     if not lf.auth_check():
         raise SystemExit(f"error  : keys rejected ({lf.last_error})")
     tid = new_id()
-    start = now_iso()
-    lf.trace(tid, name="langfuse-check", input="ping", output="pong", tags=["check"])
-    lf.span(tid, "check", start, input="ping", output="pong")
+    lf.trace(tid, name="langfuse-check", input="ping", tags=["check"])
+    lf.span(tid, "check", now_iso(), input="ping", output="pong")
+    lf.trace(tid, output="pong")
+    lf.score(tid, "check", 1, data_type="BOOLEAN")
     lf.flush()
-    print("error  : " + lf.last_error if lf.last_error else f"ok     : test trace sent -> {lf.host}/trace/{tid}")
+    print("error  : " + lf.last_error if lf.last_error else f"ok     : test trace {tid} sent -> {lf.host} (Tracing -> Traces)")

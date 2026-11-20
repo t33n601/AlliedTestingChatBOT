@@ -15,6 +15,7 @@ from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+from answer_guard import AnswerGuard, add_citations
 from chunking import file_to_chunks
 from langfuse_tracing import langfuse, new_id, now_iso, usage
 from vectorize import DB_DSN, EMBED_MODEL, embed_chunk, embed_query, make_vector
@@ -183,12 +184,40 @@ def check_not_empty(info: ChunkInfo):
         raise HTTPException(status_code=400, detail="Fields must not be empty")
 
 
-def retrieve(cur, vecs, limit=TOP_K, max_distance=MAX_DISTANCE):
+KEYWORD_BONUS = 0.06   # added to the ranking score of a chunk that contains every topic word of the query
+GENERIC_WORDS = set("""a an and are as at be by can could do does did for from has have how i in is it its
+me my of on or our please provide provides provided offer offers offered service services company
+companies tell about the their them they this to us we what which who whom why with you your yours
+give list any some there do does testing""".split())
+
+
+def topic_terms(query):
+    """The words a relevant chunk should contain: the query minus the company name and generic words.
+    Short abbreviations (AI, QA, UAT) are kept."""
+    words = re.findall(r"[a-z0-9][a-z0-9+#-]*", COMPANY_NAME.sub(" ", query).lower())
+    return sorted({w for w in words if w not in GENERIC_WORDS and (len(w) > 2 or w.isalpha())})
+
+
+def retrieve(cur, vecs, limit=TOP_K, max_distance=MAX_DISTANCE, terms=None):
     """Retrieve: chunks closest in meaning to the query (cosine distance <=>).
     `vecs` is one query vector or several (see query_vectors): a chunk counts as close
-    as its best match among them."""
+    as its best match among them.
+    With `terms` (see topic_terms) the search is hybrid: the nearest candidates are re-ranked with
+    a small bonus for the topic words they contain, so "What AI services does Allied Testing provide?"
+    ranks the AI page above the generic "about us" pages (BUG-003). `score` stays the pure cosine
+    similarity, so the "not in the knowledge base" threshold is not affected."""
     if vecs and not isinstance(vecs[0], (list, tuple)):
         vecs = [vecs]
+    if terms:
+        rows = retrieve(cur, vecs, max(limit * 4, 20), max_distance)
+        for c in rows:
+            text = f"{c['source']} {c['heading']} {c['body']}".lower()
+            # short terms (ai, qa) must be whole words; longer ones may have an ending (director-s)
+            hits = sum(bool(re.search(rf"(?<![a-z0-9]){re.escape(t)}" + (r"(?![a-z0-9])" if len(t) <= 3 else ""),
+                                      text)) for t in terms)
+            c["rank"] = c["score"] + KEYWORD_BONUS * hits / len(terms)
+        rows.sort(key=lambda c: -c.pop("rank"))
+        return rows[:limit]
     dist = "LEAST(" + ", ".join(["body_vec <=> %s::vector"] * len(vecs)) + ")"
     cur.execute(f"""
         SELECT id, source, heading, body, distance FROM (
@@ -635,7 +664,7 @@ def chat_stream(req: ChatRequest, x_kb_client: Optional[str] = Header(default=No
             conn = get_conn()
             cur = conn.cursor()
             try:
-                sources = retrieve(cur, vecs, top_k)
+                sources = retrieve(cur, vecs, top_k, terms=topic_terms(query))
                 nearest = sources[:1] or retrieve(cur, vecs, 1, max_distance=2)
             finally:
                 close_all(cur, conn)
@@ -679,6 +708,7 @@ def chat_stream(req: ChatRequest, x_kb_client: Optional[str] = Header(default=No
                 chat[-1]["content"] += LANG_NOTES[lang]
 
             gen_start, first_token_at, prompt_tokens = now_iso(), None, 0
+            guard, streamed = AnswerGuard(lang), []
             with requests.post(f"{OLLAMA_URL}/api/chat", stream=True, timeout=600, json={
                 "model": model, "messages": chat, "stream": True, "think": req.think,
                 "options": {"temperature": 0.3},
@@ -697,16 +727,30 @@ def chat_stream(req: ChatRequest, x_kb_client: Optional[str] = Header(default=No
                             first_token_at = now_iso()
                         timings.setdefault("first_token_ms", ms())
                         answer.append(m["content"])
-                        yield sse("token", {"t": m["content"]})
+                        out = guard.feed(m["content"])
+                        if out:
+                            streamed.append(out)
+                            yield sse("token", {"t": out})
                     if d.get("done"):
                         tokens = d.get("eval_count") or 0
                         prompt_tokens = d.get("prompt_eval_count") or 0
                         dur = (d.get("eval_duration") or 0) / 1e9
                         timings["tokens_per_sec"] = round(tokens / dur, 1) if dur else None
+            tail, text = guard.finish()
+            if tail:
+                streamed.append(tail)
+                yield sse("token", {"t": tail})
+            text = add_citations(text, sources)
+            if guard.dirty or text.strip() != "".join(streamed).strip():
+                # a streamed sentence was removed or citations were added: the UI swaps in the final text
+                yield sse("replace", {"text": text})
+            if guard.dropped:
+                langfuse.event(trace_id, "leak_blocked", level="WARNING",
+                               output={"sentences_removed": guard.dropped})
             timings["total_ms"] = ms()
-            text = "".join(answer)
             qid = log_query(question, text, sources, timings, tokens, trace_id)
-            langfuse.generation(trace_id, "answer", gen_start, model=model, input=chat, output=text,
+            langfuse.generation(trace_id, "answer", gen_start, model=model, input=chat,
+                                output="".join(answer),
                                 completionStartTime=first_token_at,
                                 modelParameters={"temperature": 0.3, "think": req.think},
                                 usage=usage(prompt_tokens, tokens),

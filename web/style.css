@@ -499,6 +499,7 @@ main { flex: 1; }
 @keyframes qring { from { transform: rotate(45deg) scale(.6); opacity: 1; } to { transform: rotate(45deg) scale(2.6); opacity: 0; } }
 .ev-map .cap { position: absolute; left: 8px; bottom: 6px; font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
 .ev-list { list-style: none; margin: 0; padding: 8px 10px 14px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; }
+.ev-list > * { flex-shrink: 0; }                       /* cards keep their height; the list scrolls instead */
 .ev-empty { margin: 0; padding: 16px; font-size: 13.5px; line-height: 1.55; color: var(--dim); }
 
 /* source rows (evidence panel + map side panel) */
@@ -1674,6 +1675,7 @@ body.chat-empty .run-status { opacity: 0; }
   .bench { transition: grid-template-columns .45s cubic-bezier(.2, .8, .2, 1); }
   .evidence { overflow: hidden; transition: opacity .35s ease .1s, border-color .35s; }
   .evidence > * { min-width: 359px; }                  /* the content keeps its width while the column opens */
+  .evidence > .ev-map { min-width: 327px; }            /* 359px minus its 16px side margins */
   body.chat-empty .bench { grid-template-columns: 280px minmax(0, 1fr) 0px; }
   body.chat-empty .evidence { opacity: 0; border-left-color: transparent; pointer-events: none; transition: opacity .2s ease, border-color .2s; }
 }

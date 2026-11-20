@@ -727,7 +727,7 @@
     async minimap(msg) {
       try { await MapData.load(); } catch { return; }
       if (this.msg !== msg) return;
-      const pos = (p) => ({ x: 3 + Math.max(0, Math.min(1, p.x)) * 94, y: 4 + (1 - Math.max(0, Math.min(1, p.y))) * 91 });
+      const pos = (p) => ({ x: 3 + Math.max(0, Math.min(1, p.x)) * 94, y: 11 + (1 - Math.max(0, Math.min(1, p.y))) * 80 });
       const q = pos(msg.point);
       let html = MapData.points.map((p) => { const c = pos(p); return `<span class="d" style="left:${c.x}%;top:${c.y}%"></span>`; }).join("");
       let rays = "";
@@ -898,6 +898,9 @@
           schedule();
         } else if (event === "token") {
           msg.content += data.t;
+          schedule();
+        } else if (event === "replace") {   // final text from the server: citations added or a leak removed
+          msg.content = data.text;
           schedule();
         } else if (event === "done") {
           Object.assign(msg.timings, data.timings);

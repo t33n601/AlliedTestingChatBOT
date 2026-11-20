@@ -96,7 +96,8 @@ def chat(messages, timeout=300, **extra):
             res.data[name] = payload
             if name == "token":
                 tokens.append(payload["t"])
-    res.answer = "".join(tokens)
+    # "replace" carries the final text when the server added citations or removed a leaked sentence
+    res.answer = res.data["replace"]["text"] if "replace" in res.data else "".join(tokens)
     res.error = (res.data.get("error") or {}).get("detail", "")
     return res
 

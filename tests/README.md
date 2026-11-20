@@ -9,7 +9,7 @@ tests/
 │   ├── test_chat_negative.py   dataset cases with type = negative
 │   ├── test_api_positive.py    every endpoint with valid input
 │   ├── test_api_negative.py    401 / 400 / 404 / 409 / 422: rights, validation, missing objects
-│   ├── test_langfuse.py        Langfuse tracing against a fake ingestion server (offline)
+│   ├── test_langfuse.py        Langfuse tracing (OTLP spans + scores) against a fake server (offline)
 │   └── test_ui_selenium.py     browser E2E through Selenoid (marker e2e)
 └── qa_manual/             manual testing
     ├── test_cases.md      25 positive + 21 negative manual cases with a run log

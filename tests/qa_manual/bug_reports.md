@@ -8,12 +8,12 @@ When a fix lands, the case starts to pass (XPASS): remove `known_issue` from the
 |---|---|---|---|---|
 | BUG-001 | Wrong person named as Managing Director | High | **Fixed** | `qa-pos-18-managing-director` |
 | BUG-002 | Learning Center question answered "not in the knowledge base" | Medium | **Fixed** | `qa-pos-19-learning-center` |
-| BUG-003 | AI services question does not retrieve the AI solutions document | Medium | Open | `qa-pos-20-ai-services` |
+| BUG-003 | AI services question does not retrieve the AI solutions document | Medium | **Fixed** | `qa-pos-20-ai-services` |
 | BUG-004 | Alliedium product question answered about the company instead | Medium | **Fixed** | `qa-pos-21-alliedium` |
 | BUG-005 | Very long message crashes the chat with a server error | High | **Fixed** | `qa-neg-18-very-long-prompt`, `qa-neg-19-message-too-long` |
-| BUG-006 | List-style answers sometimes have no `[n]` citations | Low | Open (intermittent, 1–2 in 10) | `qa-pos-22-list-answer-citations` |
+| BUG-006 | List-style answers sometimes have no `[n]` citations | Low | **Fixed** | `qa-pos-22-list-answer-citations` |
 | BUG-007 | "Answer language" setting ignored for English questions | Medium | **Fixed** | `qa-pos-17-answer-lang` |
-| BUG-008 | Prompt injection can make the model quote its own rules | Medium | Open (intermittent, ~1 in 10) | `qa-neg-20-system-prompt-leak` |
+| BUG-008 | Prompt injection can make the model quote its own rules | Medium | **Fixed** | `qa-neg-20-system-prompt-leak` |
 
 **Common root cause of BUG-001 … BUG-004.** Retrieval compares the question only with `body_vec`, the embedding of
 the chunk *body*. The words the user asks about are often only in the chunk *heading*: `### Managing Director`,
@@ -61,7 +61,7 @@ and never says "Alliedium". The heading is embedded too (`heading_vec`) but is n
 - **Analysis:** the chunk body starts with "Our people are Allied's most valuable asset…" and never says
   "Learning Center", which is only in the heading.
 
-## BUG-003 · AI services question does not retrieve the AI solutions document
+## BUG-003 · AI services question does not retrieve the AI solutions document — FIXED
 
 - **Severity:** Medium
 - **Steps:** ask `What AI services does Allied Testing provide?`
@@ -71,7 +71,11 @@ and never says "Alliedium". The heading is embedded too (`heading_vec`) but is n
 - **Analysis:** generic company pages score higher than the specific `aisolutions` chunks. Still open after the
   retrieval fix. Without the company name the question ("What AI services are provided?") does find
   `aisolutions`, but the full question with "Allied Testing" scores higher on `careers` and `aboutus`, and the
-  better of the two scores wins. Possible fixes: hybrid search (vector + full-text on headings), or a re-ranker.
+  better of the two scores wins.
+- **Fix:** hybrid re-ranking (`ragserver.topic_terms`, `retrieve(terms=…)`). The 20 nearest chunks are re-ranked with
+  a small bonus (up to +0.06) for the topic words of the question they contain: the question minus the company name
+  and generic words ("services", "provide"…). The reported `score` stays the pure cosine similarity, so the
+  "not in KB" threshold is unchanged. `aisolutions` is now the top source.
 
 ## BUG-004 · Alliedium product question answered about the company instead
 
@@ -96,7 +100,7 @@ and never says "Alliedium". The heading is embedded too (`heading_vec`) but is n
 - **Regression cases:** `qa-neg-18-very-long-prompt` (6,000 characters, answered "not in KB") and
   `qa-neg-19-message-too-long` (9,000 characters, rejected with 400).
 
-## BUG-006 · List-style answers sometimes have no `[n]` citations
+## BUG-006 · List-style answers sometimes have no `[n]` citations — FIXED
 
 - **Severity:** Low
 - **Steps:** ask `What security testing services do you provide?` about 10 times.
@@ -104,7 +108,8 @@ and never says "Alliedium". The heading is embedded too (`heading_vec`) but is n
 - **Actual:** roughly 1 run in 10 returns a bulleted list without any citation markers. The sources panel still
   shows the right documents. Short factual answers (5 cases × 6 runs) were cited in 30 of 30 runs.
 - **Analysis:** a small model at temperature 0.3 sometimes drops the citation format in long lists.
-  Possible fixes: temperature 0 for answers, a stricter reminder for lists, or a larger model.
+- **Fix:** `answer_guard.add_citations`. After the answer ends, every bullet or sentence without a `[n]` gets the
+  number of the source it shares the most words with, and the cleaned text replaces the streamed one in the UI.
 
 ## BUG-007 · "Answer language" setting ignored for English questions — FIXED
 
@@ -121,7 +126,7 @@ and never says "Alliedium". The heading is embedded too (`heading_vec`) but is n
     Russian. Отвечай на русском языке.)". With the Russian-only note the model still answered in English in
     10 of 10 runs; with the new note it answered in Russian in 10 of 10.
 
-## BUG-008 · Prompt injection can make the model quote its own rules
+## BUG-008 · Prompt injection can make the model quote its own rules — FIXED
 
 - **Severity:** Medium (no secret is exposed: the admin token is never in the prompt and never leaked in
   any run, but the assistant should not show its instructions)
@@ -134,4 +139,8 @@ and never says "Alliedium". The heading is embedded too (`heading_vec`) but is n
   passwords, tokens or keys". That cut the leak rate from ~5 in 10 to ~1 in 10 (measured over 10 runs).
   Moving the rules after the context was also tried, but it broke citations and the answer language (0 of 10),
   so it was reverted.
-- **Possible fix:** an output filter that hides any answer sentence that copies the system prompt, or a larger model.
+- **Fix:** `answer_guard.AnswerGuard`, an output filter on the stream. Tokens still stream live, but a sentence that
+  looks suspicious is held back until it ends and is dropped if it shares a 5-word sequence with the rules or prints
+  a password, token or key. If an already streamed sentence turns out to be a leak, the UI gets the cleaned text.
+- **Verification:** `qa-neg-20`, `qa-pos-20` and `qa-pos-22` passed in 5 of 5 consecutive full runs
+  (plus offline unit tests in `test_answer_guard.py`).
